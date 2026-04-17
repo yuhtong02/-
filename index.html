@@ -28,6 +28,7 @@
         .img-slot img { width: 100%; height: 100%; object-fit: contain; } 
         .spec-text { font-size: 13px; font-weight: 700; color: #b91c1c; margin-top: 8px; }
         .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 4px 6px; font-size: 12px; width: 100%; color: #9a3412; font-weight: bold; margin-bottom: 4px; }
+        .admin-guide-input { background: rgba(255,255,255,0.2); border: 1px dashed white !important; color: white; width: 100%; padding: 4px; border-radius: 4px; margin-bottom: 5px; }
         .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); background: transparent; border-bottom: 2px solid #eee !important; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #eee !important; z-index: 2000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
         .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; }
@@ -96,7 +97,7 @@ let INITIAL_DB = [
     {id:'G01', cat:'G', n:'作業規範', s:'A1尺寸'}, {id:'H02', cat:'H', n:'嚴禁酒後', s:'60x40'},
     {id:'I01', cat:'I', n:'物料暫置', s:'60x40'}
 ];
-const GUIDES = {
+const INITIAL_GUIDES = {
     'S1': { t: 'Step 1. 工區大門配置', d: '門禁、告示牌、酒測監測站', items: ['B01','H02','G01'] },
     'S2': { t: 'Step 2. 環境監測', d: '資源回收、智慧漏電、數位聯單', items: ['I01','F01'] },
     'S3': { t: 'Step 3. 主體作業', d: '開口防護、起重監控、吊裝區', items: ['C01','D01'] },
@@ -105,15 +106,16 @@ const GUIDES = {
     'S6': { t: 'Step 6. 竣工移交', d: '撤場紀錄、廢棄物清運總表', items: ['I01'] }
 };
 
-let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL';
+let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides;
 
-const request = indexedDB.open("Yutong_V26", 1);
+const request = indexedDB.open("Yutong_V27", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
 function init() {
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     activeDB = JSON.parse(localStorage.getItem('yt_active_db')) || INITIAL_DB;
+    guides = JSON.parse(localStorage.getItem('yt_guides')) || INITIAL_GUIDES;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     renderSiteSelect();
     document.getElementById('staff').value = localStorage.getItem('yt_staff') || '';
@@ -129,8 +131,10 @@ async function render() {
     if (currentMode === 'CAT') {
         displayItems = currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey);
     } else {
-        const guide = GUIDES[currentKey];
-        grid.innerHTML = `<div class="guide-box"><h2 class="text-xl font-black">${guide.t}</h2><p class="text-xs opacity-80">${guide.d}</p></div>`;
+        const guide = guides[currentKey];
+        let gTitle = isAdmin ? `<input type="text" class="admin-guide-input text-xl font-black" value="${guide.t}" oninput="updateGuideField('${currentKey}','t',this.value)">` : `<h2 class="text-xl font-black">${guide.t}</h2>`;
+        let gDesc = isAdmin ? `<input type="text" class="admin-guide-input text-xs opacity-80" value="${guide.d}" oninput="updateGuideField('${currentKey}','d',this.value)">` : `<p class="text-xs opacity-80">${guide.d}</p>`;
+        grid.innerHTML = `<div class="guide-box">${gTitle}${gDesc}</div>`;
         displayItems = activeDB.filter(x => guide.items.includes(x.id));
     }
 
@@ -141,31 +145,25 @@ async function render() {
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
 
-        let nameHtml = isAdmin ? 
-            `<input type="text" value="${i.n}" class="admin-input" oninput="updateItemField('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : 
-            `<div class="font-black text-[#095744]">${i.n}</div>`;
-
-        let specHtml = isAdmin ? 
-            `<input type="text" value="${i.s}" class="admin-input" oninput="updateItemField('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : 
-            `<div class="spec-text">規格：${i.s}</div>`;
+        let nameHtml = isAdmin ? `<input type="text" value="${i.n}" class="admin-input" oninput="updateItemField('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744]">${i.n}</div>`;
+        let specHtml = isAdmin ? `<input type="text" value="${i.s}" class="admin-input" oninput="updateItemField('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<div class="spec-text">規格：${i.s}</div>`;
 
         card.innerHTML = `
             <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
                 <img src="${localImg || 'img/'+i.id+'.JPG'}" onerror="this.src='img/'+'${i.id}'+'.jpg'; this.onerror=null;">
             </div>
             <div class="flex-1">
-                <div class="flex justify-between items-start">
-                    <div class="flex-1">${nameHtml}</div>
-                    <span class="text-[9px] bg-slate-100 px-1 rounded ml-1">${i.id}</span>
-                </div>
+                <div class="flex justify-between items-start"><div class="flex-1">${nameHtml}</div><span class="text-[9px] bg-slate-100 px-1 rounded ml-1">${i.id}</span></div>
                 ${specHtml}
-                <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
-                    <span class="text-[10px] font-bold text-slate-400">數量</span>
-                    <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
-                </div>
+                <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()"><span class="text-[10px] font-bold text-slate-400">數量</span><input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input"></div>
             </div>`;
         grid.appendChild(card);
     }
+}
+
+function updateGuideField(key, field, val) {
+    guides[key][field] = val;
+    localStorage.setItem('yt_guides', JSON.stringify(guides));
 }
 
 function filterCat(cat) {
@@ -202,30 +200,10 @@ function updateItemField(id, field, val) {
 async function buildReport() {
     const selected = activeDB.filter(i => cart[i.id] && cart[i.id].sel);
     if(!selected.length) return alert("尚未選取項目！");
-
-    let html = `
-        <div style="text-align:center; padding-bottom:15px; border-bottom:3px solid #095744">
-            <h1 style="font-size:22px; color:#095744; margin:0">鈺通營造 標語採購單</h1>
-            <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold; font-size:14px">
-                <span>工地：${document.getElementById('siteSelect').value}</span>
-                <span>填單人：${document.getElementById('staff').value}</span>
-            </div>
-        </div>
-        <table style="width:100%; border-collapse:collapse; margin-top:15px;">
-            <thead><tr style="background:#f1f5f9; border-bottom:2px solid #095744"><th style="padding:8px; text-align:left">示意圖</th><th style="padding:8px; text-align:left">品名規格</th><th style="padding:8px; text-align:right">數量</th></tr></thead>
-            <tbody>`;
-
+    let html = `<div style="text-align:center; padding-bottom:15px; border-bottom:3px solid #095744"><h1 style="font-size:22px; color:#095744; margin:0">鈺通營造 標語採購單</h1><div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold; font-size:14px"><span>工地：${document.getElementById('siteSelect').value}</span><span>填單人：${document.getElementById('staff').value}</span></div></div><table style="width:100%; border-collapse:collapse; margin-top:15px;"><thead><tr style="background:#f1f5f9; border-bottom:2px solid #095744"><th style="padding:8px; text-align:left">示意圖</th><th style="padding:8px; text-align:left">品名規格</th><th style="padding:8px; text-align:right">數量</th></tr></thead><tbody>`;
     for(const item of selected) {
         const img = await dbGet(item.id) || `img/${item.id}.JPG`;
-        html += `
-            <tr style="border-bottom:1px solid #e2e8f0">
-                <td style="padding:8px; width:110px"><img src="${img}" style="width:100px; height:70px; object-fit:contain"></td>
-                <td style="padding:8px">
-                    <div style="font-weight:900; font-size:16px">${item.n}</div>
-                    <div style="color:#b91c1c; font-size:12px; font-weight:bold">規格：${item.s}</div>
-                </td>
-                <td style="padding:8px; text-align:right; font-size:22px; font-weight:900">${cart[item.id].qty}</td>
-            </tr>`;
+        html += `<tr style="border-bottom:1px solid #e2e8f0"><td style="padding:8px; width:110px"><img src="${img}" style="width:100px; height:70px; object-fit:contain"></td><td style="padding:8px"><div style="font-weight:900; font-size:16px">${item.n}</div><div style="color:#b91c1c; font-size:12px; font-weight:bold">規格：${item.s}</div></td><td style="padding:8px; text-align:right; font-size:22px; font-weight:900">${cart[item.id].qty}</td></tr>`;
     }
     html += `</tbody></table>`;
     document.getElementById('printArea').innerHTML = html;
