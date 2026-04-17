@@ -19,8 +19,7 @@
         .category-scroller { 
             display: flex; overflow-x: auto; gap: 8px; padding: 12px 15px; 
             background: white; border-bottom: 1px solid #D7CCC8 !important; 
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
-            align-items: center;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch; align-items: center;
         }
         .category-scroller::-webkit-scrollbar { display: none; }
 
@@ -47,7 +46,6 @@
         .sign-card.selected { border: 3px solid var(--yt-light) !important; }
         
         .img-slot { width: 140px; height: 100px; background: #f8fafc; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
-        .admin-mode .img-slot { border: 2px dashed var(--yt-dark) !important; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; } 
         
         .spec-text { font-size: 13px; font-weight: 700; color: #b91c1c; margin-top: 8px; }
@@ -128,24 +126,29 @@
     <input type="file" id="importInput" accept=".yutong" class="hidden" onchange="importBackup(this)">
 
 <script>
+// 基礎設定
 const DEFAULT_GUIDES = {
-    'S1': { title: 'Step 1. 工區大門配置指引', desc: 'AI人臉門禁、工程告示牌、酒測監測站', items: [{id:'B01', up:'AI人臉辨識系統'}] },
-    'S2': { title: 'Step 2. 轉運與環境監測指引', desc: '資源回收分類、智慧漏電偵測', items: [{id:'I01', up:'電子清運聯單'}] },
-    'S3': { title: 'Step 3. 主體作業控制指引', desc: '開口防護、起重監控', items: [{id:'C01', up:'塔吊 AI 影像監控'}] },
-    'S4': { title: 'Step 4. 即時監控與指揮', desc: '戰情室數據整合、IOT監控', items: [{id:'C01', up:'智慧漏電監控(IOT)'}] },
-    'S5': { title: 'Step 5. 異常反應與決策支援', desc: '智慧廣播、APP異常推播', items: [{id:'C01', up:'異常影像截圖推播'}] },
-    'S6': { title: 'Step 6. 竣工移交與存證指引', desc: '撤場紀錄、廢棄物清運總表', items: [{id:'I01', up:'廢棄物數位總表'}] }
+    'S1': { title: 'Step 1. 工區大門配置指引', desc: 'AI人臉門禁、工程告示牌、酒測監測站', items: [{id:'B01', up:'安全門禁'}] },
+    'S2': { title: 'Step 2. 轉運與環境監測指引', desc: '資源回收分類、智慧漏電偵測', items: [{id:'I01', up:'數位聯單'}] },
+    'S3': { title: 'Step 3. 主體作業控制指引', desc: '開口防護、起重監控', items: [{id:'C01', up:'影像監控'}] },
+    'S4': { title: 'Step 4. 即時監控與指揮', desc: '戰情室數據整合、IOT監控', items: [{id:'C01', up:'IOT監控'}] },
+    'S5': { title: 'Step 5. 異常反應與決策支援', desc: '智慧廣播、APP異常推播', items: [{id:'C01', up:'異常推播'}] },
+    'S6': { title: 'Step 6. 竣工移交與存證指引', desc: '撤場紀錄、廢棄物清運總表', items: [{id:'I01', up:'清運總表'}] }
 };
 
 let INITIAL_DB = [
-    {id:'A01', cat:'A', n:'飲水機', s:'30x20'}, {id:'B01', cat:'B', n:'戴安全帽', s:'60x40'}, 
-    {id:'C01', cat:'C', n:'有電危險', s:'30x20'}, {id:'D01', cat:'D', n:'嚴禁煙火', s:'30x20'}
+    {id:'A01', cat:'A', n:'飲水機', s:'30x20'}, {id:'B01', cat:'B', n:'進入工地戴安全帽', s:'60x40'}, 
+    {id:'C01', cat:'C', n:'有電危險', s:'30x20'}, {id:'D01', cat:'D', n:'嚴禁煙火', s:'30x20'},
+    {id:'E01', cat:'E', n:'車輛進出口', s:'60x40'}, {id:'F01', cat:'F', n:'滅火器', s:'20x10'},
+    {id:'G01', cat:'G', n:'作業規範', s:'A1尺寸'}, {id:'H02', cat:'H', n:'嚴禁酒後', s:'60x40'},
+    {id:'I01', cat:'I', n:'物料暫置', s:'60x40'}, {id:'J01', cat:'J', n:'逃生圖', s:'依現場需求'},
+    {id:'K01', cat:'K', n:'第一工區', s:'40x20'}
 ];
 
 let activeDB = [], db, cart = {}, sites = [], isAdmin = false, curId = null, currentFilter = 'ALL', currentGuideItems = [], guides = {};
 const DEFAULT_SITES = ["嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
 
-// 使用固定的資料庫名稱 V22
+// 初始化 IndexedDB
 const request = indexedDB.open("Yutong_V22_DB", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = async e => { db = e.target.result; await initApp(); };
@@ -161,110 +164,21 @@ async function initApp() {
     render();
 }
 
-// ---------------- 導出與導入邏輯 ----------------
-async function exportBackup() {
-    const backup = {
-        localStorage: {
-            yt_sites: localStorage.getItem('yt_sites'),
-            yt_active_db: localStorage.getItem('yt_active_db'),
-            yt_guides: localStorage.getItem('yt_guides'),
-            yt_staff: localStorage.getItem('yt_staff')
-        },
-        images: {}
-    };
-    
-    // 讀取所有圖片
-    const store = db.transaction("images").objectStore("images");
-    const keys = await new Promise(r => {
-        const req = store.getAllKeys();
-        req.onsuccess = () => r(req.result);
-    });
-
-    for(let key of keys) {
-        backup.images[key] = await dbGet(key);
-    }
-
-    const blob = new Blob([JSON.stringify(backup)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Yutong_Backup_${new Date().toLocaleDateString()}.yutong`;
-    a.click();
-}
-
-async function importBackup(input) {
-    if(!input.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            const backup = JSON.parse(e.target.result);
-            // 還原 LocalStorage
-            Object.keys(backup.localStorage).forEach(key => {
-                if(backup.localStorage[key]) localStorage.setItem(key, backup.localStorage[key]);
-            });
-            // 還原圖片到 IndexedDB
-            const tx = db.transaction("images", "readwrite");
-            const store = tx.objectStore("images");
-            for(let key in backup.images) {
-                store.put(backup.images[key], key);
-            }
-            alert("導入成功！即將重新整理...");
-            location.reload();
-        } catch(err) {
-            alert("檔案格式錯誤");
-        }
-    };
-    reader.readAsText(input.files[0]);
-}
-
-// ---------------- 原有系統邏輯 ----------------
-function filterByGuide(stepKey) {
-    currentFilter = 'GUIDE';
-    const guide = guides[stepKey];
-    currentGuideItems = guide.items;
-    const grid = document.getElementById('mainGrid');
-    let headerHtml = isAdmin 
-        ? `<div class="guide-box">
-            <input type="text" class="text-2xl font-black mb-1 w-full bg-transparent border-b border-white/30" value="${guide.title}" oninput="updateGuideData('${stepKey}', 'title', this.value)">
-            <input type="text" class="text-sm font-bold opacity-90 w-full bg-transparent border-b border-white/20 mt-2" value="${guide.desc}" oninput="updateGuideData('${stepKey}', 'desc', this.value)">
-           </div>`
-        : `<div class="guide-box"><h2 class="text-2xl font-black mb-1">${guide.title}</h2><p class="text-sm font-bold opacity-90">${guide.desc}</p></div>`;
-    grid.innerHTML = headerHtml;
-    updateActiveTab(stepKey, 'step');
-    activeDB.filter(i => currentGuideItems.map(gi => gi.id).includes(i.id)).forEach(async i => await appendCard(grid, i));
-}
-
-function updateGuideData(key, field, val) { guides[key][field] = val; localStorage.setItem('yt_guides', JSON.stringify(guides)); }
-function filterCat(cat) { currentFilter = cat; updateActiveTab(cat, 'cat'); render(); }
-
-function updateActiveTab(key, type) {
-    document.querySelectorAll('.cat-tab-step, .cat-tab-item').forEach(t => {
-        t.classList.remove('active');
-        if (type === 'step' && t.classList.contains('cat-tab-step') && t.innerText.includes(key.replace('S',''))) t.classList.add('active');
-        if (type === 'cat' && t.classList.contains('cat-tab-item') && (t.innerText.startsWith(key) || (key==='ALL' && t.innerText==='全部'))) t.classList.add('active');
-    });
-}
-
-async function render() {
-    const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
-    let items = currentFilter === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentFilter);
-    items.sort((a,b) => a.id.localeCompare(b.id));
-    for (const i of items) await appendCard(grid, i);
-}
-
+// 核心渲染邏輯 (圖片自動對應 A01 -> A01.jpg)
 async function appendCard(container, i) {
     const c = cart[i.id] || { sel:false, qty:1 };
-    const img = await dbGet(i.id);
+    
+    // 圖片讀取邏輯
+    let localImg = await dbGet(i.id); // 找本地導入的照片
+    let githubImg = `${i.id}.jpg`;   // 找 GitHub 上的照片 (檔名 = ID.jpg)
+    
     const card = document.createElement('div');
     card.id = `card-${i.id}`;
     card.className = `sign-card ${c.sel?'selected':''}`;
     card.onclick = () => toggleSelect(i.id);
     
-    let upTag = "";
-    if(currentFilter === 'GUIDE') {
-        const gi = currentGuideItems.find(g => g.id === i.id);
-        if(gi) upTag = `<div class="upgrade-tag">✨ ${gi.up}</div>`;
-    }
+    let upTag = (currentFilter === 'GUIDE' && currentGuideItems.find(g => g.id === i.id)) 
+                ? `<div class="upgrade-tag">✨ ${currentGuideItems.find(g => g.id === i.id).up}</div>` : "";
 
     let specContent = isAdmin 
         ? `<input type="text" value="${i.s}" oninput="updateBaseSpec('${i.id}', this.value)" class="spec-input" onclick="event.stopPropagation()">`
@@ -274,7 +188,7 @@ async function appendCard(container, i) {
 
     card.innerHTML = `${delHtml}
         <div class="img-slot" id="img-${i.id}" onclick="handleImg(event, '${i.id}')">
-            ${img ? `<img src="${img}">` : (isAdmin ? '相機' : '-')}
+            ${localImg ? `<img src="${localImg}">` : `<img src="${githubImg}" onerror="this.onerror=null; this.src='https://placehold.co/140x100?text=無照片';">`}
         </div>
         <div style="flex:1" onclick="event.stopPropagation()">
             <div class="flex justify-between font-black text-[#095744]"><span>${i.n}</span><span class="text-[10px] bg-slate-100 px-1 rounded">${i.id}</span></div>
@@ -285,42 +199,68 @@ async function appendCard(container, i) {
     container.appendChild(card);
 }
 
-function updateBaseSpec(id, val) { const item = activeDB.find(x => x.id === id); if(item) item.s = val; localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); }
+// ---------------- 以下為系統功能邏輯 (備份、管理、渲染) ----------------
+
+async function exportBackup() {
+    const backup = { localStorage: { yt_sites: localStorage.getItem('yt_sites'), yt_active_db: localStorage.getItem('yt_active_db'), yt_guides: localStorage.getItem('yt_guides'), yt_staff: localStorage.getItem('yt_staff') }, images: {} };
+    const store = db.transaction("images").objectStore("images");
+    const keys = await new Promise(r => { const req = store.getAllKeys(); req.onsuccess = () => r(req.result); });
+    for(let key of keys) { backup.images[key] = await dbGet(key); }
+    const blob = new Blob([JSON.stringify(backup)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `Yutong_Backup_${new Date().toLocaleDateString()}.yutong`; a.click();
+}
+
+async function importBackup(input) {
+    if(!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const backup = JSON.parse(e.target.result);
+            Object.keys(backup.localStorage).forEach(key => { if(backup.localStorage[key]) localStorage.setItem(key, backup.localStorage[key]); });
+            const tx = db.transaction("images", "readwrite");
+            const store = tx.objectStore("images");
+            for(let key in backup.images) { store.put(backup.images[key], key); }
+            alert("導入成功！即將重新整理..."); location.reload();
+        } catch(err) { alert("檔案格式錯誤"); }
+    };
+    reader.readAsText(input.files[0]);
+}
+
+function filterByGuide(stepKey) {
+    currentFilter = 'GUIDE'; const guide = guides[stepKey]; currentGuideItems = guide.items;
+    const grid = document.getElementById('mainGrid');
+    grid.innerHTML = isAdmin ? `<div class="guide-box"><input type="text" class="text-2xl font-black mb-1 w-full bg-transparent border-b border-white/30" value="${guide.title}" oninput="updateGuideData('${stepKey}', 'title', this.value)"><input type="text" class="text-sm font-bold opacity-90 w-full bg-transparent border-b border-white/20 mt-2" value="${guide.desc}" oninput="updateGuideData('${stepKey}', 'desc', this.value)"></div>` : `<div class="guide-box"><h2 class="text-2xl font-black mb-1">${guide.title}</h2><p class="text-sm font-bold opacity-90">${guide.desc}</p></div>`;
+    updateActiveTab(stepKey, 'step');
+    activeDB.filter(i => currentGuideItems.map(gi => gi.id).includes(i.id)).forEach(async i => await appendCard(grid, i));
+}
+
+function updateGuideData(key, field, val) { guides[key][field] = val; localStorage.setItem('yt_guides', JSON.stringify(guides)); }
+function filterCat(cat) { currentFilter = cat; updateActiveTab(cat, 'cat'); render(); }
+function updateActiveTab(key, type) { document.querySelectorAll('.cat-tab-step, .cat-tab-item').forEach(t => { t.classList.remove('active'); if (type === 'step' && t.innerText.includes(key.replace('S',''))) t.classList.add('active'); if (type === 'cat' && (t.innerText.startsWith(key) || (key==='ALL' && t.innerText==='全部'))) t.classList.add('active'); }); }
+async function render() { const grid = document.getElementById('mainGrid'); grid.innerHTML = ''; let items = currentFilter === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentFilter); items.sort((a,b) => a.id.localeCompare(b.id)); for (const i of items) await appendCard(grid, i); }
 function toggleSelect(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; render(); autoSaveConfig(); }
 function updQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qty=v; autoSaveConfig(); }
 function autoSaveConfig() { localStorage.setItem('yt_staff', document.getElementById('staff').value); localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value); localStorage.setItem('yt_cart', JSON.stringify(cart)); }
 function dbGet(k) { return new Promise(r => { if(!db) return r(null); const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); t.onerror = () => r(null); }); }
 function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
-
 function handleImg(e, id) { e.stopPropagation(); if(!isAdmin) return; curId = id; document.getElementById('photoInput').click(); }
 async function handlePhoto(input) { if(input.files[0]){ const r = new FileReader(); r.onload = async e => { await dbSet(curId, e.target.result); render(); }; r.readAsDataURL(input.files[0]); }}
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('') + `<option value="__NEW__">➕ 新增工地...</option>`; }
 function handleSiteChange() { const s = document.getElementById('siteSelect'); if(s.value==='__NEW__'){ const n=prompt("名稱？"); if(n){sites.push(n);localStorage.setItem('yt_sites',JSON.stringify(sites));renderSiteSelect();s.value=n;}} autoSaveConfig(); }
-
-function toggleAdmin() { 
-    if(prompt("密碼")==="1234"){
-        isAdmin=!isAdmin; 
-        document.getElementById('addNewBtn').classList.toggle('hidden',!isAdmin); 
-        document.getElementById('adminControls').classList.toggle('hidden',!isAdmin); 
-        document.getElementById('appBody').classList.toggle('admin-mode', isAdmin);
-        render();
-    }
-}
-
+function toggleAdmin() { if(prompt("密碼")==="1234"){ isAdmin=!isAdmin; document.getElementById('addNewBtn').classList.toggle('hidden',!isAdmin); document.getElementById('adminControls').classList.toggle('hidden',!isAdmin); document.getElementById('appBody').classList.toggle('admin-mode', isAdmin); render(); } }
 function deleteItem(id) { if(confirm("確定刪除？")){ activeDB=activeDB.filter(x=>x.id!==id); localStorage.setItem('yt_active_db',JSON.stringify(activeDB)); render(); }}
-function addNewItem() { 
-    const n=prompt("標語名稱？"); const c=prompt("分類代碼？ (A~K)");
-    if(n && c){ activeDB.push({id:c.toUpperCase()+Date.now(),cat:c.toUpperCase(),n:n,s:'預設規格'}); render(); }
-}
+function addNewItem() { const n=prompt("標語名稱？"); const c=prompt("分類代碼？ (A~K)"); if(n && c){ activeDB.push({id:c.toUpperCase()+Date.now(),cat:c.toUpperCase(),n:n,s:'預設規格'}); render(); } }
 function resetAll() { if(confirm("確定清空選單？")){ cart={}; localStorage.removeItem('yt_cart'); render(); }}
+function updateBaseSpec(id, val) { const item = activeDB.find(x => x.id === id); if(item) item.s = val; localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); }
 
 async function buildReport() {
-    const sIds = Object.keys(cart).filter(id => cart[id].sel);
-    if(!sIds.length) return alert('未選項目');
+    const sIds = Object.keys(cart).filter(id => cart[id].sel); if(!sIds.length) return alert('未選項目');
     let h = `<div style="text-align:center; border-bottom:4px solid #095744; padding-bottom:10px;"><h1 style="color:#095744">鈺通營造採購需求單</h1><p>${document.getElementById('siteSelect').value} / ${document.getElementById('staff').value}</p></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
     for(const id of sIds) {
-        const item = activeDB.find(x => x.id === id); const img = await dbGet(id);
-        h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:150px">${img?`<img src="${img}" style="width:100%">`:'-'}</td><td style="padding:10px"><b style="font-size:18px">${item.n}</b><br><span style="color:#b91c1c; font-size:14px; font-weight:bold">規格：${item.s}</span></td><td style="padding:10px; font-size:24px; text-align:right"><b>${cart[id].qty}</b></td></tr>`;
+        const item = activeDB.find(x => x.id === id); 
+        const img = await dbGet(id) || `${id}.jpg`;
+        h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:150px"><img src="${img}" style="width:100%" onerror="this.style.display='none'"></td><td style="padding:10px"><b style="font-size:18px">${item.n}</b><br><span style="color:#b91c1c; font-size:14px; font-weight:bold">規格：${item.s}</span></td><td style="padding:10px; font-size:24px; text-align:right"><b>${cart[id].qty}</b></td></tr>`;
     }
     document.getElementById('printArea').innerHTML = h + `</table>`;
     document.getElementById('modal').style.display = 'flex';
