@@ -27,7 +27,7 @@
         .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; }
         .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 4px 6px; font-size: 12px; width: 100%; color: #9a3412; font-weight: bold; pointer-events: auto; }
         .admin-step-input { background: rgba(255,255,255,0.2); border: 1px dashed white !important; color: white; width: 100%; border-radius: 4px; padding: 2px 5px; margin-top: 4px; }
-        .img-slot { width: 140px; height: 100px; background: #f8fafc; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
+        .img-slot { width: 140px; height: 100px; background: #f1f5f9; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; } 
         .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); background: transparent; border-bottom: 2px solid #eee !important; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #eee !important; z-index: 2000; }
@@ -84,7 +84,6 @@ if (/Line/i.test(navigator.userAgent)) document.getElementById('lineAlert').styl
 const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
 const CAT_LABELS = {'ALL':'全部','A':'A類｜生活設施','B':'B類｜安全防護','C':'C類｜危險警示','D':'D類｜禁止事項','E':'E類｜交通動線','F':'F類｜設備設施','G':'G類｜作業規範','H':'H類｜宣導標語','I':'I類｜環境管理','J':'J類｜圖資指引','K':'K類｜區域單位'};
 
-// 標語資料庫擴充
 const INITIAL_DB = [
     {id:'A01', cat:'A', n:'飲水機', s:'30x20'}, {id:'A02', cat:'A', n:'洗手間', s:'30x20'},
     {id:'B01', cat:'B', n:'戴安全帽', s:'60x40'}, {id:'B02', cat:'B', n:'穿安全鞋', s:'60x40'},
@@ -109,7 +108,8 @@ const DEFAULT_GUIDES = {
 
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, curEditImgId;
 
-const request = indexedDB.open("Yutong_V45", 1);
+// 版號更新以確保套用新邏輯
+const request = indexedDB.open("Yutong_V46", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
@@ -140,11 +140,13 @@ function renderTabs() {
 async function render() {
     const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
     let display = (currentMode === 'CAT') ? (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : activeDB.filter(x => (guides[currentKey] && guides[currentKey].items.includes(x.id)));
+    
     if(currentMode === 'GUIDE' && guides[currentKey]) {
         const g = guides[currentKey];
         let delBtn = isAdmin ? `<button onclick="deleteStep('${currentKey}')" class="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-2 py-1 rounded">刪除</button>` : '';
         grid.innerHTML = `<div class="guide-box">${delBtn}${isAdmin ? `<input class="admin-step-input text-xl font-black" value="${g.t}" oninput="updateG('${currentKey}','t',this.value)">` : `<h2 class="text-xl font-black">${g.t}</h2>`}${isAdmin ? `<input class="admin-step-input text-xs" value="${g.d}" oninput="updateG('${currentKey}','d',this.value)">` : `<p class="text-xs opacity-80">${g.d}</p>`}</div>`;
     }
+
     for (const i of display) {
         const c = cart[i.id] || { sel:false, qty:1 };
         const localImg = await dbGet(i.id);
@@ -152,7 +154,23 @@ async function render() {
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
         let delItemBtn = isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20">✕</button>` : '';
-        card.innerHTML = `${delItemBtn}<div class="img-slot" onclick="handleImgClick(event, '${i.id}')"><img src="${localImg || 'img/'+i.id+'.JPG'}" onerror="this.src='https://via.placeholder.com/150?text=無圖'"></div><div class="flex-1"><div class="flex justify-between items-start"><div class="flex-1">${isAdmin ? `<input class="admin-input mb-1" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744]">${i.n}</div>`}</div><span class="text-[9px] bg-slate-100 p-1 rounded ml-1">${i.id}</span></div><div class="text-[13px] font-bold text-red-700 mt-1">規格：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : i.s}</div>${isAdmin ? `<button onclick="event.stopPropagation(); ${currentMode==='GUIDE'?'unlink':'linkToStep'}('${i.id}')" class="text-[10px] ${currentMode==='GUIDE'?'text-blue-500':'text-green-600'} mt-1 underline">${currentMode==='GUIDE'?'移除':'➕ 加入步驟'}</button>` : ''}<div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()"><span class="text-[10px] font-bold text-slate-400">數量</span><input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input"></div></div>`;
+        
+        // 修正：增加 onerror 處理，並將 src 設為空白來防止閃爍
+        const imgSrc = localImg ? localImg : `img/${i.id}.JPG`;
+
+        card.innerHTML = `${delItemBtn}
+            <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
+                <img src="${imgSrc}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f5f9%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%2394a3b8%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3E無照片%3C%2Ftext%3E%3C%2Fsvg%3E';">
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">${isAdmin ? `<input class="admin-input mb-1" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744]">${i.n}</div>`}</div>
+                    <span class="text-[9px] bg-slate-100 p-1 rounded ml-1">${i.id}</span>
+                </div>
+                <div class="text-[13px] font-bold text-red-700 mt-1">規格：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : i.s}</div>
+                ${isAdmin ? `<button onclick="event.stopPropagation(); ${currentMode==='GUIDE'?'unlink':'linkToStep'}('${i.id}')" class="text-[10px] ${currentMode==='GUIDE'?'text-blue-500':'text-green-600'} mt-1 underline">${currentMode==='GUIDE'?'移除':'➕ 加入步驟'}</button>` : ''}
+                <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()"><span class="text-[10px] font-bold text-slate-400">數量</span><input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input"></div>
+            </div>`;
         grid.appendChild(card);
     }
 }
@@ -162,10 +180,27 @@ function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { 
 function setFilter(m, k) { currentMode=m; currentKey=k; renderTabs(); render(); }
 function toggleItem(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; autoSave(); render(); }
 function updateQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qty=parseInt(v)||1; autoSave(); }
-function toggleAdmin() { if(!isAdmin) { if(prompt("密碼")==="751113") { isAdmin=true; document.getElementById('adminBtn').innerText="🔓 管理中"; document.getElementById('addItemBtn').classList.remove('hidden'); } } else { isAdmin=false; document.getElementById('adminBtn').innerText="🔒 管理員"; document.getElementById('addItemBtn').classList.add('hidden'); } renderTabs(); render(); }
-function manageSteps() { if(!isAdmin) return alert("請開啟管理員權限"); const k = prompt("新代號(如 S7)"); if(k){ guides[k]={t:"新標題", d:"新說明", items:[]}; localStorage.setItem('yt_guides', JSON.stringify(guides)); renderTabs(); }}
-function deleteStep(k) { if(confirm("刪除？")){ delete guides[k]; localStorage.setItem('yt_guides', JSON.stringify(guides)); setFilter('CAT','ALL'); }}
-function linkToStep(id) { const s = prompt("加入哪步? (如 S1)"); if(guides[s]){ if(!guides[s].items.includes(id)) guides[s].items.push(id); localStorage.setItem('yt_guides', JSON.stringify(guides)); alert("OK"); }}
+
+function toggleAdmin() {
+    if(!isAdmin) {
+        if(prompt("請輸入管理員密碼") === "751113") {
+            isAdmin = true;
+            document.getElementById('adminBtn').innerText = "🔓 管理中";
+            document.getElementById('addItemBtn').classList.remove('hidden');
+        } else {
+            alert("密碼錯誤！");
+        }
+    } else {
+        isAdmin = false;
+        document.getElementById('adminBtn').innerText = "🔒 管理員";
+        document.getElementById('addItemBtn').classList.add('hidden');
+    }
+    renderTabs(); render();
+}
+
+function manageSteps() { if(!isAdmin) return alert("管理員限定"); const k = prompt("代號(如S7)"); if(k){ guides[k]={t:"新標題", d:"新說明", items:[]}; localStorage.setItem('yt_guides', JSON.stringify(guides)); renderTabs(); }}
+function deleteStep(k) { if(confirm("刪除此步？")){ delete guides[k]; localStorage.setItem('yt_guides', JSON.stringify(guides)); setFilter('CAT','ALL'); }}
+function linkToStep(id) { const s = prompt("加入哪步?(如S1)"); if(guides[s]){ if(!guides[s].items.includes(id)) guides[s].items.push(id); localStorage.setItem('yt_guides', JSON.stringify(guides)); alert("OK"); }}
 function unlink(id) { guides[currentKey].items = guides[currentKey].items.filter(x => x !== id); localStorage.setItem('yt_guides', JSON.stringify(guides)); render(); }
 function autoSave() { localStorage.setItem('yt_staff', document.getElementById('staff').value); localStorage.setItem('yt_site', document.getElementById('siteSelect').value); localStorage.setItem('yt_cart', JSON.stringify(cart)); }
 function resetCart() { cart = {}; autoSave(); render(); }
@@ -174,12 +209,17 @@ function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 function addNewItem() { const id = prompt("編號"); if(id){ activeDB.push({id, cat: id.charAt(0).toUpperCase(), n:"新標語", s:"規格"}); localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); render(); }}
 function deleteItem(id) { activeDB = activeDB.filter(x => x.id !== id); localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); render(); }
+
 async function buildReport() {
     const sel = activeDB.filter(i => cart[i.id] && cart[i.id].sel); if(!sel.length) return alert("未選");
     let h = `<div id="captureTarget" style="background:white; padding:20px; border:2px solid #095744;"><div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:10px;"><h1 style="color:#095744">鈺通營造 標語採購單</h1><div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold"><span>工地：${document.getElementById('siteSelect').value}</span><span>填單人：${document.getElementById('staff').value}</span></div></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
-    for(const i of sel) { const img = await dbGet(i.id) || `img/${i.id}.JPG`; h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:110px"><img src="${img}" style="width:100px"></td><td style="padding:10px"><b>${i.n}</b><br><small>規格：${i.s}</small></td><td style="padding:10px; text-align:right; font-size:20px"><b>${cart[i.id].qty}</b></td></tr>`; }
+    for(const i of sel) { 
+        const img = await dbGet(i.id) || `img/${i.id}.JPG`; 
+        h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:110px"><img src="${img}" style="width:100px" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%2260%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f5f9%22%2F%3E%3C/svg%3E';"></td><td style="padding:10px"><b>${i.n}</b><br><small>規格：${i.s}</small></td><td style="padding:10px; text-align:right; font-size:20px"><b>${cart[i.id].qty}</b></td></tr>`; 
+    }
     document.getElementById('printArea').innerHTML = h + `</table></div>`; document.getElementById('modal').style.display='flex';
 }
+
 function captureToImage() { const target = document.getElementById('captureTarget'); html2canvas(target, { useCORS: true, scale: 2 }).then(canvas => { const imgData = canvas.toDataURL("image/png"); document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">圖片已生成！請「長按圖片」儲存。</p><img src="${imgData}" style="width:100%; border:1px solid #ddd;">`; }); }
 function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
 async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
