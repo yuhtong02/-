@@ -164,13 +164,13 @@ async function initApp() {
     render();
 }
 
-// 核心渲染邏輯 (圖片自動對應 A01 -> A01.jpg)
+// 核心渲染邏輯 (圖片路徑修正為 img/資料夾)
 async function appendCard(container, i) {
     const c = cart[i.id] || { sel:false, qty:1 };
     
     // 圖片讀取邏輯
     let localImg = await dbGet(i.id); // 找本地導入的照片
-    let githubImg = `${i.id}.jpg`;   // 找 GitHub 上的照片 (檔名 = ID.jpg)
+    let githubImg = `img/${i.id}.jpg`; // 關鍵修正：路徑指向 img/ 資料夾
     
     const card = document.createElement('div');
     card.id = `card-${i.id}`;
@@ -259,7 +259,8 @@ async function buildReport() {
     let h = `<div style="text-align:center; border-bottom:4px solid #095744; padding-bottom:10px;"><h1 style="color:#095744">鈺通營造採購需求單</h1><p>${document.getElementById('siteSelect').value} / ${document.getElementById('staff').value}</p></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
     for(const id of sIds) {
         const item = activeDB.find(x => x.id === id); 
-        const img = await dbGet(id) || `${id}.jpg`;
+        const localImg = await dbGet(id);
+        const img = localImg || `img/${id}.jpg`;
         h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:150px"><img src="${img}" style="width:100%" onerror="this.style.display='none'"></td><td style="padding:10px"><b style="font-size:18px">${item.n}</b><br><span style="color:#b91c1c; font-size:14px; font-weight:bold">規格：${item.s}</span></td><td style="padding:10px; font-size:24px; text-align:right"><b>${cart[id].qty}</b></td></tr>`;
     }
     document.getElementById('printArea').innerHTML = h + `</table>`;
