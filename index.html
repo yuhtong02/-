@@ -118,8 +118,10 @@ let INITIAL_DB = [
     {id:'K01', cat:'K', n:'第一工區', s:'40x20'}
 ];
 
+// 工地清單：已加入 嘉義創世基金會
+const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
+
 let activeDB = [], db, cart = {}, sites = [], isAdmin = false, curId = null, currentFilter = 'ALL', currentGuideItems = [], guides = {};
-const DEFAULT_SITES = ["嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
 
 const request = indexedDB.open("Yutong_V22_DB", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
@@ -136,13 +138,13 @@ async function initApp() {
     render();
 }
 
-// 核心渲染邏輯 (支援 img/ 資料夾與大小寫 JPG)
 async function appendCard(container, i) {
     const c = cart[i.id] || { sel:false, qty:1 };
     let localImg = await dbGet(i.id);
-    const githubImg = `img/${i.id}.jpg`;
-    const githubImgUpper = `img/${i.id}.JPG`;
-    
+    const tryP1 = `img/${i.id}.jpg`;
+    const tryP2 = `img/${i.id}.JPG`;
+    const tryP3 = `${i.id}.jpg`;
+
     const card = document.createElement('div');
     card.id = `card-${i.id}`;
     card.className = `sign-card ${c.sel?'selected':''}`;
@@ -153,12 +155,11 @@ async function appendCard(container, i) {
     let specContent = isAdmin 
         ? `<input type="text" value="${i.s}" oninput="updateBaseSpec('${i.id}', this.value)" class="spec-input" onclick="event.stopPropagation()">`
         : `<div class="spec-text">規格：${i.s || '現場評估'}</div>`;
-    let delHtml = isAdmin ? `<div style="position:absolute;top:-8px;right:-8px;background:red;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;font-weight:bold;border:2px solid white;" onclick="event.stopPropagation(); deleteItem('${i.id}')">×</div>` : '';
 
-    card.innerHTML = `${delHtml}
+    card.innerHTML = `
         <div class="img-slot" id="img-${i.id}" onclick="handleImg(event, '${i.id}')">
             ${localImg ? `<img src="${localImg}">` : `
-                <img src="${githubImg}" onerror="this.onerror=null; this.src='${githubImgUpper}'; this.setAttribute('onerror', 'this.style.display=\'none\'');">
+                <img src="${tryP1}" onerror="this.onerror=null; this.src='${tryP2}'; this.setAttribute('onerror', 'this.src=\\'${tryP3}\\'; this.setAttribute(\\'onerror\\', \\'this.style.display=\\\\\\'none\\\\\\'\\')');">
             `}
         </div>
         <div style="flex:1" onclick="event.stopPropagation()">
@@ -170,38 +171,23 @@ async function appendCard(container, i) {
     container.appendChild(card);
 }
 
-// 基礎功能
-async function exportBackup() {
-    const backup = { localStorage: { yt_sites: localStorage.getItem('yt_sites'), yt_active_db: localStorage.getItem('yt_active_db'), yt_guides: localStorage.getItem('yt_guides'), yt_staff: localStorage.getItem('yt_staff') }, images: {} };
-    const store = db.transaction("images").objectStore("images");
-    const keys = await new Promise(r => { const req = store.getAllKeys(); req.onsuccess = () => r(req.result); });
-    for(let key of keys) { backup.images[key] = await dbGet(key); }
-    const blob = new Blob([JSON.stringify(backup)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `Yutong_Backup_${new Date().toLocaleDateString()}.yutong`; a.click();
-}
-async function importBackup(input) {
-    if(!input.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            const backup = JSON.parse(e.target.result);
-            Object.keys(backup.localStorage).forEach(key => { if(backup.localStorage[key]) localStorage.setItem(key, backup.localStorage[key]); });
-            const tx = db.transaction("images", "readwrite");
-            const store = tx.objectStore("images");
-            for(let key in backup.images) { store.put(backup.images[key], key); }
-            alert("導入成功！即將重新整理..."); location.reload();
-        } catch(err) { alert("檔案格式錯誤"); }
-    };
-    reader.readAsText(input.files[0]);
-}
 function filterByGuide(stepKey) {
     currentFilter = 'GUIDE'; const guide = guides[stepKey]; currentGuideItems = guide.items;
     const grid = document.getElementById('mainGrid');
-    grid.innerHTML = isAdmin ? `<div class="guide-box"><input type="text" class="text-2xl font-black mb-1 w-full bg-transparent border-b border-white/30" value="${guide.title}" oninput="updateGuideData('${stepKey}', 'title', this.value)"><input type="text" class="text-sm font-bold opacity-90 w-full bg-transparent border-b border-white/20 mt-2" value="${guide.desc}" oninput="updateGuideData('${stepKey}', 'desc', this.value)"></div>` : `<div class="guide-box"><h2 class="text-2xl font-black mb-1">${guide.title}</h2><p class="text-sm font-bold opacity-90">${guide.desc}</p></div>`;
+    
+    // 管理員模式下可編輯標題
+    let titleHtml = isAdmin ? 
+        `<input type="text" class="text-2xl font-black mb-1 w-full bg-transparent border-b border-white/30" value="${guide.title}" oninput="updateGuideData('${stepKey}', 'title', this.value)">` : 
+        `<h2 class="text-2xl font-black mb-1">${guide.title}</h2>`;
+    let descHtml = isAdmin ? 
+        `<input type="text" class="text-sm font-bold opacity-90 w-full bg-transparent border-b border-white/20 mt-2" value="${guide.desc}" oninput="updateGuideData('${stepKey}', 'desc', this.value)">` : 
+        `<p class="text-sm font-bold opacity-90">${guide.desc}</p>`;
+
+    grid.innerHTML = `<div class="guide-box">${titleHtml}${descHtml}</div>`;
     updateActiveTab(stepKey, 'step');
     activeDB.filter(i => currentGuideItems.map(gi => gi.id).includes(i.id)).forEach(async i => await appendCard(grid, i));
 }
+
 function updateGuideData(key, field, val) { guides[key][field] = val; localStorage.setItem('yt_guides', JSON.stringify(guides)); }
 function filterCat(cat) { currentFilter = cat; updateActiveTab(cat, 'cat'); render(); }
 function updateActiveTab(key, type) { document.querySelectorAll('.cat-tab-step, .cat-tab-item').forEach(t => { t.classList.remove('active'); if (type === 'step' && t.innerText.includes(key.replace('S',''))) t.classList.add('active'); if (type === 'cat' && (t.innerText.startsWith(key) || (key==='ALL' && t.innerText==='全部'))) t.classList.add('active'); }); }
@@ -215,21 +201,18 @@ function handleImg(e, id) { e.stopPropagation(); if(!isAdmin) return; curId = id
 async function handlePhoto(input) { if(input.files[0]){ const r = new FileReader(); r.onload = async e => { await dbSet(curId, e.target.result); render(); }; r.readAsDataURL(input.files[0]); }}
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('') + `<option value="__NEW__">➕ 新增工地...</option>`; }
 function handleSiteChange() { const s = document.getElementById('siteSelect'); if(s.value==='__NEW__'){ const n=prompt("名稱？"); if(n){sites.push(n);localStorage.setItem('yt_sites',JSON.stringify(sites));renderSiteSelect();s.value=n;}} autoSaveConfig(); }
-function toggleAdmin() { if(prompt("密碼")==="1234"){ isAdmin=!isAdmin; document.getElementById('addNewBtn').classList.toggle('hidden',!isAdmin); document.getElementById('adminControls').classList.toggle('hidden',!isAdmin); document.getElementById('appBody').classList.toggle('admin-mode', isAdmin); render(); } }
-function deleteItem(id) { if(confirm("確定刪除？")){ activeDB=activeDB.filter(x=>x.id!==id); localStorage.setItem('yt_active_db',JSON.stringify(activeDB)); render(); }}
-function addNewItem() { const n=prompt("標語名稱？"); const c=prompt("分類代碼？ (A~K)"); if(n && c){ activeDB.push({id:c.toUpperCase()+Date.now(),cat:c.toUpperCase(),n:n,s:'預設規格'}); render(); } }
+function toggleAdmin() { if(prompt("密碼")==="1234"){ isAdmin=!isAdmin; document.getElementById('addNewBtn').classList.toggle('hidden',!isAdmin); document.getElementById('adminControls').classList.toggle('hidden',!isAdmin); render(); } }
 function resetAll() { if(confirm("確定清空選單？")){ cart={}; localStorage.removeItem('yt_cart'); render(); }}
 function updateBaseSpec(id, val) { const item = activeDB.find(x => x.id === id); if(item) item.s = val; localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); }
 
 async function buildReport() {
     const sIds = Object.keys(cart).filter(id => cart[id].sel); if(!sIds.length) return alert('未選項目');
-    let h = `<div style="text-align:center; border-bottom:4px solid #095744; padding-bottom:10px;"><h1 style="color:#095744">鈺通營造採購需求單</h1><p>${document.getElementById('siteSelect').value} / ${document.getElementById('staff').value}</p></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
+    let h = `<div style="text-align:center; border-bottom:4px solid #095744; padding-bottom:10px;"><h1 style="color:#095744">鈺通營造採購需求單</h1><p>${document.getElementById('siteSelect').value}</p></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
     for(const id of sIds) {
         const item = activeDB.find(x => x.id === id); 
         const localImg = await dbGet(id);
-        // 生成單據時也檢查大小寫
         const img = localImg || `img/${id}.jpg`;
-        h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:150px"><img src="${img}" onerror="this.onerror=null; this.src='img/${id}.JPG'; this.setAttribute('onerror', 'this.style.display=\'none\'');" style="width:100%"></td><td style="padding:10px"><b style="font-size:18px">${item.n}</b><br><span style="color:#b91c1c; font-size:14px; font-weight:bold">規格：${item.s}</span></td><td style="padding:10px; font-size:24px; text-align:right"><b>${cart[id].qty}</b></td></tr>`;
+        h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:150px"><img src="${img}" onerror="this.onerror=null; this.src='img/${id}.JPG';" style="width:100%"></td><td style="padding:10px"><b style="font-size:18px">${item.n}</b><br><span style="color:#b91c1c; font-size:14px; font-weight:bold">規格：${item.s}</span></td><td style="padding:10px; font-size:24px; text-align:right"><b>${cart[id].qty}</b></td></tr>`;
     }
     document.getElementById('printArea').innerHTML = h + `</table>`;
     document.getElementById('modal').style.display = 'flex';
