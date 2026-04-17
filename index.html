@@ -43,7 +43,14 @@
         .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; position: relative; }
         .divider { width: 2px; height: 24px; background: #e2e8f0; flex-shrink: 0; margin: 0 4px; }
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
-        @media print { .no-print { display: none !important; } body { background: white !important; padding: 0; } }
+        
+        /* 針對列印的樣式 */
+        @media print { 
+            .no-print { display: none !important; } 
+            body { background: white !important; padding: 0; margin: 0; }
+            #modal { position: static; display: block; background: white; }
+            .bg-white { box-shadow: none !important; padding: 0 !important; max-height: none !important; overflow: visible !important; }
+        }
     </style>
 </head>
 <body>
@@ -73,10 +80,10 @@
 
     <div id="modal" class="no-print">
         <div class="bg-white w-full max-w-4xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-2xl">✕</button>
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-2xl no-print">✕</button>
             <div id="printArea"></div>
-            <div class="flex gap-4 mt-6">
-                <button onclick="window.print()" class="flex-1 bg-[#095744] text-white py-4 rounded-xl font-black text-lg">確認列印 / PDF</button>
+            <div class="flex gap-4 mt-6 no-print">
+                <button onclick="executePrint()" class="flex-1 bg-[#095744] text-white py-4 rounded-xl font-black text-lg">確認列印 / 存為 PDF</button>
             </div>
         </div>
     </div>
@@ -88,7 +95,7 @@ const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博
 const CAT_LABELS = {
     'ALL': '全部項目', 'A': 'A類｜生活設施', 'B': 'B類｜安全防護', 'C': 'C類｜危險警示', 'D': 'D類｜禁止事項',
     'E': 'E類｜交通與動線', 'F': 'F類｜設備設施', 'G': 'G類｜作業規範', 'H': 'H類｜宣導標語',
-    'I': 'I類｜環境管理', 'J': 'J類｜圖資指引', 'K': 'K類｜單位標示'
+    'I': 'I類｜環境管理', 'J': 'J類｜圖資指引', 'K': 'K類｜區域單位'
 };
 const DEFAULT_DB = [
     {id:'A01', cat:'A', n:'飲水機', s:'30x20'}, {id:'B01', cat:'B', n:'戴安全帽', s:'60x40'}, {id:'G01', cat:'G', n:'作業規範告示', s:'120x90'}
@@ -104,7 +111,7 @@ const DEFAULT_GUIDES = {
 
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, curEditImgId;
 
-const request = indexedDB.open("Yutong_V37", 1);
+const request = indexedDB.open("Yutong_V38", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
@@ -122,17 +129,14 @@ function init() {
 
 function renderTabs() {
     let html = '';
-    // Step 按鈕
     Object.keys(guides).sort().forEach(k => {
         html += `<div class="cat-tab-step ${currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}</div>`;
     });
-    // ⚙️ 齒輪按鈕：在管理員模式下綁定 manageSteps 函數
     if(isAdmin) {
         html += `<div class="cat-tab-step bg-blue-600 border-blue-600" style="padding: 8px 12px; cursor:pointer;" onclick="manageSteps()">⚙️</div>`;
     } else {
         html += `<div class="cat-tab-step opacity-30" style="padding: 8px 12px; cursor:not-allowed;">⚙️</div>`;
     }
-    
     html += `<div class="divider"></div>`;
     Object.keys(CAT_LABELS).forEach(k => {
         html += `<div class="cat-tab-item ${currentKey===k?'active':''}" onclick="setFilter('CAT','${k}')">${CAT_LABELS[k]}</div>`;
@@ -159,9 +163,7 @@ async function render() {
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
-
         let delItemBtn = isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20">✕</button>` : '';
-        
         card.innerHTML = `${delItemBtn}
             <div class="img-slot" onclick="handleImgClick(event, '${i.id}')"><img src="${localImg || 'img/'+i.id+'.JPG'}" onerror="this.src='img/'+'${i.id}'+'.jpg'; this.onerror=null;"></div>
             <div class="flex-1">
@@ -205,37 +207,11 @@ function toggleAdmin() {
 }
 
 function manageSteps() {
-    const key = prompt("請輸入步驟代碼 (例如 S7, S8)");
+    const key = prompt("請輸入步驟代碼 (例如 S7)");
     if(!key) return;
-    if(guides[key]) return alert("此步驟已存在");
-    guides[key] = { t: "新步驟標題", d: "請點擊管理員模式進行編輯", items: [] };
+    guides[key] = { t: "新步驟標題", d: "說明文字", items: [] };
     localStorage.setItem('yt_guides', JSON.stringify(guides));
     renderTabs();
-}
-
-function deleteStep(key) {
-    if(confirm("確定刪除此步驟？")) {
-        delete guides[key];
-        localStorage.setItem('yt_guides', JSON.stringify(guides));
-        setFilter('CAT', 'ALL');
-    }
-}
-
-function linkToStep(id) {
-    const s = prompt("要加入哪個 Step? (例如 S1)");
-    if(guides[s]) {
-        if(!guides[s].items.includes(id)) guides[s].items.push(id);
-        localStorage.setItem('yt_guides', JSON.stringify(guides));
-        alert("已加入 " + s);
-    } else {
-        alert("找不到該步驟");
-    }
-}
-
-function unlink(id) {
-    guides[currentKey].items = guides[currentKey].items.filter(x => x !== id);
-    localStorage.setItem('yt_guides', JSON.stringify(guides));
-    render();
 }
 
 function autoSave() { localStorage.setItem('yt_staff', document.getElementById('staff').value); localStorage.setItem('yt_site', document.getElementById('siteSelect').value); localStorage.setItem('yt_cart', JSON.stringify(cart)); }
@@ -245,10 +221,26 @@ function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 function addNewItem() { const id = prompt("編號"); if(!id) return; activeDB.push({id, cat: id.charAt(0).toUpperCase(), n:"新標語", s:"規格"}); localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); render(); }
 function deleteItem(id) { activeDB = activeDB.filter(x => x.id !== id); localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); render(); }
-function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
-async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
-async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
-async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
+
+// 核心列印函數優化
+function executePrint() {
+    // 解決手機不彈出列印視窗的問題：先嘗試直接呼叫，無效則開啟新視窗
+    if (typeof window.print === 'function') {
+        window.print();
+    } else {
+        const printContent = document.getElementById('printArea').innerHTML;
+        const WinPrint = window.open('', '', 'width=900,height=650');
+        WinPrint.document.write('<html><head><title>採購單</title>');
+        WinPrint.document.write('<style>table{width:100%;border-collapse:collapse;} td{padding:10px;border-bottom:1px solid #eee;} img{width:100px;}</style>');
+        WinPrint.document.write('</head><body>');
+        WinPrint.document.write(printContent);
+        WinPrint.document.write('</body></html>');
+        WinPrint.document.close();
+        WinPrint.focus();
+        WinPrint.print();
+        WinPrint.close();
+    }
+}
 
 async function buildReport() {
     const sel = activeDB.filter(i => cart[i.id] && cart[i.id].sel); if(!sel.length) return alert("未選項目");
@@ -256,6 +248,11 @@ async function buildReport() {
     for(const i of sel) { const img = await dbGet(i.id) || `img/${i.id}.JPG`; h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:110px"><img src="${img}" style="width:100px"></td><td style="padding:10px"><b>${i.n}</b><br><small>規格：${i.s}</small></td><td style="padding:10px; text-align:right; font-size:20px"><b>${cart[i.id].qty}</b></td></tr>`; }
     document.getElementById('printArea').innerHTML = h + `</table>`; document.getElementById('modal').style.display='flex';
 }
+
+function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
+async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
+async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
+async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
 </script>
 </body>
 </html>
