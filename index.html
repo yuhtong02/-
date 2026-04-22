@@ -25,17 +25,16 @@
         .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
         .sign-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid var(--yt-card-border) !important; display: flex; gap: 16px; cursor: pointer; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; }
-        /* 編輯框樣式優化 */
-        .edit-input { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.5) !important; color: white; width: 100%; border-radius: 6px; padding: 4px 8px; margin-bottom: 4px; }
+        .edit-input { background: rgba(255,255,255,0.15); border: 1px dashed rgba(255,255,255,0.4) !important; color: white; width: 100%; border-radius: 6px; padding: 5px 10px; margin-bottom: 5px; font-weight: 900; }
         .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 6px; font-size: 11px; width: 100%; color: #9a3412; font-weight: bold; }
         .img-slot { width: 140px; height: 100px; background: #f1f5f9; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; } 
         .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); background: transparent; border-bottom: 2px solid #eee !important; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #eee !important; z-index: 2000; }
         .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; }
-        .spec-label { font-size: 11px; font-weight: bold; color: #64748b; margin-top: 4px; }
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
         .print-paper { background: white; width: 100%; max-width: 600px; border-radius: 24px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .spec-label { font-size: 11px; font-weight: bold; color: #64748b; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -50,7 +49,7 @@
         <div class="input-row">
             <div class="flex gap-1 overflow-hidden">
                 <select id="siteSelect" class="flex-1 bg-white text-[#095744] p-2 rounded-xl text-xs font-black border border-[#095744]/20 min-w-0" onchange="autoSave()"></select>
-                <button id="addSiteBtn" onclick="addNewSite()" class="bg-[#095744] text-white px-3 rounded-xl font-bold flex-shrink-0">+</button>
+                <button onclick="addNewSite()" class="bg-[#095744] text-white px-3 rounded-xl font-bold flex-shrink-0">+</button>
             </div>
             <input type="text" id="staff" class="bg-white text-[#095744] p-2 rounded-xl text-xs font-black border border-[#095744]/20" placeholder="填單人員" oninput="autoSave()">
         </div>
@@ -60,7 +59,7 @@
     <div class="grid-container max-w-7xl mx-auto" id="mainGrid"></div>
 
     <nav class="footer-nav no-print">
-        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full max-w-3xl bg-amber-50 text-amber-700 py-2 mb-2 rounded-xl font-black text-sm mx-auto border border-amber-200">➕ 新增標語項目 (管理員限定)</button>
+        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full max-w-3xl bg-amber-50 text-amber-700 py-2 mb-2 rounded-xl font-black text-sm mx-auto border border-amber-200">➕ 管理員：新增標語項目</button>
         <div class="flex w-full max-w-3xl gap-3 px-4 mx-auto">
             <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-lg">📋 生成採購單</button>
             <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-400 rounded-2xl text-[10px] font-bold">重選</button>
@@ -159,13 +158,12 @@ async function render() {
 
     display.sort((a, b) => a.id.localeCompare(b.id));
 
-    // 更新：STEP 1~6 的大卡片標題與說明均設為可編輯
+    // 更新：不論是否為管理員，Step 內容皆可編輯
     if(currentMode === 'GUIDE' && guides[currentKey]) {
         const g = guides[currentKey];
         grid.innerHTML = `<div class="guide-box">
-            <input class="edit-input text-xl font-black" value="${g.t}" oninput="updateG('${currentKey}','t',this.value)">
+            <input class="edit-input text-xl" value="${g.t}" oninput="updateG('${currentKey}','t',this.value)">
             <input class="edit-input text-xs" value="${g.d}" oninput="updateG('${currentKey}','d',this.value)">
-            <p class="text-[10px] mt-2 opacity-60">※ 點擊上方文字可直接修改流程名稱</p>
         </div>`;
     }
 
@@ -189,10 +187,12 @@ async function render() {
                     </div>
                     <span class="text-[9px] bg-slate-100 p-1 rounded ml-1 font-bold">${i.id}</span>
                 </div>
+                
                 <div class="grid grid-cols-2 gap-2 mt-1">
                     <div><div class="spec-label">規格</div>${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<div class="text-[12px] font-bold text-red-700">${i.s}</div>`}</div>
                     <div><div class="spec-label">材質</div>${isAdmin ? `<input class="admin-input" value="${i.m||''}" oninput="updateI('${i.id}','m',this.value)" onclick="event.stopPropagation()" placeholder="材質">` : `<div class="text-[12px] font-bold text-blue-700">${i.m||'中空板'}</div>`}</div>
                 </div>
+
                 <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
                     <span class="text-[10px] font-bold text-slate-400">數量</span>
                     <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
@@ -227,7 +227,7 @@ function updateQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qt
 function resetCart() { cart = {}; autoSave(); render(); }
 function hardReset() { if(confirm("確定要清空並還原？")){ localStorage.clear(); location.reload(); }}
 function addNewItem() { const newID = prompt("新編號:")?.toUpperCase().trim(); if(newID) { activeDB.push({id:newID, cat:newID.charAt(0), n:"新標語", s:"60x40", m:"中空板"}); saveDB(); render(); }}
-function deleteItem(id) { if(confirm("刪除？")){ activeDB = activeDB.filter(x => x.id !== id); saveDB(); render(); }}
+function deleteItem(id) { if(confirm("刪除項目？")){ activeDB = activeDB.filter(x => x.id !== id); saveDB(); render(); }}
 function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
 async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
 async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
@@ -235,7 +235,7 @@ async function handlePhoto(input) { if(input.files[0]) { const reader = new File
 
 async function buildReport() {
     const sel = activeDB.filter(i => cart[i.id] && cart[i.id].sel).sort((a,b) => a.id.localeCompare(b.id));
-    if(!sel.length) return alert("未選取");
+    if(!sel.length) return alert("未選取任何項目");
     let h = `<div id="captureTarget" style="background:white; padding:20px; border:2px solid #095744;"><div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:10px;"><h1 style="color:#095744; font-size:24px;">鈺通營造 標語採購單</h1><div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold"><span>工地：${document.getElementById('siteSelect').value}</span><span>填單人：${document.getElementById('staff').value}</span></div></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
     for(const i of sel) { 
         const img = await dbGet(i.id) || `img/${i.id}.JPG`; 
