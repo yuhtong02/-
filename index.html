@@ -26,8 +26,8 @@
         .sign-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid var(--yt-card-border) !important; display: flex; gap: 16px; cursor: pointer; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; }
         .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 4px 6px; font-size: 12px; width: 100%; color: #9a3412; font-weight: bold; pointer-events: auto; }
-        /* 新增編號專用樣式 */
         .admin-id-input { background: #e0f2fe; border: 1px solid #0ea5e9 !important; color: #0369a1; width: 60px; text-align: center; }
+        .admin-step-input { background: rgba(255,255,255,0.15); border: 1px dashed white !important; color: white; width: 100%; border-radius: 6px; padding: 5px 10px; margin-bottom: 5px; font-weight: 900; }
         .img-slot { width: 140px; height: 100px; background: #f1f5f9; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; } 
         .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); background: transparent; border-bottom: 2px solid #eee !important; }
@@ -47,7 +47,10 @@
             <button onclick="toggleAdmin()" id="adminBtn" class="text-[10px] font-black bg-white text-[#095744] px-3 py-1.5 rounded-full border border-[#095744]/20">🔒 管理員</button>
         </div>
         <div class="input-row">
-            <select id="siteSelect" class="bg-white text-[#095744] p-2 rounded-xl text-xs font-black border border-[#095744]/20" onchange="autoSave()"></select>
+            <div class="relative flex gap-1">
+                <select id="siteSelect" class="flex-1 bg-white text-[#095744] p-2 rounded-xl text-xs font-black border border-[#095744]/20" onchange="autoSave()"></select>
+                <button id="addSiteBtn" onclick="addNewSite()" class="hidden bg-[#095744] text-white px-2 rounded-xl font-bold">+</button>
+            </div>
             <input type="text" id="staff" class="bg-white text-[#095744] p-2 rounded-xl text-xs font-black border border-[#095744]/20" placeholder="填單人員" oninput="autoSave()">
         </div>
         <div class="category-scroller" id="tabContainer"></div>
@@ -131,27 +134,20 @@ function renderTabs() {
     document.getElementById('tabContainer').innerHTML = html;
 }
 
-// ✨ 編號重排核心邏輯 ✨
-function reorderIDs(targetID) {
-    const prefix = targetID.charAt(0).toUpperCase();
-    const targetNum = parseInt(targetID.substring(1));
-    if (isNaN(targetNum)) return;
+function renderSiteSelect() {
+    document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('');
+    const savedSite = localStorage.getItem('yt_site');
+    if(savedSite && sites.includes(savedSite)) document.getElementById('siteSelect').value = savedSite;
+}
 
-    // 找出同類別的所有項目並排序
-    let itemsInCategory = activeDB
-        .filter(i => i.id.startsWith(prefix))
-        .sort((a, b) => parseInt(a.id.substring(1)) - parseInt(b.id.substring(1)));
-
-    // 從後往前檢查，如果發現編號重複或衝突，就往後推
-    for (let i = itemsInCategory.length - 1; i >= 0; i--) {
-        let item = itemsInCategory[i];
-        let currentNum = parseInt(item.id.substring(1));
-        
-        // 如果這個項目的編號大於等於我們目標編號，就把它 +1
-        if (currentNum >= targetNum) {
-            let nextNum = (currentNum + 1).toString().padStart(2, '0');
-            item.id = prefix + nextNum;
-        }
+function addNewSite() {
+    const name = prompt("請輸入新工地名稱:");
+    if(name && name.trim()) {
+        sites.push(name.trim());
+        localStorage.setItem('yt_sites', JSON.stringify(sites));
+        renderSiteSelect();
+        document.getElementById('siteSelect').value = name.trim();
+        autoSave();
     }
 }
 
@@ -161,11 +157,20 @@ async function render() {
         (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : 
         activeDB.filter(x => (guides[currentKey] && guides[currentKey].items.includes(x.id)));
 
-    // 排序顯示：按 ID 排序
     display.sort((a, b) => a.id.localeCompare(b.id));
 
     if(currentMode === 'GUIDE' && guides[currentKey]) {
-        grid.innerHTML = `<div class="guide-box"><h2 class="text-xl font-black">${guides[currentKey].t}</h2><p class="text-xs opacity-80">${guides[currentKey].d}</p></div>`;
+        const g = guides[currentKey];
+        grid.innerHTML = `
+            <div class="guide-box">
+                ${isAdmin ? `
+                    <input class="admin-step-input text-xl" value="${g.t}" oninput="updateG('${currentKey}','t',this.value)">
+                    <input class="admin-step-input text-xs" value="${g.d}" oninput="updateG('${currentKey}','d',this.value)">
+                ` : `
+                    <h2 class="text-xl font-black">${g.t}</h2>
+                    <p class="text-xs opacity-80">${g.d}</p>
+                `}
+            </div>`;
     }
 
     for (const i of display) {
@@ -174,7 +179,6 @@ async function render() {
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
-        
         const imgSrc = localImg ? localImg : `img/${i.id}.JPG`;
         const fallbackImg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f5f9%22%2F%3E%3C/svg%3E`;
 
@@ -200,38 +204,31 @@ async function render() {
     }
 }
 
-// ✨ 管理員更改編號功能 ✨
+function updateG(k, f, v) { guides[k][f] = v; localStorage.setItem('yt_guides', JSON.stringify(guides)); }
 function changeID(oldID, newID) {
     newID = newID.toUpperCase().trim();
     if (oldID === newID) return;
-    
-    // 如果新編號已經有人用了，執行重排
     if (activeDB.some(i => i.id === newID)) {
-        if(confirm(`編號 ${newID} 已存在，是否將現有項目及後續項目自動往後順延？`)) {
+        if(confirm(`編號 ${newID} 已存在，是否順延？`)) {
             const item = activeDB.find(i => i.id === oldID);
-            // 先把原本的這個暫時移走，避免干擾排序
-            item.id = "TEMP_ID";
-            reorderIDs(newID);
-            item.id = newID;
-            item.cat = newID.charAt(0);
-        } else {
-            render(); return;
-        }
+            item.id = "TEMP_ID"; reorderIDs(newID); item.id = newID; item.cat = newID.charAt(0);
+        } else { render(); return; }
     } else {
-        // 如果新編號沒人用，直接改
         const item = activeDB.find(i => i.id === oldID);
-        item.id = newID;
-        item.cat = newID.charAt(0);
+        item.id = newID; item.cat = newID.charAt(0);
     }
-    
-    // 同步購物車狀態
-    if(cart[oldID]) {
-        cart[newID] = cart[oldID];
-        delete cart[oldID];
+    if(cart[oldID]) { cart[newID] = cart[oldID]; delete cart[oldID]; }
+    saveDB(); render();
+}
+
+function reorderIDs(targetID) {
+    const prefix = targetID.charAt(0).toUpperCase();
+    const targetNum = parseInt(targetID.substring(1));
+    let items = activeDB.filter(i => i.id.startsWith(prefix)).sort((a, b) => parseInt(a.id.substring(1)) - parseInt(b.id.substring(1)));
+    for (let i = items.length - 1; i >= 0; i--) {
+        let currentNum = parseInt(items[i].id.substring(1));
+        if (currentNum >= targetNum) items[i].id = prefix + (currentNum + 1).toString().padStart(2, '0');
     }
-    
-    saveDB();
-    render();
 }
 
 function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveDB(); }}
@@ -241,42 +238,32 @@ function toggleItem(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel
 function updateQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qty=parseInt(v)||1; autoSave(); }
 function autoSave() { localStorage.setItem('yt_staff', document.getElementById('staff').value); localStorage.setItem('yt_site', document.getElementById('siteSelect').value); localStorage.setItem('yt_cart', JSON.stringify(cart)); }
 function resetCart() { cart = {}; autoSave(); render(); }
-function hardReset() { if(confirm("確定要清空所有資料並還原預設值嗎？")){ localStorage.clear(); location.reload(); }}
-function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
-function closeModal() { document.getElementById('modal').style.display = 'none'; }
+function hardReset() { if(confirm("確定要清空並還原？")){ localStorage.clear(); location.reload(); }}
 
 function toggleAdmin() {
-    if(!isAdmin) {
-        if(prompt("管理員密碼") === "751113") {
-            isAdmin = true;
-            document.getElementById('adminBtn').innerText = "🔓 管理中";
-            document.getElementById('addItemBtn').classList.remove('hidden');
-        } else { alert("錯誤"); }
+    isAdmin = !isAdmin;
+    if(isAdmin) {
+        if(prompt("管理員密碼") !== "751113") { isAdmin = false; return alert("錯誤"); }
+        document.getElementById('adminBtn').innerText = "🔓 管理中";
+        document.getElementById('addItemBtn').classList.remove('hidden');
+        document.getElementById('addSiteBtn').classList.remove('hidden');
     } else {
-        isAdmin = false;
         document.getElementById('adminBtn').innerText = "🔒 管理員";
         document.getElementById('addItemBtn').classList.add('hidden');
+        document.getElementById('addSiteBtn').classList.add('hidden');
     }
     renderTabs(); render();
 }
 
 function addNewItem() {
-    const newID = prompt("請輸入新標語編號 (例如 F01):");
+    const newID = prompt("新編號 (例如 A03):")?.toUpperCase().trim();
     if(!newID) return;
-    const cleanID = newID.toUpperCase().trim();
-    
-    // 如果編號已存在，執行自動順延
-    if(activeDB.some(i => i.id === cleanID)) {
-        reorderIDs(cleanID);
-    }
-    
-    activeDB.push({id: cleanID, cat: cleanID.charAt(0), n: "新標語名稱", s: "60x40"});
-    saveDB();
-    render();
+    if(activeDB.some(i => i.id === newID)) reorderIDs(newID);
+    activeDB.push({id: newID, cat: newID.charAt(0), n: "新標語", s: "60x40"});
+    saveDB(); render();
 }
 
 function deleteItem(id) { if(confirm("刪除？")){ activeDB = activeDB.filter(x => x.id !== id); saveDB(); render(); }}
-
 function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
 async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
 async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
