@@ -25,13 +25,14 @@
         .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
         .sign-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid var(--yt-card-border) !important; display: flex; gap: 16px; cursor: pointer; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; }
-        .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 6px; font-size: 11px; width: 100%; color: #9a3412; font-weight: bold; pointer-events: auto; margin-top: 2px; }
-        .admin-id-input { background: #e0f2fe; border: 1px solid #0ea5e9 !important; color: #0369a1; width: 60px; text-align: center; }
-        .admin-step-input { background: rgba(255,255,255,0.15); border: 1px dashed white !important; color: white; width: 100%; border-radius: 6px; padding: 5px 10px; margin-bottom: 5px; font-weight: 900; }
+        /* 編輯框樣式優化 */
+        .edit-input { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.5) !important; color: white; width: 100%; border-radius: 6px; padding: 4px 8px; margin-bottom: 4px; }
+        .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 6px; font-size: 11px; width: 100%; color: #9a3412; font-weight: bold; }
         .img-slot { width: 140px; height: 100px; background: #f1f5f9; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; } 
         .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); background: transparent; border-bottom: 2px solid #eee !important; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #eee !important; z-index: 2000; }
+        .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; }
         .spec-label { font-size: 11px; font-weight: bold; color: #64748b; margin-top: 4px; }
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
         .print-paper { background: white; width: 100%; max-width: 600px; border-radius: 24px; padding: 20px; max-height: 90vh; overflow-y: auto; }
@@ -158,11 +159,13 @@ async function render() {
 
     display.sort((a, b) => a.id.localeCompare(b.id));
 
+    // 更新：STEP 1~6 的大卡片標題與說明均設為可編輯
     if(currentMode === 'GUIDE' && guides[currentKey]) {
         const g = guides[currentKey];
         grid.innerHTML = `<div class="guide-box">
-            ${isAdmin ? `<input class="admin-step-input text-xl" value="${g.t}" oninput="updateG('${currentKey}','t',this.value)">` : `<h2 class="text-xl font-black">${g.t}</h2>`}
-            ${isAdmin ? `<input class="admin-step-input text-xs" value="${g.d}" oninput="updateG('${currentKey}','d',this.value)">` : `<p class="text-xs opacity-80">${g.d}</p>`}
+            <input class="edit-input text-xl font-black" value="${g.t}" oninput="updateG('${currentKey}','t',this.value)">
+            <input class="edit-input text-xs" value="${g.d}" oninput="updateG('${currentKey}','d',this.value)">
+            <p class="text-[10px] mt-2 opacity-60">※ 點擊上方文字可直接修改流程名稱</p>
         </div>`;
     }
 
@@ -184,7 +187,7 @@ async function render() {
                     <div class="flex-1">
                         ${isAdmin ? `<input class="admin-input" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`}
                     </div>
-                    ${isAdmin ? `<input class="admin-input admin-id-input ml-1" value="${i.id}" onchange="changeID('${i.id}', this.value)" onclick="event.stopPropagation()">` : `<span class="text-[9px] bg-slate-100 p-1 rounded ml-1 font-bold">${i.id}</span>`}
+                    <span class="text-[9px] bg-slate-100 p-1 rounded ml-1 font-bold">${i.id}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-1">
                     <div><div class="spec-label">規格</div>${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<div class="text-[12px] font-bold text-red-700">${i.s}</div>`}</div>
