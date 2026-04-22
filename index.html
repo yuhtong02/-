@@ -25,7 +25,7 @@
         .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
         .sign-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid var(--yt-card-border) !important; display: flex; gap: 16px; cursor: pointer; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; }
-        .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 4px 6px; font-size: 12px; width: 100%; color: #9a3412; font-weight: bold; pointer-events: auto; }
+        .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 6px; font-size: 11px; width: 100%; color: #9a3412; font-weight: bold; pointer-events: auto; margin-top: 2px; }
         .admin-id-input { background: #e0f2fe; border: 1px solid #0ea5e9 !important; color: #0369a1; width: 60px; text-align: center; }
         .admin-step-input { background: rgba(255,255,255,0.15); border: 1px dashed white !important; color: white; width: 100%; border-radius: 6px; padding: 5px 10px; margin-bottom: 5px; font-weight: 900; }
         .img-slot { width: 140px; height: 100px; background: #f1f5f9; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
@@ -35,6 +35,7 @@
         .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; position: relative; }
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
         .print-paper { background: white; width: 100%; max-width: 600px; border-radius: 24px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .spec-label { font-size: 11px; font-weight: bold; color: #64748b; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -86,17 +87,18 @@ if (/Line/i.test(navigator.userAgent)) document.getElementById('lineAlert').styl
 const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
 const CAT_LABELS = {'ALL':'全部','A':'A類｜生活設施','B':'B類｜安全防護','C':'C類｜危險警示','D':'D類｜禁止事項','E':'E類｜交通動線','F':'F類｜設備設施','G':'G類｜作業規範','H':'H類｜宣導標語','I':'I類｜環境管理','J':'J類｜圖資指引','K':'K類｜區域單位'};
 
+// 加入 m (材質) 預設值
 const INITIAL_DB = [
-    {id:'A01', cat:'A', n:'飲水機', s:'30x20'}, {id:'A02', cat:'A', n:'洗手間', s:'30x20'},
-    {id:'B01', cat:'B', n:'戴安全帽', s:'60x40'}, {id:'B02', cat:'B', n:'穿安全鞋', s:'60x40'},
-    {id:'C01', cat:'C', n:'有電危險', s:'60x40'}, {id:'C02', cat:'C', n:'當心墜落', s:'60x40'},
-    {id:'D01', cat:'D', n:'嚴禁煙火', s:'60x40'}, {id:'D02', cat:'D', n:'禁止進入', s:'60x40'},
-    {id:'E01', cat:'E', n:'車輛進出口', s:'120x60'}, {id:'E02', cat:'E', n:'安全通道', s:'60x40'},
-    {id:'F01', cat:'F', n:'滅火器', s:'30x20'}, {id:'F02', cat:'F', n:'急救箱', s:'30x20'},
-    {id:'G01', cat:'G', n:'施工告示牌', s:'120x90'}, {id:'G02', cat:'G', n:'作業規範', s:'90x60'},
-    {id:'H01', cat:'H', n:'酒後禁工', s:'60x40'}, {id:'H02', cat:'H', n:'工安第一', s:'60x40'},
-    {id:'I01', cat:'I', n:'物料暫置', s:'60x40'}, {id:'I02', cat:'I', n:'廢棄物堆放', s:'60x40'},
-    {id:'J01', cat:'J', n:'逃生路線圖', s:'客製'}, {id:'K01', cat:'K', n:'工地辦公室', s:'60x20'}
+    {id:'A01', cat:'A', n:'飲水機', s:'30x20', m:'中空板'}, {id:'A02', cat:'A', n:'洗手間', s:'30x20', m:'中空板'},
+    {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}, {id:'B02', cat:'B', n:'穿安全鞋', s:'60x40', m:'中空板'},
+    {id:'C01', cat:'C', n:'有電危險', s:'60x40', m:'中空板'}, {id:'C02', cat:'C', n:'當心墜落', s:'60x40', m:'中空板'},
+    {id:'D01', cat:'D', n:'嚴禁煙火', s:'60x40', m:'中空板'}, {id:'D02', cat:'D', n:'禁止進入', s:'60x40', m:'中空板'},
+    {id:'E01', cat:'E', n:'車輛進出口', s:'120x60', m:'帆布'}, {id:'E02', cat:'E', n:'安全通道', s:'60x40', m:'中空板'},
+    {id:'F01', cat:'F', n:'滅火器', s:'30x20', m:'貼紙'}, {id:'F02', cat:'F', n:'急救箱', s:'30x20', m:'貼紙'},
+    {id:'G01', cat:'G', n:'施工告示牌', s:'120x90', m:'鋁板'}, {id:'G02', cat:'G', n:'作業規範', s:'90x60', m:'中空板'},
+    {id:'H01', cat:'H', n:'酒後禁工', s:'60x40', m:'中空板'}, {id:'H02', cat:'H', n:'工安第一', s:'60x40', m:'中空板'},
+    {id:'I01', cat:'I', n:'物料暫置', s:'60x40', m:'中空板'}, {id:'I02', cat:'I', n:'廢棄物堆放', s:'60x40', m:'中空板'},
+    {id:'J01', cat:'J', n:'逃生路線圖', s:'客製', m:'壓克力'}, {id:'K01', cat:'K', n:'工地辦公室', s:'60x20', m:'中空板'}
 ];
 
 const DEFAULT_GUIDES = {
@@ -180,22 +182,32 @@ async function render() {
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
         const imgSrc = localImg ? localImg : `img/${i.id}.JPG`;
-        const fallbackImg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f5f9%22%2F%3E%3C/svg%3E`;
-
+        
         card.innerHTML = `
             ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20">✕</button>` : ''}
             <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
-                <img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackImg}';">
+                <img src="${imgSrc}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f5f9%22%2F%3E%3C/svg%3E';">
             </div>
             <div class="flex-1">
-                <div class="flex justify-between items-start mb-1">
+                <div class="flex justify-between items-start">
                     <div class="flex-1">
-                        ${isAdmin ? `<input class="admin-input" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-lg">${i.n}</div>`}
+                        ${isAdmin ? `<input class="admin-input" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`}
                     </div>
                     ${isAdmin ? `<input class="admin-input admin-id-input ml-1" value="${i.id}" onchange="changeID('${i.id}', this.value)" onclick="event.stopPropagation()">` : `<span class="text-[9px] bg-slate-100 p-1 rounded ml-1 font-bold">${i.id}</span>`}
                 </div>
-                <div class="text-[13px] font-bold text-red-700">規格：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : i.s}</div>
-                <div class="flex items-center gap-2 mt-3" onclick="event.stopPropagation()">
+                
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <div>
+                        <div class="spec-label">規格</div>
+                        ${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<div class="text-[12px] font-bold text-red-700">${i.s}</div>`}
+                    </div>
+                    <div>
+                        <div class="spec-label">材質</div>
+                        ${isAdmin ? `<input class="admin-input" value="${i.m||''}" oninput="updateI('${i.id}','m',this.value)" onclick="event.stopPropagation()" placeholder="如：中空板">` : `<div class="text-[12px] font-bold text-blue-700">${i.m||'未設定'}</div>`}
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
                     <span class="text-[10px] font-bold text-slate-400">數量</span>
                     <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
                 </div>
@@ -259,7 +271,7 @@ function addNewItem() {
     const newID = prompt("新編號 (例如 A03):")?.toUpperCase().trim();
     if(!newID) return;
     if(activeDB.some(i => i.id === newID)) reorderIDs(newID);
-    activeDB.push({id: newID, cat: newID.charAt(0), n: "新標語", s: "60x40"});
+    activeDB.push({id: newID, cat: newID.charAt(0), n: "新標語", s: "60x40", m: "中空板"});
     saveDB(); render();
 }
 
@@ -275,7 +287,7 @@ async function buildReport() {
     let h = `<div id="captureTarget" style="background:white; padding:20px; border:2px solid #095744;"><div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:10px;"><h1 style="color:#095744; font-size:24px;">鈺通營造 標語採購單</h1><div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold"><span>工地：${document.getElementById('siteSelect').value}</span><span>填單人：${document.getElementById('staff').value}</span></div></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
     for(const i of sel) { 
         const img = await dbGet(i.id) || `img/${i.id}.JPG`; 
-        h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:110px"><img src="${img}" style="width:100px" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%2260%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f5f9%22%2F%3E%3C/svg%3E';"></td><td style="padding:10px"><b>[${i.id}] ${i.n}</b><br><small>規格：${i.s}</small></td><td style="padding:10px; text-align:right; font-size:20px; color:#70B934"><b>x ${cart[i.id].qty}</b></td></tr>`; 
+        h += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; width:110px"><img src="${img}" style="width:100px" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%2260%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f1f5f9%22%2F%3E%3C/svg%3E';"></td><td style="padding:10px"><b>[${i.id}] ${i.n}</b><br><small>規格：${i.s}</small> | <small>材質：${i.m||'未指定'}</small></td><td style="padding:10px; text-align:right; font-size:20px; color:#70B934"><b>x ${cart[i.id].qty}</b></td></tr>`; 
     }
     document.getElementById('printArea').innerHTML = h + `</table></div>`; document.getElementById('modal').style.display='flex';
 }
