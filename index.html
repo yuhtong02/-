@@ -3,78 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 (穩定版)</title>
+    <title>鈺通營造工安標語系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; --yt-card-border: #D7CCC8; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 120px; }
+        :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 120px; overflow-x: hidden; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 4px solid var(--yt-dark); }
         .cat-tab-item { white-space: nowrap; padding: 8px 18px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; cursor: pointer; flex-shrink: 0; font-size: 13px; font-weight: 700; }
         .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); font-weight: 900; }
-        .sign-card { background: white; border-radius: 16px; padding: 15px; border: 1px solid var(--yt-card-border); display: flex; gap: 12px; cursor: pointer; position: relative; }
-        .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; }
+        .sign-card { background: white; border-radius: 16px; padding: 15px; border: 1px solid #D7CCC8; display: flex; gap: 12px; cursor: pointer; position: relative; transition: transform 0.1s; }
+        .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; transform: scale(1.01); }
         .img-slot { width: 120px; height: 90px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
-        .qty-input { width: 50px; text-align: center; font-size: 20px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #eee; }
+        .qty-input { width: 50px; text-align: center; font-size: 20px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #eee; background: transparent; }
         .admin-input { background: #fff7ed; border: 1px dashed #fb923c; border-radius: 4px; padding: 2px 4px; font-size: 12px; width: 100%; color: #9a3412; font-weight: bold; }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
 
-<div class="sticky-header px-4 py-2">
+<div class="sticky-header px-4 py-2 no-print">
     <div class="flex justify-between items-center mb-2">
-        <h1 class="text-xl font-black text-[#095744]">鈺通營造工安標語</h1>
+        <h1 class="text-xl font-black text-[#095744]">鈺通營造工安標語系統</h1>
         <button onclick="toggleAdmin()" id="adminBtn" class="text-xs font-bold bg-white px-3 py-1 rounded-full border border-[#095744]">🔒 管理員</button>
     </div>
-    <div class="flex gap-2 mb-3">
-        <select id="siteSelect" class="flex-1 bg-white p-2 rounded-xl text-xs font-bold border" onchange="saveStatus()"></select>
-        <button onclick="addNewSite()" class="bg-[#095744] text-white px-3 rounded-xl font-bold">+</button>
-        <input type="text" id="staff" class="w-1/3 bg-white p-2 rounded-xl text-xs font-bold border" placeholder="填單人" oninput="saveStatus()">
+    <div class="grid grid-cols-2 gap-2 mb-3">
+        <div class="flex gap-1">
+            <select id="siteSelect" class="flex-1 bg-white p-2 rounded-xl text-xs font-bold border" onchange="saveAll()"></select>
+            <button onclick="addNewSite()" class="bg-[#095744] text-white px-3 rounded-xl font-bold">+</button>
+        </div>
+        <input type="text" id="staff" class="bg-white p-2 rounded-xl text-xs font-bold border" placeholder="填單人員" oninput="saveAll()">
     </div>
     <div class="flex overflow-x-auto gap-2 pb-2" id="tabContainer"></div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4" id="mainGrid"></div>
 
-<div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-top z-50">
-    <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-amber-50 text-amber-700 py-2 mb-2 rounded-xl font-black border border-amber-200">➕ 插入項目並重排序號</button>
-    <div class="flex gap-2">
-        <button onclick="buildReport()" class="flex-1 bg-[#095744] text-white py-4 rounded-2xl font-black text-xl">📋 生成採購單</button>
-        <button onclick="resetCart()" class="bg-red-50 text-red-500 px-4 rounded-2xl font-bold">重選</button>
+<div class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-sm border-t no-print z-50">
+    <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-amber-50 text-amber-700 py-2 mb-2 rounded-xl font-black border border-amber-200 shadow-sm">➕ 插入項目並重排序號 (管理員)</button>
+    <div class="flex gap-2 max-w-4xl mx-auto">
+        <button onclick="buildReport()" class="flex-[3] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-lg">📋 生成採購單</button>
+        <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-500 rounded-2xl font-bold text-sm">重選</button>
+        <button onclick="hardReset()" class="flex-1 bg-gray-100 text-gray-400 rounded-2xl font-bold text-sm">還原</button>
     </div>
 </div>
 
-<div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[9999]">
+<div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-[9999] no-print">
     <div class="bg-white w-full max-w-xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
         <div id="printArea"></div>
-        <div class="flex gap-2 mt-4">
-            <button onclick="window.print()" class="flex-1 bg-[#095744] text-white py-3 rounded-xl font-bold">列印/存PDF</button>
-            <button onclick="closeModal()" class="flex-1 bg-gray-100 py-3 rounded-xl font-bold">關閉</button>
+        <div class="grid grid-cols-2 gap-3 mt-6">
+            <button onclick="window.print()" class="bg-[#095744] text-white py-3 rounded-xl font-bold">PDF / 列印</button>
+            <button onclick="closeModal()" class="bg-gray-100 py-3 rounded-xl font-bold text-gray-500">返回修改</button>
         </div>
     </div>
 </div>
 
 <script>
-// --- [重點] 修改這裡的內容，無論無痕或換手機都會固定下來 ---
+// --- [ 預設模板資料 ] ---
 const INITIAL_DB = [
     {id:'A01', cat:'A', n:'飲水機', s:'30x20', m:'中空板'},
     {id:'A02', cat:'A', n:'洗手間', s:'30x20', m:'中空板'},
     {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'},
-    {id:'C01', cat:'C', n:'有電危險', s:'60x40', m:'中空板'}
+    {id:'C01', cat:'C', n:'有電危險', s:'60x40', m:'中空板'},
+    {id:'D01', cat:'D', n:'嚴禁煙火', s:'60x40', m:'中空板'}
 ];
-const DEFAULT_SITES = ["嘉義創世", "嘉義嘉科", "嘉義博愛", "嘉義北門", "嘉義民雄", "臺南林森"];
-const CAT_LABELS = {'ALL':'全部','A':'A類','B':'B類','C':'C類','D':'D類','E':'E類','F':'F類','G':'G類','H':'H類','I':'I類','J':'J類','K':'K類'};
+const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
+const CAT_LABELS = {'ALL':'全部','A':'A類｜生活','B':'B類｜防護','C':'C類｜危險','D':'D類｜禁止','E':'E類｜交通','F':'F類｜設備','G':'G類｜規範','H':'H類｜宣導','I':'I類｜環境','J':'J類｜圖資','K':'K類｜單位'};
 
 let activeDB, cart = {}, sites, isAdmin = false, currentKey = 'ALL';
 
-// 初始化
 function init() {
-    // 優先讀取暫存，沒有就讀取上面的 INITIAL_DB
     activeDB = JSON.parse(localStorage.getItem('yt_db')) || INITIAL_DB;
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
+    
     renderSiteSelect();
     renderTabs();
     renderGrid();
@@ -83,7 +87,7 @@ function init() {
 function renderSiteSelect() {
     const sel = document.getElementById('siteSelect');
     sel.innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('');
-    if(localStorage.getItem('yt_curSite')) sel.value = localStorage.getItem('yt_curSite');
+    if(localStorage.getItem('yt_lastSite')) sel.value = localStorage.getItem('yt_lastSite');
 }
 
 function renderTabs() {
@@ -98,30 +102,30 @@ function renderGrid() {
     grid.innerHTML = '';
     const filtered = currentKey === 'ALL' ? activeDB : activeDB.filter(i => i.cat === currentKey);
     
+    // 排序：確保編號 A01, A02 順序正確
     filtered.sort((a,b) => a.id.localeCompare(b.id)).forEach(i => {
         const c = cart[i.id] || { sel: false, qty: 1 };
-        // 重要：這裡強制抓取 img 資料夾裡的 .jpg 檔案
         const imgPath = `img/${i.id}.jpg`;
         
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
         card.innerHTML = `
-            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs">✕</button>` : ''}
-            <div class="img-slot"><img src="${imgPath}" onerror="this.src='https://placehold.co/150x100?text=無照片';"></div>
+            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs shadow-md">✕</button>` : ''}
+            <div class="img-slot"><img src="${imgPath}" onerror="this.src='https://placehold.co/150x100?text=${i.id}';"></div>
             <div class="flex-1">
-                <div class="flex justify-between">
-                    ${isAdmin ? `<input class="admin-input" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<b class="text-[#095744]">${i.n}</b>`}
-                    <span class="text-[10px] text-gray-300">${i.id}</span>
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        ${isAdmin ? `<input class="admin-input" value="${i.n}" oninput="updateItem('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<b class="text-[#095744] text-lg leading-tight">${i.n}</b>`}
+                    </div>
+                    <span class="text-[9px] font-bold text-gray-300 ml-1">${i.id}</span>
                 </div>
-                <div class="text-[11px] mt-1">
-                    規格：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<span class="text-red-600">${i.s}</span>`}
-                </div>
-                <div class="text-[11px]">
-                    材質：${isAdmin ? `<input class="admin-input" value="${i.m||''}" oninput="updateI('${i.id}','m',this.value)" onclick="event.stopPropagation()">` : `<span class="text-blue-600">${i.m||'中空板'}</span>`}
+                <div class="grid grid-cols-2 gap-x-2 mt-1">
+                    <div class="text-[11px] font-bold text-gray-400">規格：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateItem('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<span class="text-red-600">${i.s}</span>`}</div>
+                    <div class="text-[11px] font-bold text-gray-400">材質：${isAdmin ? `<input class="admin-input" value="${i.m||''}" oninput="updateItem('${i.id}','m',this.value)" onclick="event.stopPropagation()">` : `<span class="text-blue-600">${i.m||'中空板'}</span>`}</div>
                 </div>
                 <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
-                    <span class="text-xs text-gray-400">數量</span>
+                    <span class="text-xs font-black text-gray-400">數量</span>
                     <input type="number" class="qty-input" value="${c.qty}" oninput="updateQty('${i.id}', this.value)">
                 </div>
             </div>
@@ -130,7 +134,7 @@ function renderGrid() {
     });
 }
 
-// 核心：自動重排功能
+// --- [ 核心邏輯：序號自動跳號 ] ---
 function addNewItem() {
     let prefix = currentKey === 'ALL' ? 'A' : currentKey;
     let max = 0;
@@ -138,86 +142,106 @@ function addNewItem() {
         let n = parseInt(i.id.slice(1)); if(n > max) max = n;
     });
     let suggestID = prefix + (max + 1).toString().padStart(2, '0');
-    let inputID = prompt("輸入編號 (若編號重複將自動向後擠):", suggestID);
+    let inputID = prompt("請輸入新編號 (輸入現有編號則會自動向後擠):", suggestID);
     if(!inputID) return;
     inputID = inputID.toUpperCase();
 
-    // 如果重複，執行位移
+    // 如果輸入的編號已經存在，則啟動重排
     if(activeDB.some(x => x.id === inputID)) {
-        if(confirm(`編號 ${inputID} 已存在，是否將後方項目序號自動後移？`)) {
-            let num = parseInt(inputID.slice(1));
-            activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) >= num)
+        if(confirm(`編號 ${inputID} 已存在。要將此編號之後的所有項目自動往後移一號嗎？`)) {
+            let startNum = parseInt(inputID.slice(1));
+            // 從最後面開始改編號，避免覆蓋
+            activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) >= startNum)
                     .sort((a,b) => parseInt(b.id.slice(1)) - parseInt(a.id.slice(1)))
                     .forEach(item => {
-                        let nextNum = parseInt(item.id.slice(1)) + 1;
-                        item.id = prefix + nextNum.toString().padStart(2, '0');
+                        let currentNum = parseInt(item.id.slice(1));
+                        item.id = prefix + (currentNum + 1).toString().padStart(2, '0');
                     });
         }
     }
-    activeDB.push({id: inputID, cat: inputID.charAt(0), n: "新項目", s: "60x40", m: "中空板"});
-    saveStatus();
+    
+    activeDB.push({id: inputID, cat: inputID.charAt(0), n: "新標語項目", s: "60x40", m: "中空板"});
+    saveAll();
     renderGrid();
 }
 
 function toggleItem(id) {
     if(!cart[id]) cart[id] = { sel: false, qty: 1 };
     cart[id].sel = !cart[id].sel;
-    saveStatus();
+    saveAll();
     renderGrid();
 }
 
 function updateQty(id, val) {
     if(!cart[id]) cart[id] = { sel: true, qty: 1 };
     cart[id].qty = parseInt(val) || 1;
-    saveStatus();
+    saveAll();
 }
 
-function updateI(id, field, val) {
+function updateItem(id, field, val) {
     const item = activeDB.find(x => x.id === id);
-    if(item) { item[field] = val; saveStatus(); }
+    if(item) { item[field] = val; saveAll(); }
+}
+
+function deleteItem(id) {
+    if(confirm(`確定刪除 [${id}]？`)) {
+        activeDB = activeDB.filter(x => x.id !== id);
+        saveAll();
+        renderGrid();
+    }
 }
 
 function filterCat(k) { currentKey = k; renderTabs(); renderGrid(); }
 
 function toggleAdmin() {
     isAdmin = !isAdmin;
-    if(isAdmin && prompt("管理密碼") !== "751113") { isAdmin = false; return; }
-    document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理中" : "🔒 管理員";
+    if(isAdmin && prompt("管理員密碼") !== "751113") { isAdmin = false; return; }
+    document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理模式" : "🔒 管理員";
     document.getElementById('addItemBtn').classList.toggle('hidden', !isAdmin);
     renderGrid();
 }
 
-function saveStatus() {
+function saveAll() {
     localStorage.setItem('yt_db', JSON.stringify(activeDB));
     localStorage.setItem('yt_cart', JSON.stringify(cart));
     localStorage.setItem('yt_sites', JSON.stringify(sites));
-    localStorage.setItem('yt_curSite', document.getElementById('siteSelect').value);
+    localStorage.setItem('yt_lastSite', document.getElementById('siteSelect').value);
 }
 
 function addNewSite() {
-    const n = prompt("新增工地名稱:");
-    if(n) { sites.push(n); saveStatus(); renderSiteSelect(); }
+    const n = prompt("請輸入新工地名稱:");
+    if(n) { sites.push(n); saveAll(); renderSiteSelect(); document.getElementById('siteSelect').value = n; }
 }
 
-function resetCart() { cart = {}; saveStatus(); renderGrid(); }
+function resetCart() { cart = {}; saveAll(); renderGrid(); }
+function hardReset() { if(confirm("確定要清空所有修改並還原到預設狀態嗎？")) { localStorage.clear(); location.reload(); } }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
 function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
-    if(!sel.length) return alert("請先選取項目");
-    let h = `<h2 class="text-center text-xl font-bold border-b-2 border-black pb-2 mb-4">鈺通營造標語採購單</h2>
-             <div class="flex justify-between mb-4 text-sm font-bold">
-                <span>工地：${document.getElementById('siteSelect').value}</span>
-                <span>填單人：${document.getElementById('staff').value}</span>
-             </div>
-             <table class="w-full text-left border-collapse">`;
+    if(!sel.length) return alert("請先勾選標語");
+    
+    let h = `<div style="padding:10px; border:2px solid #095744; background:white;">
+                <h2 style="text-align:center; font-size:20px; color:#095744; margin-bottom:10px; border-bottom:2px solid #095744; padding-bottom:5px;">鈺通營造標語採購單</h2>
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:10px; font-weight:bold;">
+                    <span>工地：${document.getElementById('siteSelect').value}</span>
+                    <span>填單人：${document.getElementById('staff').value}</span>
+                </div>
+                <table style="width:100%; border-collapse:collapse;">`;
+    
     sel.forEach(i => {
-        h += `<tr class="border-b">
-                <td class="py-2 w-20"><img src="img/${i.id}.jpg" class="w-16"></td>
-                <td class="py-2 text-sm"><b>[${i.id}] ${i.n}</b><br><small>${i.s} / ${i.m||'中空板'}</small></td>
-                <td class="py-2 text-right font-black text-green-600">x ${cart[i.id].qty}</td>
+        h += `<tr style="border-bottom:1px solid #eee;">
+                <td style="padding:8px 0; width:70px;"><img src="img/${i.id}.jpg" style="width:60px;" onerror="this.src='https://placehold.co/60x40?text=無圖';"></td>
+                <td style="padding:8px; font-size:13px;">
+                    <b>[${i.id}] ${i.n}</b><br>
+                    <small style="color:gray;">${i.s} / ${i.m||'中空板'}</small>
+                </td>
+                <td style="padding:8px; text-align:right; font-size:18px; color:#70B934; font-weight:900;">x ${cart[i.id].qty}</td>
               </tr>`;
     });
-    document.getElementById('printArea').innerHTML = h + `</table>`;
+    
+    h += `</table></div>`;
+    document.getElementById('printArea').innerHTML = h;
     document.getElementById('modal').style.display = 'flex';
 }
 
