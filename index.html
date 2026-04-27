@@ -14,26 +14,19 @@
         .main-title { font-size: 1.5rem; font-weight: 900; letter-spacing: 0.1em; }
         .admin-btn { background: white; color: var(--yt-dark); padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 900; cursor: pointer; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: white; border-bottom: 3px solid var(--yt-dark); }
-        
-        /* 標籤樣式 */
         .cat-tab-step, .cat-tab-item { white-space: nowrap; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; border: 2px solid transparent; }
         .cat-tab-step { background: var(--yt-dark); color: white; border-color: var(--yt-dark); }
         .cat-tab-step.active { background: var(--yt-light); border-color: var(--yt-light); }
         .cat-tab-item { background: white; color: #475569; border-color: #e2e8f0; }
         .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); }
-        
         .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
         .sign-card { background: white; border-radius: 15px; padding: 12px; border: 1px solid #D7CCC8; display: flex; gap: 10px; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; }
-        
         .img-slot { width: 100px; height: 80px; background: #f8fafc; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
         .qty-input { width: 50px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; outline: none; }
-        
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .result-img { max-width: 100%; max-height: 75vh; border-radius: 8px; border: 2px solid white; }
-        
-        /* 隱藏區塊 */
         #hiddenCapture { position: fixed; left: -9999px; top: 0; width: 450px; background: white; }
         .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 4000; align-items: center; justify-content: center; font-weight: 900; color: var(--yt-dark); }
     </style>
@@ -48,14 +41,16 @@
             <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">🔒 管理員</button>
         </div>
         <div class="grid grid-cols-2 gap-2 px-4 py-2 bg-white border-b shadow-sm">
-            <select id="siteSelect" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200"></select>
+            <div class="flex gap-1">
+                <select id="siteSelect" class="flex-1 bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
+                <button onclick="editSites()" class="bg-gray-100 px-3 rounded-lg text-xs font-bold border border-gray-200 active:bg-gray-200">＋</button>
+            </div>
             <input type="text" id="staff" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200" placeholder="填單人員">
         </div>
         <div class="flex overflow-x-auto gap-2 p-3 bg-white scrollbar-hide" id="tabContainer"></div>
     </div>
 
     <div id="mainGrid" class="grid-container max-w-7xl mx-auto"></div>
-
     <div id="hiddenCapture"></div>
 
     <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-50 flex gap-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
@@ -74,7 +69,6 @@ let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey
 const GITHUB_BASE = "https://yuhtong02.github.io/-/img/";
 
 function init() {
-    // 預載資料 (維持一致性)
     const savedDB = localStorage.getItem('yt_db');
     activeDB = savedDB ? JSON.parse(savedDB) : [
         {id:'A01', cat:'A', n:'飲水機', s:'30x15', m:'中空板'},
@@ -89,61 +83,36 @@ function init() {
     renderTabs(); renderSiteSelect(); render();
 }
 
+// 這是新增的工地編輯功能
+function editSites() {
+    const res = prompt("請修改或新增工地名稱（多筆請用逗號隔開）：", sites.join(','));
+    if(res !== null) {
+        sites = res.split(/[，,]/).map(s => s.trim()).filter(s => s);
+        localStorage.setItem('yt_sites', JSON.stringify(sites));
+        renderSiteSelect();
+    }
+}
+
 async function buildReportImage() {
     const sel = activeDB.filter(i => cart[i.id]?.sel);
     if(!sel.length) return alert("請先選取標語");
-
     document.getElementById('loading').style.display = 'flex';
-
     setTimeout(async () => {
         const site = document.getElementById('siteSelect').value;
         const staff = document.getElementById('staff').value || "現場人員";
         const now = new Date().toLocaleString();
-        
-        let h = `
-            <div style="padding:25px; background:white; width:450px;">
-                <div style="border:5px solid #095744; padding:20px; border-radius:15px;">
-                    <h2 style="color:#095744; text-align:center; font-size:26px; font-weight:900; margin-bottom:15px;">鈺通營造工安標語採購單</h2>
-                    <div style="font-size:15px; margin-bottom:15px; border-bottom:3px solid #f0f0f0; padding-bottom:10px; color:#333;">
-                        <p><b>工程工地：</b>${site}</p>
-                        <p><b>填單人員：</b>${staff}</p>
-                        <p><b>產生日期：</b>${now}</p>
-                    </div>
-                    <table style="width:100%; border-collapse:collapse;">
-                        <tr style="background:#095744; color:white; font-size:13px;">
-                            <th style="padding:10px; text-align:left;">項目與規格</th>
-                            <th style="padding:10px; text-align:center; width:70px;">數量</th>
-                        </tr>
-        `;
-        
+        let h = `<div style="padding:25px; background:white; width:450px;"><div style="border:5px solid #095744; padding:20px; border-radius:15px;"><h2 style="color:#095744; text-align:center; font-size:26px; font-weight:900; margin-bottom:15px;">鈺通營造工安標語採購單</h2><div style="font-size:15px; margin-bottom:15px; border-bottom:3px solid #f0f0f0; padding-bottom:10px; color:#333;"><p><b>工程工地：</b>${site}</p><p><b>填單人員：</b>${staff}</p><p><b>產生日期：</b>${now}</p></div><table style="width:100%; border-collapse:collapse;"><tr style="background:#095744; color:white; font-size:13px;"><th style="padding:10px; text-align:left;">項目與規格</th><th style="padding:10px; text-align:center; width:70px;">數量</th></tr>`;
         sel.forEach(i => {
-            h += `
-                <tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:12px 0;">
-                        <b style="font-size:18px; color:#095744;">[${i.id}] ${i.n}</b><br>
-                        <span style="font-size:12px; color:#666;">規格：${i.s} / 材質：${i.m}</span>
-                    </td>
-                    <td style="text-align:center; font-size:24px; font-weight:900; color:#70B934;">x ${cart[i.id].qty}</td>
-                </tr>
-            `;
+            h += `<tr style="border-bottom:1px solid #eee;"><td style="padding:12px 0;"><b style="font-size:18px; color:#095744;">[${i.id}] ${i.n}</b><br><span style="font-size:12px; color:#666;">規格：${i.s} / 材質：${i.m}</span></td><td style="text-align:center; font-size:24px; font-weight:900; color:#70B934;">x ${cart[i.id].qty}</td></tr>`;
         });
-
         h += `</table><div style="text-align:right; margin-top:20px; font-size:11px; color:#999; letter-spacing:1px;">YUH TONG CONSTRUCTION CO., LTD.</div></div></div>`;
-        
         const captureArea = document.getElementById('hiddenCapture');
         captureArea.innerHTML = h;
-
         try {
-            const canvas = await html2canvas(captureArea, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: "#ffffff"
-            });
+            const canvas = await html2canvas(captureArea, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: "#ffffff" });
             const img = new Image();
             img.src = canvas.toDataURL("image/png");
             img.className = "result-img";
-            
             document.getElementById('imgPlaceholder').innerHTML = '';
             document.getElementById('imgPlaceholder').appendChild(img);
             document.getElementById('loading').style.display = 'none';
@@ -185,25 +154,13 @@ function render() {
     let display = (currentMode === 'CAT') ? 
         (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : 
         activeDB.filter(x => guides[currentKey].items.includes(x.id));
-    
     display.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true}));
-
     display.forEach(i => {
         const c = cart[i.id] || { sel:false, qty:1 };
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => { if(!isAdmin) { cart[i.id] = {sel: !c.sel, qty: c.qty}; render(); } };
-        
-        card.innerHTML = `
-            <div class="img-slot"><img src="${GITHUB_BASE}${i.id}.JPG" onerror="this.src='${GITHUB_BASE}${i.id}.jpg'; this.onerror=null; this.parentElement.innerHTML='<div class=p-4 text-[10px]>無圖</div>'"></div>
-            <div class="flex-1">
-                <div class="font-black text-[#095744] text-sm">${i.n}</div>
-                <div class="text-[10px] text-gray-500 mt-1">${i.s} / ${i.m}</div>
-                <div class="flex items-center justify-between mt-2" onclick="event.stopPropagation()">
-                    <input type="number" value="${c.qty}" oninput="if(!cart['${i.id}']) cart['${i.id}']={sel:true}; cart['${i.id}'].qty=parseInt(this.value)||1" class="qty-input">
-                    <span class="text-[9px] text-gray-300 font-bold">${i.id}</span>
-                </div>
-            </div>`;
+        card.innerHTML = `<div class="img-slot"><img src="${GITHUB_BASE}${i.id}.JPG" onerror="this.src='${GITHUB_BASE}${i.id}.jpg'; this.onerror=null; this.parentElement.innerHTML='<div class=p-4 text-[10px]>無圖</div>'"></div><div class="flex-1"><div class="font-black text-[#095744] text-sm">${i.n}</div><div class="text-[10px] text-gray-500 mt-1">${i.s} / ${i.m}</div><div class="flex items-center justify-between mt-2" onclick="event.stopPropagation()"><input type="number" value="${c.qty}" oninput="if(!cart['${i.id}']) cart['${i.id}']={sel:true}; cart['${i.id}'].qty=parseInt(this.value)||1" class="qty-input"><span class="text-[9px] text-gray-300 font-bold">${i.id}</span></div></div>`;
         grid.appendChild(card);
     });
 }
@@ -219,7 +176,6 @@ function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = 
 function saveData() { localStorage.setItem('yt_db', JSON.stringify(activeDB)); localStorage.setItem('yt_guides', JSON.stringify(guides)); localStorage.setItem('yt_cats', JSON.stringify(catLabels)); }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 function resetCart() { if(confirm("清空選取？")) { cart = {}; render(); } }
-
 window.onload = init;
 </script>
 </body>
