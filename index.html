@@ -1,311 +1,283 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 (全功能大改善版)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 180px; overflow-x: hidden; }
-        
-        /* 改善 1：頭部佈局保護，防止工地名稱縮水 */
-        .sticky-header { 
-            position: sticky; top: 0; z-index: 1000; background: white; 
-            border-bottom: 4px solid var(--yt-dark); 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .controls-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 15px; 
-            min-width: 320px; /* 保護最小寬度 */
-        }
-        #siteSelect { min-width: 160px; font-weight: 900; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px; }
-        #staff { font-weight: 900; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px; }
-
-        .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 10px 15px; -webkit-overflow-scrolling: touch; }
-        .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; }
-        .cat-tab-step.active { background: var(--yt-light); box-shadow: 0 0 10px rgba(112, 185, 52, 0.4); }
-        .cat-tab-item { white-space: nowrap; padding: 8px 18px; border-radius: 10px; background: #f8fafc; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0; flex-shrink: 0; }
-        .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); font-weight: 900; }
-
-        /* 改善 2：標語卡片細節優化 */
-        .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
-        .sign-card { background: white; border-radius: 16px; padding: 15px; border: 1.5px solid #eee; display: flex; gap: 12px; cursor: pointer; position: relative; transition: 0.2s; }
-        .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; transform: translateY(-2px); }
-        
-        .img-slot { width: 130px; height: 90px; background: #f1f5f9; border-radius: 12px; overflow: hidden; flex-shrink: 0; border: 1px solid #eee; }
-        .img-slot img { width: 100%; height: 100%; object-fit: contain; }
-        
-        .qty-input { width: 55px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; }
-        .admin-input { background: #fff7ed; border: 1px dashed #fb923c; border-radius: 6px; padding: 4px; font-size: 12px; width: 100%; font-weight: bold; }
-        
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>鈺通營造工安標語系統 (自動遞補版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg) !important; padding-bottom: 180px; overflow-x: hidden; }
+        .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 4px solid var(--yt-dark) !important; }
+        .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 12px 15px; background: white; border-bottom: 1px solid #D7CCC8 !important; -webkit-overflow-scrolling: touch; }
+        .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background-color: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 1px solid var(--yt-dark) !important; display: flex; align-items: center; }
+        .cat-tab-step::before { content: "📌"; margin-right: 4px; }
+        .cat-tab-step.active { background-color: var(--yt-light); border-color: var(--yt-light) !important; }
+        .cat-tab-item { white-space: nowrap; padding: 8px 18px; border-radius: 10px; background-color: white; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0 !important; flex-shrink: 0; }
+        .cat-tab-item.active { background-color: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark) !important; font-weight: 900; }
+        .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+        .sign-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid #D7CCC8 !important; display: flex; gap: 16px; cursor: pointer; position: relative; }
+        .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; }
+        .img-slot { width: 140px; height: 100px; background: #f1f5f9; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #e2e8f0 !important; }
+        .img-slot img { width: 100%; height: 100%; object-fit: contain; } 
+        .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); background: transparent; border-bottom: 2px solid #eee !important; }
+        .admin-input { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 6px; font-size: 11px; width: 100%; color: #9a3412; font-weight: bold; }
+        .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; }
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
+    </style>
 </head>
 <body>
 
-    <div class="sticky-header">
-        <div class="flex items-center justify-between px-4 py-3 bg-[#095744] text-white">
-            <span class="text-xl font-black italic tracking-tighter">鈺通營造工安系統</span>
-            <div class="flex gap-2">
-                <button onclick="exportData()" id="exportBtn" class="hidden text-[10px] bg-white/20 px-2 py-1 rounded">💾 備份</button>
-                <button onclick="toggleAdmin()" id="adminBtn" class="text-[10px] font-black bg-white text-[#095744] px-3 py-1.5 rounded-full">🔒 管理員</button>
-            </div>
-        </div>
-        
-        <div class="controls-grid">
-            <div class="flex gap-1">
-                <select id="siteSelect" onchange="autoSave()"></select>
-                <button onclick="addNewSite()" class="bg-[#095744] text-white px-3 rounded-xl font-bold">+</button>
-            </div>
-            <input type="text" id="staff" placeholder="填單人員" oninput="autoSave()">
-        </div>
-        
-        <div class="category-scroller" id="tabContainer"></div>
-    </div>
+    <div class="sticky-header">
+        <div class="flex items-center justify-between px-4 py-2">
+            <span class="text-xl font-black text-[#095744]">鈺通營造工安標語系統</span>
+            <button onclick="toggleAdmin()" id="adminBtn" class="text-[10px] font-black bg-white text-[#095744] px-3 py-1.5 rounded-full border border-[#095744]/20">🔒 管理員</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 px-4 pb-2">
+            <div class="flex gap-1">
+                <select id="siteSelect" class="flex-1 bg-white p-2 rounded-xl text-xs font-black border" onchange="autoSave()"></select>
+                <button onclick="addNewSite()" class="bg-[#095744] text-white px-3 rounded-xl font-bold">+</button>
+            </div>
+            <input type="text" id="staff" class="bg-white p-2 rounded-xl text-xs font-black border" placeholder="填單人員" oninput="autoSave()">
+        </div>
+        <div class="category-scroller" id="tabContainer"></div>
+    </div>
 
-    <div id="mainGrid" class="grid-container max-w-7xl mx-auto"></div>
+    <div id="mainGrid" class="grid-container max-w-7xl mx-auto"></div>
 
-    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-50 shadow-2xl backdrop-blur-md">
-        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-orange-50 text-orange-700 py-3 mb-3 rounded-xl font-black border border-orange-200">➕ 插入標語 (序號自動後移遞補)</button>
-        <div class="flex gap-3 max-w-3xl mx-auto">
-            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-2xl shadow-lg active:scale-95 transition-transform">📋 生成採購單</button>
-            <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-500 rounded-2xl text-[10px] font-bold">重選</button>
-            <button onclick="hardReset()" class="flex-1 bg-slate-100 text-slate-400 rounded-2xl text-[10px] font-bold">還原</button>
-        </div>
-    </nav>
+    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t z-50 shadow-2xl">
+        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-amber-50 text-amber-700 py-2 mb-2 rounded-xl font-black border border-amber-200">➕ 插入項目並重排序號 (自動後移)</button>
+        <div class="flex gap-3 max-w-3xl mx-auto">
+            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-lg">📋 生成採購單</button>
+            <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-400 rounded-2xl text-[10px] font-bold">重選</button>
+            <button onclick="hardReset()" class="flex-1 bg-slate-100 text-slate-400 rounded-2xl text-[10px] font-bold">還原</button>
+        </div>
+    </nav>
 
-    <div id="modal">
-        <div class="bg-white w-full max-w-2xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div id="printArea"></div>
-            <div class="grid grid-cols-2 gap-3 mt-6">
-                <button onclick="window.print()" class="bg-[#095744] text-white py-4 rounded-xl font-black text-lg">PDF / 列印</button>
-                <button onclick="closeModal()" class="bg-gray-100 py-4 rounded-xl font-bold text-gray-500">返回</button>
-            </div>
-        </div>
-    </div>
+    <div id="modal">
+        <div class="bg-white w-full max-w-xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto m-4">
+            <div id="printArea"></div>
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                <button onclick="window.print()" class="bg-[#095744] text-white py-3 rounded-xl font-bold">PDF / 列印</button>
+                <button onclick="closeModal()" class="bg-gray-100 py-3 rounded-xl font-bold text-gray-500">返回</button>
+            </div>
+        </div>
+    </div>
 
-    <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhoto(this)">
+    <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhoto(this)">
 
 <script>
-// ==================== [核心資料結構] ====================
-let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL';
-let catLabels, guides, curEditImgId;
+let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels, curEditImgId;
 
 const DEFAULT_CATS = {
-    'ALL':'全部', 'A':'A類 生活設施', 'B':'B類 安全防護', 'C':'C類 施工告示', 'D':'D類 指引警告', 
-    'E':'E類 電力設備', 'F':'F類 車輛管理', 'G':'G類 環境衛生', 'H':'H類 消防救護'
+    'ALL':'全部', 
+    'A':'A類 生活設施', 'B':'B類 安全防護', 'C':'C類 施工告示', 'D':'D類 指引警告', 
+    'E':'E類 電力設備', 'F':'F類 車輛管理', 'G':'G類 環境衛生', 'H':'H類 消防救護', 
+    'I':'I類 吊掛作業', 'J':'J類 其他標語', 'K':'K類 雜項清單'
 };
 
-const request = indexedDB.open("Yutong_System_Final", 1);
+const request = indexedDB.open("Yutong_SignSystem_V2", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
 function init() {
-    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世", "嘉義嘉科", "嘉義博愛", "嘉義北門", "臺南林森"];
-    activeDB = JSON.parse(localStorage.getItem('yt_db_vFinal')) || [
-        {id:'A01', cat:'A', n:'飲水機', s:'30x20', m:'中空板'},
-        {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}
-    ];
-    catLabels = JSON.parse(localStorage.getItem('yt_cats')) || DEFAULT_CATS;
-    guides = JSON.parse(localStorage.getItem('yt_guides')) || {
-        'S1': { t: 'Step 1. 大門配置', d: '門禁、警衛室', items: ['A01','B01'] }
-    };
-    cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
+    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世", "嘉義嘉科", "嘉義博愛", "嘉義北門", "嘉義民雄", "臺南林森"];
+    activeDB = JSON.parse(localStorage.getItem('yt_active_db')) || [
+        {id:'A01', cat:'A', n:'飲水機', s:'30x20', m:'中空板'},
+        {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}
+    ];
+    guides = JSON.parse(localStorage.getItem('yt_guides')) || {
+        'S1': { t: 'Step 1. 工區大門配置', d: '門禁、警衛室告示', items: ['A01','B01'] },
+        'S2': { t: 'Step 2. 基礎設施', d: '辦公室與生活區', items: [] },
+        'S3': { t: 'Step 3. 施工安全', d: '圍籬與高架作業', items: [] },
+        'S4': { t: 'Step 4. 動線管制', d: '車道與人員出入口', items: [] },
+        'S5': { t: 'Step 5. 機具電力', d: '開關箱與操作守則', items: [] },
+        'S6': { t: 'Step 6. 環境清潔', d: '垃圾分類與洗車台', items: [] }
+    };
+    catLabels = JSON.parse(localStorage.getItem('yt_cat_labels')) || DEFAULT_CATS;
+    cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
+    
+    if(localStorage.getItem('yt_lastSite')) document.getElementById('siteSelect').value = localStorage.getItem('yt_lastSite');
+    if(localStorage.getItem('yt_lastStaff')) document.getElementById('staff').value = localStorage.getItem('yt_lastStaff');
 
-    document.getElementById('staff').value = localStorage.getItem('yt_lastStaff') || "";
-    renderTabs(); renderSiteSelect(); render();
-}
-
-// ==================== [改善：強效照片路徑偵測] ====================
-function getImgSrc(id) {
-    // 這裡會產生多個可能路徑，HTML 會透過 onerror 逐一嘗試
-    const paths = [
-        `IMG/${id}.jpg`,
-        `img/${id.toLowerCase()}.jpg`,
-        `IMG/${id}.JPG`,
-        `https://yuhtong02.github.io/-/${id}.jpg` // 指向你的 GitHub
-    ];
-    return paths[0];
+    renderTabs(); renderSiteSelect(); render();
 }
 
 async function render() {
-    const grid = document.getElementById('mainGrid'); 
-    grid.innerHTML = '';
-    let display = (currentMode === 'CAT') ? 
-        (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : 
-        activeDB.filter(x => (guides[currentKey]?.items.includes(x.id)));
+    const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
+    let display = (currentMode === 'CAT') ? 
+        (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : 
+        activeDB.filter(x => (guides[currentKey] && guides[currentKey].items.includes(x.id)));
 
-    display.sort((a, b) => a.id.localeCompare(b.id));
+    display.sort((a, b) => a.id.localeCompare(b.id));
 
-    for (const i of display) {
-        const c = cart[i.id] || { sel:false, qty:1 };
-        const localImg = await dbGet(i.id);
-        const card = document.createElement('div');
-        card.className = `sign-card ${c.sel ? 'selected' : ''}`;
-        card.onclick = () => toggleItem(i.id);
-        
-        card.innerHTML = `
-            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20 shadow-md">✕</button>` : ''}
-            <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
-                <img src="${localImg || getImgSrc(i.id)}" 
-                     onerror="this.onerror=null; this.src='img/${i.id.toLowerCase()}.jpg'; this.onerror=function(){this.src='https://placehold.co/130x90?text=${i.id}';}">
-            </div>
-            <div class="flex-1">
-                <div class="flex justify-between items-start mb-1">
-                    <div class="flex-1">
-                        ${isAdmin ? `<input class="admin-input" value="${i.n}" oninput="updateItem('${i.id}','n',this.value)" onclick="event.stopPropagation()">` 
-                                  : `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`}
-                    </div>
-                    <span class="text-[9px] font-black text-slate-300 ml-1 bg-slate-50 px-1 rounded">${i.id}</span>
-                </div>
-                <div class="grid grid-cols-2 gap-1 text-[11px] mb-2">
-                    <div>尺寸：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateItem('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<span class="text-red-500 font-bold">${i.s}</span>`}</div>
-                    <div>材質：${isAdmin ? `<input class="admin-input" value="${i.m||''}" oninput="updateItem('${i.id}','m',this.value)" onclick="event.stopPropagation()">` : `<span class="text-blue-500 font-bold">${i.m||'中空板'}</span>`}</div>
-                </div>
-                <div class="flex items-center gap-3" onclick="event.stopPropagation()">
-                    <span class="text-[10px] font-black text-slate-400">採購數量</span>
-                    <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
-                </div>
-            </div>`;
-        grid.appendChild(card);
-    }
+    if(currentMode === 'GUIDE' && guides[currentKey]) {
+        const g = guides[currentKey];
+        grid.innerHTML = `<div class="guide-box">
+            ${isAdmin ? `<input class="bg-transparent border-b border-white/30 text-xl font-black w-full mb-2 outline-none" value="${g.t}" oninput="updateGuide('${currentKey}','t',this.value)">` : `<h2 class="text-xl font-black">${g.t}</h2>`}
+            ${isAdmin ? `<input class="bg-transparent border-b border-white/30 text-xs w-full opacity-80 outline-none" value="${g.d}" oninput="updateGuide('${currentKey}','d',this.value)">` : `<p class="text-xs opacity-80">${g.d}</p>`}
+        </div>`;
+    }
+
+    for (const i of display) {
+        const c = cart[i.id] || { sel:false, qty:1 };
+        const localImg = await dbGet(i.id);
+        const card = document.createElement('div');
+        card.className = `sign-card ${c.sel ? 'selected' : ''}`;
+        card.onclick = () => toggleItem(i.id);
+        
+        const imgSrc = localImg || `IMG/${i.id}.jpg`;
+        const idLower = i.id.toLowerCase();
+
+        card.innerHTML = `
+            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20">✕</button>` : ''}
+            <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
+                <img src="${imgSrc}" onerror="this.onerror=null; this.src='img/${idLower}.jpg'; this.onerror=function(){this.src='IMG/${i.id}.JPG'; this.onerror=function(){this.src='https://placehold.co/150x100?text=${i.id}';}}">
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">${isAdmin ? `<input class="admin-input" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`}</div>
+                    <span class="text-[9px] font-bold text-slate-300 ml-1">${i.id}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1 mt-1 text-[11px]">
+                    <div>規格：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<span class="text-red-600 font-bold">${i.s}</span>`}</div>
+                    <div>材質：${isAdmin ? `<input class="admin-input" value="${i.m||''}" oninput="updateI('${i.id}','m',this.value)" onclick="event.stopPropagation()">` : `<span class="text-blue-600 font-bold">${i.m||'中空板'}</span>`}</div>
+                </div>
+                <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
+                    <span class="text-[10px] font-black text-slate-400">數量</span>
+                    <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
+                    ${isAdmin && currentMode === 'CAT' ? `<select onchange="addIntoStep(this.value, '${i.id}')" class="text-[9px] border px-1 rounded"><option>加入Step...</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option><option value="S6">S6</option></select>` : ''}
+                </div>
+            </div>`;
+        grid.appendChild(card);
+    }
 }
 
-// ==================== [自動遞補與排序邏輯] ====================
+// 【自動遞補邏輯修正版】
 async function deleteItem(id) {
-    if(!confirm(`確定刪除 [${id}]？後方的標語將自動往前移動序號。`)) return;
-    let prefix = id.charAt(0);
-    let startNum = parseInt(id.slice(1));
-    
-    // 刪除本項
-    activeDB = activeDB.filter(x => x.id !== id);
-    
-    // 找出同分類且序號大於它的，由小到大排序
-    let targets = activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) > startNum)
-                          .sort((a,b) => parseInt(a.id.slice(1)) - parseInt(b.id.slice(1)));
-
-    for(let item of targets) {
-        let oldID = item.id;
-        let newID = prefix + (parseInt(oldID.slice(1)) - 1).toString().padStart(2, '0');
-        
-        // 移動照片與狀態
-        let imgData = await dbGet(oldID);
-        if(imgData) await dbSet(newID, imgData);
-        if(cart[oldID]) { cart[newID] = cart[oldID]; delete cart[oldID]; }
-        item.id = newID;
-    }
-    saveAll(); render();
+    if(!confirm(`確定刪除 [${id}] 並自動往前遞補序號？`)) return;
+    
+    let prefix = id.charAt(0);
+    let startNum = parseInt(id.slice(1));
+    
+    // 1. 刪除該項目
+    activeDB = activeDB.filter(x => x.id !== id);
+    
+    // 2. 找出同分類中序號較大的項目，由小到大排列
+    let targets = activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) > startNum)
+                          .sort((a,b) => parseInt(a.id.slice(1)) - parseInt(b.id.slice(1)));
+    
+    // 3. 逐一將序號往前推一格
+    for(let item of targets) {
+        let oldID = item.id;
+        let newNum = parseInt(oldID.slice(1)) - 1;
+        let newID = prefix + newNum.toString().padStart(2, '0');
+        
+        // 搬移資料庫中的照片
+        let imgData = await dbGet(oldID);
+        if(imgData) {
+            await dbSet(newID, imgData);
+            // 由於 IndexedDB 沒辦法直接改 Key，這裡不需要特別刪除 oldID，因為最後會被新圖蓋掉或維持原樣
+        }
+        
+        // 搬移購物車選擇狀態
+        if(cart[oldID]) {
+            cart[newID] = cart[oldID];
+            delete cart[oldID];
+        }
+        
+        item.id = newID;
+    }
+    
+    saveDB();
+    autoSave();
+    render();
 }
 
 async function addNewItem() {
-    let prefix = (currentMode === 'CAT' && currentKey !== 'ALL') ? currentKey : 'A';
-    let inputID = prompt(`請輸入插入序號 (例如 ${prefix}05，該號碼後的標語將自動後退一格):`);
-    if(!inputID) return;
-    inputID = inputID.toUpperCase();
+    let prefix = currentKey !== 'ALL' && currentMode === 'CAT' ? currentKey : 'A';
+    let max = 0;
+    activeDB.filter(i => i.id.startsWith(prefix)).forEach(i => { let n = parseInt(i.id.slice(1)); if(n>max) max=n; });
+    let suggestID = prefix + (max + 1).toString().padStart(2, '0');
+    let inputID = prompt("插入位置序號 (該號碼以後的會自動往後移):", suggestID);
+    if(!inputID) return;
+    inputID = inputID.toUpperCase();
 
-    // 排序後退邏輯
-    let startNum = parseInt(inputID.slice(1));
-    let targets = activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) >= startNum)
-                          .sort((a,b) => parseInt(b.id.slice(1)) - parseInt(a.id.slice(1)));
-    
-    for(let item of targets) {
-        let oldID = item.id;
-        let nextID = prefix + (parseInt(oldID.slice(1)) + 1).toString().padStart(2, '0');
-        let imgData = await dbGet(oldID);
-        if(imgData) await dbSet(nextID, imgData);
-        if(cart[oldID]) { cart[nextID] = cart[oldID]; delete cart[oldID]; }
-        item.id = nextID;
-    }
-    
-    activeDB.push({id: inputID, cat: prefix, n: "新標語項目", s: "60x40", m: "中空板"});
-    saveAll(); render();
-}
-
-// ==================== [工具函式] ====================
-function saveAll() {
-    localStorage.setItem('yt_db_vFinal', JSON.stringify(activeDB));
-    localStorage.setItem('yt_sites', JSON.stringify(sites));
-    localStorage.setItem('yt_cats', JSON.stringify(catLabels));
-    localStorage.setItem('yt_guides', JSON.stringify(guides));
-}
-
-function autoSave() {
-    localStorage.setItem('yt_cart', JSON.stringify(cart));
-    localStorage.setItem('yt_lastStaff', document.getElementById('staff').value);
+    if(activeDB.some(x => x.id === inputID)) {
+        let startNum = parseInt(inputID.slice(1));
+        let targets = activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) >= startNum)
+                              .sort((a,b) => parseInt(b.id.slice(1)) - parseInt(a.id.slice(1)));
+        for(let item of targets) {
+            let oldID = item.id;
+            let nextID = prefix + (parseInt(oldID.slice(1)) + 1).toString().padStart(2, '0');
+            let imgData = await dbGet(oldID);
+            if(imgData) await dbSet(nextID, imgData);
+            if(cart[oldID]) { cart[nextID] = cart[oldID]; delete cart[oldID]; }
+            item.id = nextID;
+        }
+    }
+    activeDB.push({id: inputID, cat: inputID.charAt(0), n:"新標語", s:"60x40", m:"中空板"});
+    saveDB(); render();
 }
 
 function renderTabs() {
-    let h = '';
-    Object.keys(guides).forEach(k => {
-        h += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}</div>`;
-    });
-    Object.keys(catLabels).forEach(k => {
-        h += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="setFilter('CAT','${k}')">${catLabels[k]}</div>`;
-    });
-    document.getElementById('tabContainer').innerHTML = h;
+    let html = '';
+    Object.keys(guides).sort().forEach(k => {
+        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}</div>`;
+    });
+    Object.keys(catLabels).forEach(k => {
+        const isAdminStyle = isAdmin && k !== 'ALL' ? 'border-dashed border-orange-400 bg-orange-50' : '';
+        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdminStyle}" onclick="${isAdmin && k !== 'ALL' ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">${catLabels[k]}</div>`;
+    });
+    document.getElementById('tabContainer').innerHTML = html;
 }
 
+function renameCat(k) { const n = prompt(`修改分類 [${k}] 名稱:`, catLabels[k]); if (n) { catLabels[k] = n; localStorage.setItem('yt_cat_labels', JSON.stringify(catLabels)); renderTabs(); }}
+function updateGuide(key, f, v) { guides[key][f] = v; saveDB(); }
+function addIntoStep(gk, id) { if(!guides[gk].items.includes(id)) { guides[gk].items.push(id); saveDB(); alert('已加入 '+gk); }}
+function autoSave() { localStorage.setItem('yt_cart', JSON.stringify(cart)); localStorage.setItem('yt_lastSite', document.getElementById('siteSelect').value); localStorage.setItem('yt_lastStaff', document.getElementById('staff').value); }
+function saveDB() { localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); localStorage.setItem('yt_guides', JSON.stringify(guides)); }
 function setFilter(m, k) { currentMode=m; currentKey=k; renderTabs(); render(); }
 function toggleItem(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; autoSave(); render(); }
 function updateQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qty=parseInt(v)||1; autoSave(); }
-function updateItem(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveAll(); }}
-
-function toggleAdmin() {
-    if(!isAdmin && prompt("管理密碼") !== "751113") return;
-    isAdmin = !isAdmin;
-    document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理中" : "🔒 管理員";
-    document.getElementById('addItemBtn').classList.toggle('hidden', !isAdmin);
-    document.getElementById('exportBtn').classList.toggle('hidden', !isAdmin);
-    render();
-}
-
-function exportData() {
-    const data = { activeDB, sites, catLabels, guides };
-    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `鈺通標語備份_${new Date().toLocaleDateString()}.json`;
-    a.click();
-}
-
-async function buildReport() {
-    const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
-    if(!sel.length) return alert("尚未勾選標語");
-    
-    let h = `<div style="border:3px solid #095744; padding:20px; background:white; font-family: sans-serif;">
-        <h2 style="text-align:center; color:#095744; font-size:24px; border-bottom:3px solid #095744; padding-bottom:10px;">鈺通營造工安標語採購單</h2>
-        <div style="display:flex; justify-content:space-between; margin:15px 0; font-weight:bold;">
-            <span>工地：${document.getElementById('siteSelect').value}</span>
-            <span>填單人：${document.getElementById('staff').value}</span>
-        </div>
-        <table style="width:100%; border-collapse:collapse;">`;
-
-    for(let i of sel) {
-        const localImg = await dbGet(i.id);
-        h += `<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:10px 0; width:80px;"><img src="${localImg || getImgSrc(i.id)}" style="width:70px; height:50px; object-fit:contain;"></td>
-            <td style="padding:10px; font-size:14px;"><b>[${i.id}] ${i.n}</b><br><small style="color:gray;">${i.s} / ${i.m||'中空板'}</small></td>
-            <td style="padding:10px; text-align:right; font-size:20px; color:#70B934; font-weight:900;">x ${cart[i.id].qty}</td>
-        </tr>`;
-    }
-    document.getElementById('printArea').innerHTML = h + `</table></div>`;
-    document.getElementById('modal').style.display = 'flex';
-}
-
-function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
-function addNewSite() { const n = prompt("新工地名稱:"); if(n) { sites.push(n); saveAll(); renderSiteSelect(); }}
-function hardReset() { if(confirm("還原將清空所有自訂內容，確定嗎？")) { localStorage.clear(); location.reload(); }}
-function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function resetCart() { if(confirm("清空已選項目？")) { cart = {}; autoSave(); render(); }}
-
+function renderSiteSelect() { const sel = document.getElementById('siteSelect'); sel.innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
+function addNewSite() { const n = prompt("新工地:"); if(n) { sites.push(n); localStorage.setItem('yt_sites', JSON.stringify(sites)); renderSiteSelect(); document.getElementById('siteSelect').value = n; autoSave(); }}
+function toggleAdmin() { isAdmin = !isAdmin; if(isAdmin && prompt("管理密碼") !== "751113") { isAdmin = false; return; } document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理中" : "🔒 管理員"; document.getElementById('addItemBtn').classList.toggle('hidden', !isAdmin); renderTabs(); render(); }
+function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
 async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
 async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
-function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
 async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
+function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveDB(); }}
+function hardReset() { if(confirm("確定還原？")) { localStorage.clear(); location.reload(); }}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+function resetCart() { if(confirm("清空？")) { cart = {}; autoSave(); render(); } }
 
-window.onload = () => {}; // init 會在 IndexedDB 成功後執行
+async function buildReport() {
+    const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
+    if(!sel.length) return alert("請勾選標語");
+    let h = `<div style="border:2px solid #095744; padding:15px; background:white;">
+        <h2 style="text-align:center; color:#095744; font-size:20px; font-weight:900; border-bottom:2px solid #095744; padding-bottom:10px; margin-bottom:10px;">鈺通營造工安標語採購單</h2>
+        <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:15px; font-size:12px;">
+            <span>工地：${document.getElementById('siteSelect').value}</span>
+            <span>填單：${document.getElementById('staff').value}</span>
+        </div>
+        <table style="width:100%; border-collapse:collapse;">`;
+    for(let i of sel) {
+        const localImg = await dbGet(i.id);
+        const img = localImg || `IMG/${i.id}.jpg`;
+        h += `<tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px 0; width:80px;"><img src="${img}" style="width:70px; height:50px; object-fit:contain;" onerror="this.onerror=null; this.src='img/${i.id.toLowerCase()}.jpg'; this.onerror=function(){this.src='IMG/${i.id}.JPG'; this.onerror=function(){this.src='https://placehold.co/70x50?text=無圖';};"></td>
+            <td style="padding:10px; font-size:13px;"><b>[${i.id}] ${i.n}</b><br><small style="color:gray;">${i.s} / ${i.m||'中空板'}</small></td>
+            <td style="padding:10px; text-align:right; font-size:18px; color:#70B934; font-weight:900;">x ${cart[i.id].qty}</td>
+        </tr>`;
+    }
+    document.getElementById('printArea').innerHTML = h + `</table></div>`;
+    document.getElementById('modal').style.display = 'flex';
+}
 </script>
 </body>
 </html>
+
+要以這個程式碼下去改
