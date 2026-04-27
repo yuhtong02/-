@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通標語系統 V6.9 - 流程歸類版</title>
+    <title>鈺通標語系統 V6.9.1 - 全歸類自訂版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -17,13 +17,12 @@
         .cat-tab.active { background-color: var(--yt-light); border-color: var(--yt-light); color: white; }
         .tab-edit-input { background: rgba(255,255,255,0.2); color: inherit; border: 1px dashed #fbbf24; font-size: 11px; width: 90px; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
         .admin-edit { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 1px 4px; font-size: 11px; color: #9a3412; font-weight: bold; width: 100%; }
-        .step-select-admin { background: #eff6ff; border: 1px solid #3b82f6; font-size: 10px; border-radius: 4px; color: #1d4ed8; padding: 1px; width: 100%; margin-top: 2px; font-weight: bold; }
         .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(1, 1fr); }
         @media (min-width: 640px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
-        .sign-card { background: white; border-radius: 12px; padding: 12px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 145px; position: relative; }
+        .sign-card { background: white; border-radius: 12px; padding: 12px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 155px; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .img-slot { width: 85px; height: 115px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
+        .img-slot { width: 85px; height: 125px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
         .index-badge { position: absolute; top: -8px; left: -8px; background: #fbbf24; color: #000; min-width: 30px; height: 30px; border: 2.5px solid var(--yt-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; z-index: 10; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #eee; z-index: 2000; }
@@ -57,7 +56,7 @@
         <div class="flex w-full max-w-6xl gap-2 mx-auto">
             <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-lg transition">📋 生成採購單</button>
             <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-400 rounded-xl text-[10px] font-bold">重選</button>
-            <button onclick="hardReset()" class="flex-1 bg-slate-100 text-slate-400 rounded-xl text-[10px] font-bold">清空</button>
+            <button onclick="hardReset()" class="flex-1 bg-slate-100 text-slate-400 rounded-xl text-[10px] font-bold">全清</button>
         </div>
     </nav>
 
@@ -66,7 +65,7 @@
             <div id="printArea"></div>
             <div class="grid grid-cols-1 gap-2 mt-4">
                 <button onclick="window.print()" class="bg-[#095744] text-white py-3 rounded-lg font-black">1. 直接列印</button>
-                <button onclick="captureToImage()" class="bg-amber-500 text-white py-3 rounded-lg font-black">2. 轉為圖片分享</button>
+                <button onclick="captureToImage()" class="bg-amber-500 text-white py-3 rounded-lg font-black">2. 轉為圖片</button>
                 <button onclick="closeModal()" class="bg-slate-200 text-slate-500 py-2 rounded-lg font-bold">返回編輯</button>
             </div>
         </div>
@@ -95,15 +94,11 @@ const DEFAULT_CATEGORIES = {
 
 const RAW_SIGNS = [
     {id:'A01', cat:'A', n:'守衛室', s:'30x10', m:'PVC噴漆'}, {id:'A02', cat:'A', n:'工具箱會議', s:'60x40', m:'中空板'}, {id:'B01', cat:'B', n:'工程告示牌', s:'120x90', m:'鍍鋅鐵板'}, {id:'B04', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}, {id:'D01', cat:'D', n:'嚴禁酒後', s:'60x40', m:'中空板'}, {id:'E01', cat:'E', n:'請勿停車', s:'60x40', m:'中空板'}, {id:'E04', cat:'E', n:'緩慢行駛', s:'60x40', m:'中空板'}, {id:'K01', cat:'K', n:'工地名稱', s:'客製', m:'帆布'},
-    {id:'A03', cat:'A', n:'統包商辦公室', s:'30x10', m:'PVC'}, {id:'A04', cat:'A', n:'監造單位', s:'30x10', m:'PVC'}, {id:'A05', cat:'A', n:'管理單位', s:'30x10', m:'PVC'}, {id:'A06', cat:'A', n:'會議室', s:'30x10', m:'PVC'}, {id:'A07', cat:'A', n:'倉庫', s:'30x10', m:'PVC'}, {id:'A08', cat:'A', n:'建材展覽室', s:'30x10', m:'PVC'}, {id:'A09', cat:'A', n:'男化妝室', s:'20x10', m:'PVC'}, {id:'A10', cat:'A', n:'女化妝室', s:'20x10', m:'PVC'}, {id:'A11', cat:'A', n:'休息區', s:'30x10', m:'PVC'}, {id:'A12', cat:'A', n:'飲水機', s:'15x5', m:'PVC'},
-    {id:'B02', cat:'B', n:'安全第一', s:'60x40', m:'中空板'}, {id:'B03', cat:'B', n:'安衛告示牌', s:'90x90', m:'鍍鋅鐵板'}, {id:'C01', cat:'C', n:'有電危險', s:'30x20', m:'中空板'}, {id:'C03', cat:'C', n:'小心墜落', s:'60x40', m:'中空板'}, {id:'D02', cat:'D', n:'人員禁入', s:'60x40', m:'中空板'}, {id:'D04', cat:'D', n:'禁止跨越', s:'60x40', m:'中空板'},
-    {id:'E02', cat:'E', n:'汽車停放區', s:'60x40', m:'中空板'}, {id:'E03', cat:'E', n:'機車停放區', s:'60x40', m:'中空板'}, {id:'E05', cat:'E', n:'施工電梯', s:'30x10', m:'PVC'}, {id:'J01', cat:'J', n:'樓梯標示', s:'20x10', m:'PVC'}, {id:'J02', cat:'J', n:'樓層標示', s:'20x20', m:'PVC'}, {id:'K05', cat:'K', n:'安全出口', s:'30x10', m:'PVC'},
-    {id:'B05', cat:'B', n:'今日危害因素', s:'90x60', m:'白板'}, {id:'G01', cat:'G', n:'安全帶穿戴', s:'90x120', m:'鍍鋅鐵板'}, {id:'G02', cat:'G', n:'施工架規定', s:'60x90', m:'中空板'}, {id:'H01', cat:'H', n:'工安公布欄', s:'120x90', m:'鍍鋅鐵板'}, {id:'H04', cat:'H', n:'品質至上', s:'120x30', m:'帆布'}, {id:'H06', cat:'H', n:'工安宣導', s:'60x40', m:'中空板'}, {id:'H07', cat:'H', n:'標語6S', s:'60x40', m:'中空板'},
-    {id:'I01', cat:'I', n:'一般垃圾', s:'30x40', m:'PVC'}, {id:'I02', cat:'I', n:'資源回收', s:'30x40', m:'PVC'}, {id:'K02', cat:'K', n:'上梁典禮', s:'客製', m:'帆布'}, {id:'K03', cat:'K', n:'急救箱', s:'20x20', m:'PVC'}, {id:'K04', cat:'K', n:'滅火器', s:'10x30', m:'PVC'}
+    {id:'A03', cat:'A', n:'統包商辦公室', s:'30x10', m:'PVC'}, {id:'A04', cat:'A', n:'監造單位', s:'30x10', m:'PVC'}, {id:'A05', cat:'A', n:'管理單位', s:'30x10', m:'PVC'}, {id:'A06', cat:'A', n:'會議室', s:'30x10', m:'PVC'}, {id:'A07', cat:'A', n:'倉庫', s:'30x10', m:'PVC'}, {id:'A08', cat:'A', n:'建材展覽室', s:'30x10', m:'PVC'}, {id:'A09', cat:'A', n:'男化妝室', s:'20x10', m:'PVC'}, {id:'A10', cat:'A', n:'女化妝室', s:'20x10', m:'PVC'}, {id:'A11', cat:'A', n:'休息區', s:'30x10', m:'PVC'}, {id:'A12', cat:'A', n:'飲水機', s:'15x5', m:'PVC'}
 ];
 
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db_v69')) || RAW_SIGNS;
+    activeDB = JSON.parse(localStorage.getItem('yt_db_v691')) || RAW_SIGNS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     config = JSON.parse(localStorage.getItem('yt_config')) || { title: "鈺通營造工安標語" };
@@ -170,13 +165,21 @@ function render() {
                     <div class="min-w-0">
                         <div class="text-[9px] font-bold text-gray-400 font-mono uppercase mb-[-2px]">ID: ${item.id}</div>
                         ${isAdmin ? `<input class="admin-edit mb-1" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-[14px] truncate">${item.n}</div>`}
-                        <div class="text-[10px] font-bold text-red-600">規：${isAdmin ? `<input class="admin-edit" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : item.s}</div>
-                        <div class="text-[10px] font-bold text-blue-600">材：${isAdmin ? `<input class="admin-edit" value="${item.m}" oninput="updateDB('${item.id}','m',this.value)" onclick="event.stopPropagation()">` : item.m}</div>
+                        <div class="grid grid-cols-2 gap-1 mt-0.5">
+                            <div class="text-[10px] font-bold text-red-600">規：${isAdmin ? `<input class="admin-edit" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : item.s}</div>
+                            <div class="text-[10px] font-bold text-blue-600">材：${isAdmin ? `<input class="admin-edit" value="${item.m}" oninput="updateDB('${item.id}','m',this.value)" onclick="event.stopPropagation()">` : item.m}</div>
+                        </div>
+
                         ${isAdmin ? `
-                            <select class="step-select-admin" onclick="event.stopPropagation()" onchange="moveToStep('${item.id}', this.value)">
-                                <option value="">未歸類 Step</option>
-                                ${Object.keys(stepData).map(k => `<option value="${k}" ${currentStep===k?'selected':''}>歸至 ${stepData[k].t.split(' ')[2]}</option>`).join('')}
-                            </select>
+                            <div class="flex gap-1 mt-1" onclick="event.stopPropagation()">
+                                <select class="flex-1 bg-orange-50 border border-orange-200 text-[9px] rounded font-bold text-orange-700 p-0.5" onchange="updateDB('${item.id}','cat',this.value); renderTabs(); render();">
+                                    ${Object.keys(cats).filter(c=>c!=='ALL').map(k => `<option value="${k}" ${item.cat===k?'selected':''}>改分類 ${k}</option>`).join('')}
+                                </select>
+                                <select class="flex-1 bg-blue-50 border border-blue-200 text-[9px] rounded font-bold text-blue-700 p-0.5" onchange="moveToStep('${item.id}', this.value)">
+                                    <option value="">無 Step</option>
+                                    ${Object.keys(stepData).map(k => `<option value="${k}" ${currentStep===k?'selected':''}>改Step ${k.replace('S','')}</option>`).join('')}
+                                </select>
+                            </div>
                         ` : ''}
                     </div>
                     <div class="flex items-center gap-1 self-end" onclick="event.stopPropagation()">
@@ -215,7 +218,7 @@ function updateDB(id, field, val) {
 }
 
 function save() {
-    localStorage.setItem('yt_db_v69', JSON.stringify(activeDB));
+    localStorage.setItem('yt_db_v691', JSON.stringify(activeDB));
     localStorage.setItem('yt_cart', JSON.stringify(cart));
     localStorage.setItem('yt_staff', document.getElementById('staff').value);
     localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value);
@@ -238,11 +241,11 @@ function exportData() {
 
 function importData() {
     const input = prompt("貼上備份內容");
-    if (input) { try { const d = JSON.parse(input); activeDB = d.db; sites = d.sites; config = d.config; stepData = d.stepData; cats = d.cats; save(); location.reload(); } catch(e) { alert("出錯"); } }
+    if (input) { try { const d = JSON.parse(input); activeDB = d.db; sites = d.sites; config = d.config; stepData = d.stepData; cats = d.cats; save(); location.reload(); } catch(e) { alert("格式錯誤"); } }
 }
 
 function resetCart() { if(confirm("重選？")) { cart = {}; save(); render(); } }
-function hardReset() { if(confirm("全清空？")) { localStorage.clear(); location.reload(); } }
+function hardReset() { if(confirm("全清？")) { localStorage.clear(); location.reload(); } }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
 function buildReport() {
@@ -269,7 +272,7 @@ function buildReport() {
 
 function captureToImage() {
     html2canvas(document.getElementById('captureTarget'), { useCORS: true, scale: 2 }).then(canvas => {
-        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; font-size:12px; margin-bottom:5px;">長按存圖</p><img src="${canvas.toDataURL("image/png")}" style="width:100%;">`;
+        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; font-size:12px; margin-bottom:5px;">長按儲存圖片</p><img src="${canvas.toDataURL("image/png")}" style="width:100%;">`;
     });
 }
 init();
