@@ -35,6 +35,9 @@
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; flex-direction: column; }
         #hiddenCapture { position: fixed; left: -9999px; width: 450px; background: white; }
         .loading-text { color: white; font-weight: 900; margin-bottom: 10px; display: none; }
+        
+        /* 一般人可用之工地編輯按鈕 */
+        .site-edit-btn { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 0 12px; border-radius: 8px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -45,9 +48,9 @@
             <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">🔒 管理員</button>
         </div>
         <div class="grid grid-cols-2 gap-2 px-4 py-2 bg-white border-b">
-            <div class="flex gap-1 items-center">
-                <select id="siteSelect" class="w-full bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
-                <button onclick="editSites()" id="editSiteBtn" class="hidden text-xs bg-gray-200 p-2 rounded">📝</button>
+            <div class="flex gap-1 items-center overflow-hidden">
+                <select id="siteSelect" class="flex-1 bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none truncate"></select>
+                <button onclick="editSites()" class="site-edit-btn h-full whitespace-nowrap">新增工地</button>
             </div>
             <input type="text" id="staff" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200" placeholder="填單人員">
         </div>
@@ -60,7 +63,7 @@
     <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-50 flex flex-col gap-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
         <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-orange-500 text-white py-3 rounded-xl font-bold mb-1">＋ 新增標語項目</button>
         <div class="flex gap-3">
-            <button onclick="buildReportImage()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl active:scale-95 transition-transform">📋 生成採購單截圖</button>
+            <button onclick="buildReportImage()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-xl active:scale-95 transition-transform">📋 生成截圖</button>
             <button onclick="resetCart()" class="flex-1 bg-gray-100 text-gray-400 rounded-xl text-xs font-bold">清空</button>
         </div>
     </nav>
@@ -77,7 +80,6 @@ let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey
 const GITHUB_BASE = "https://yuhtong02.github.io/-/img/";
 
 function init() {
-    // 預設資料 (若手機無舊資料則採用)
     activeDB = JSON.parse(localStorage.getItem('yt_db')) || [
         {id:'A01', cat:'A', n:'飲水機', s:'30x15', m:'中空板'},
         {id:'B01', cat:'B', n:'進入工地請戴安全帽', s:'60x40', m:'中空板'}
@@ -89,17 +91,16 @@ function init() {
     catLabels = JSON.parse(localStorage.getItem('yt_cats')) || {
         'ALL':'全部標語', 'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.危險警示', 'D':'D.禁止事項', 'E':'E.交通與動線', 'F':'F.設施位置', 'G':'G.作業規範', 'H':'H.宣導標語', 'I':'I.環境管理', 'J':'J.圖資與指引'
     };
-    // 這裡放你完整的工地名單預設值
-    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門住宅", "嘉義民雄院區", "臺南林森圖書館", "臺南安南區專案", "高雄大寮專案"];
+    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "臺南林森圖書館"];
 
     renderTabs(); renderSiteSelect(); render();
 }
 
-// 工地名單管理
+// 開放給一般人新增工地的功能
 function editSites() {
-    const newList = prompt("請輸入工地名稱（以中文逗號或英文逗號隔開）：", sites.join(','));
-    if (newList) {
-        sites = newList.split(/[,,]/).map(s => s.trim()).filter(s => s);
+    const newList = prompt("請修改或新增工地名稱（多筆請用逗號隔開）：", sites.join(','));
+    if (newList !== null) {
+        sites = newList.split(/[，,]/).map(s => s.trim()).filter(s => s);
         localStorage.setItem('yt_sites', JSON.stringify(sites));
         renderSiteSelect();
     }
@@ -210,7 +211,6 @@ function toggleAdmin() {
     isAdmin = !isAdmin;
     document.getElementById('adminBtn').innerText = isAdmin ? "🔓 編輯中" : "🔒 管理員";
     document.getElementById('addItemBtn').classList.toggle('hidden', !isAdmin);
-    document.getElementById('editSiteBtn').classList.toggle('hidden', !isAdmin);
     render();
 }
 
