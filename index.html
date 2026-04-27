@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 (全功能版)</title>
+    <title>鈺通營造工安標語系統 (分類優化版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg) !important; padding-bottom: 180px; overflow-x: hidden; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 4px solid var(--yt-dark) !important; }
-        .category-scroller { display: flex; overflow-x: auto; gap: 10px; padding: 15px; background: white; border-bottom: 1px solid #D7CCC8 !important; }
+        .category-scroller { display: flex; overflow-x: auto; gap: 10px; padding: 10px 15px; background: white; border-bottom: 1px solid #D7CCC8 !important; -webkit-overflow-scrolling: touch; }
         .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background-color: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 1px solid var(--yt-dark) !important; display: flex; align-items: center; }
         .cat-tab-step::before { content: "📌"; margin-right: 4px; }
         .cat-tab-step.active { background-color: var(--yt-light); border-color: var(--yt-light) !important; }
@@ -45,7 +45,7 @@
         <div class="category-scroller" id="tabContainer"></div>
     </div>
 
-    <div class="grid-container max-w-7xl mx-auto" id="mainGrid"></div>
+    <div id="mainGrid" class="grid-container max-w-7xl mx-auto"></div>
 
     <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t z-50 shadow-2xl">
         <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-amber-50 text-amber-700 py-2 mb-2 rounded-xl font-black border border-amber-200">➕ 插入項目並重排序號</button>
@@ -69,10 +69,24 @@
     <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhoto(this)">
 
 <script>
-const CAT_LABELS = {'ALL':'全部','A':'A類','B':'B類','C':'C類','D':'D類','E':'E類','F':'F類','G':'G類','H':'H類','I':'I類','J':'J類','K':'K類'};
+// 改進點：完整的分類名稱
+const CAT_LABELS = {
+    'ALL': '全部',
+    'A': 'A類 生活設施',
+    'B': 'B類 安全防護',
+    'C': 'C類 施工告示',
+    'D': 'D類 指引警告',
+    'E': 'E類 電力設備',
+    'F': 'F類 車輛管理',
+    'G': 'G類 環境衛生',
+    'H': 'H類 消防救護',
+    'I': 'I類 吊掛作業',
+    'J': 'J類 其他標語',
+    'K': 'K類 雜項清單'
+};
+
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, curEditImgId;
 
-// 使用 V2 資料庫確保照片抓得回來
 const request = indexedDB.open("Yutong_SignSystem_V2", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
@@ -83,14 +97,13 @@ function init() {
         {id:'A01', cat:'A', n:'飲水機', s:'30x20', m:'中空板'},
         {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}
     ];
-    // 預設 Step 1-6 標題內容
     guides = JSON.parse(localStorage.getItem('yt_guides')) || {
-        'S1': { t: 'Step 1. 工區大門配置', d: '門禁管制、告示牌設置', items: ['A01','B01'] },
-        'S2': { t: 'Step 2. 辦公與生活區', d: '工務所、休息室設施', items: [] },
-        'S3': { t: 'Step 3. 安全防護欄杆', d: '臨邊防護、安全網', items: [] },
-        'S4': { t: 'Step 4. 動線與指引', d: '車道標示、逃生指引', items: [] },
-        'S5': { t: 'Step 5. 電力與機具', d: '電箱告示、開關標示', items: [] },
-        'S6': { t: 'Step 6. 環境與整潔', d: '回收分類、環境清掃', items: [] }
+        'S1': { t: 'Step 1. 工區大門配置', d: '門禁、警衛室告示', items: ['A01','B01'] },
+        'S2': { t: 'Step 2. 基礎設施', d: '辦公室與生活區', items: [] },
+        'S3': { t: 'Step 3. 施工安全', d: '圍籬與高架作業', items: [] },
+        'S4': { t: 'Step 4. 動線管制', d: '車道與人員出入口', items: [] },
+        'S5': { t: 'Step 5. 機具電力', d: '開關箱與操作守則', items: [] },
+        'S6': { t: 'Step 6. 環境清潔', d: '垃圾分類與洗車台', items: [] }
     };
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     
@@ -108,7 +121,6 @@ async function render() {
 
     display.sort((a, b) => a.id.localeCompare(b.id));
 
-    // 如果是 Step 模式，顯示可編輯的引導框
     if(currentMode === 'GUIDE' && guides[currentKey]) {
         const g = guides[currentKey];
         const gBox = document.createElement('div');
@@ -144,7 +156,6 @@ async function render() {
                 <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
                     <span class="text-[10px] font-black text-slate-400">數量</span>
                     <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
-                    ${isAdmin && currentMode === 'GUIDE' ? `<button onclick="toggleGuideItem('${currentKey}','${i.id}')" class="text-[9px] bg-red-100 text-red-500 px-2 py-1 rounded">移出Step</button>` : ''}
                     ${isAdmin && currentMode === 'CAT' ? `<select onchange="addIntoStep(this.value, '${i.id}')" class="text-[9px] border px-1 rounded"><option>加入Step...</option><option value="S1">Step 1</option><option value="S2">Step 2</option><option value="S3">Step 3</option><option value="S4">Step 4</option><option value="S5">Step 5</option><option value="S6">Step 6</option></select>` : ''}
                 </div>
             </div>`;
@@ -152,18 +163,17 @@ async function render() {
     }
 }
 
-// 核心：中間插入自動跳號並轉移圖片
 async function addNewItem() {
     let prefix = currentKey !== 'ALL' && currentMode === 'CAT' ? currentKey : 'A';
     let max = 0;
     activeDB.filter(i => i.id.startsWith(prefix)).forEach(i => { let n = parseInt(i.id.slice(1)); if(n>max) max=n; });
     let suggestID = prefix + (max + 1).toString().padStart(2, '0');
-    let inputID = prompt("輸入序號 (重複將自動後移):", suggestID);
+    let inputID = prompt("序號 (重複將自動後移):", suggestID);
     if(!inputID) return;
     inputID = inputID.toUpperCase();
 
     if(activeDB.some(x => x.id === inputID)) {
-        if(confirm(`編號 ${inputID} 已存在，要將此編號後的所有項目自動往後推嗎？`)) {
+        if(confirm(`編號 ${inputID} 已存在，自動往後推嗎？`)) {
             let startNum = parseInt(inputID.slice(1));
             let targets = activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) >= startNum)
                                   .sort((a,b) => parseInt(b.id.slice(1)) - parseInt(a.id.slice(1)));
@@ -174,11 +184,6 @@ async function addNewItem() {
                 if(imgData) await dbSet(nextID, imgData);
                 if(cart[oldID]) { cart[nextID] = cart[oldID]; delete cart[oldID]; }
                 item.id = nextID;
-                // 同時更新 Step 裡面的關聯
-                Object.values(guides).forEach(g => {
-                    let idx = g.items.indexOf(oldID);
-                    if(idx !== -1) g.items[idx] = nextID;
-                });
             }
         }
     }
@@ -188,9 +193,11 @@ async function addNewItem() {
 
 function renderTabs() {
     let html = '';
+    // 渲染 Step
     Object.keys(guides).sort().forEach(k => {
         html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}</div>`;
     });
+    // 渲染 分類 (顯示完整名稱)
     Object.keys(CAT_LABELS).forEach(k => {
         html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="setFilter('CAT','${k}')">${CAT_LABELS[k]}</div>`;
     });
@@ -198,14 +205,8 @@ function renderTabs() {
 }
 
 function updateGuide(key, field, val) { guides[key][field] = val; localStorage.setItem('yt_guides', JSON.stringify(guides)); }
-function toggleGuideItem(gKey, id) { guides[gKey].items = guides[gKey].items.filter(x => x !== id); updateGuide(gKey, 'items', guides[gKey].items); render(); }
 function addIntoStep(gKey, id) { if(!guides[gKey].items.includes(id)) { guides[gKey].items.push(id); updateGuide(gKey, 'items', guides[gKey].items); alert('已加入 '+gKey); }}
-
-function autoSave() {
-    localStorage.setItem('yt_cart', JSON.stringify(cart));
-    localStorage.setItem('yt_lastSite', document.getElementById('siteSelect').value);
-    localStorage.setItem('yt_lastStaff', document.getElementById('staff').value);
-}
+function autoSave() { localStorage.setItem('yt_cart', JSON.stringify(cart)); localStorage.setItem('yt_lastSite', document.getElementById('siteSelect').value); localStorage.setItem('yt_lastStaff', document.getElementById('staff').value); }
 function saveDB() { localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); localStorage.setItem('yt_guides', JSON.stringify(guides)); }
 function setFilter(m, k) { currentMode=m; currentKey=k; renderTabs(); render(); }
 function toggleItem(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; autoSave(); render(); }
@@ -219,11 +220,12 @@ async function dbGet(k) { return new Promise(r => { const t = db.transaction("im
 async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
 async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
 function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveDB(); }}
-function hardReset() { if(confirm("確定還原預設？")) { localStorage.clear(); location.reload(); }}
+function hardReset() { if(confirm("確定還原？")) { localStorage.clear(); location.reload(); }}
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
+function resetCart() { if(confirm("重選項目？")) { cart = {}; autoSave(); render(); } }
 
 async function buildReport() {
-    const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
+    const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.compare(b.id));
     if(!sel.length) return alert("請勾選標語");
     let h = `<div style="border:2px solid #095744; padding:15px; background:white;">
         <h2 style="text-align:center; color:#095744; font-size:22px; font-weight:900; border-bottom:2px solid #095744; padding-bottom:10px; margin-bottom:10px;">鈺通營造工安標語採購單</h2>
@@ -234,9 +236,8 @@ async function buildReport() {
         <table style="width:100%; border-collapse:collapse;">`;
     for(let i of sel) {
         const localImg = await dbGet(i.id);
-        const img = localImg || `img/${i.id.toLowerCase()}.jpg`;
         h += `<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:10px 0; width:80px;"><img src="${img}" style="width:70px; height:50px; object-fit:contain;" onerror="this.src='https://placehold.co/70x50?text=無圖';"></td>
+            <td style="padding:10px 0; width:80px;"><img src="${localImg || 'img/'+i.id.toLowerCase()+'.jpg'}" style="width:70px; height:50px; object-fit:contain;" onerror="this.src='https://placehold.co/70x50?text=無圖';"></td>
             <td style="padding:10px; font-size:14px;"><b>[${i.id}] ${i.n}</b><br><small style="color:gray;">${i.s} / ${i.m||'中空板'}</small></td>
             <td style="padding:10px; text-align:right; font-size:20px; color:#70B934; font-weight:900;">x ${cart[i.id].qty}</td>
         </tr>`;
