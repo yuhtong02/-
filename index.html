@@ -3,40 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 - 旗艦版</title>
+    <title id="pageTitle">工安標語管理系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 220px; touch-action: manipulation; }
-        
         .sticky-header { position: sticky; top: 0; z-index: 100; background: white; border-bottom: 3px solid var(--yt-dark); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .cat-tab-item, .cat-tab-step { white-space: nowrap; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; border: 2px solid transparent; transition: 0.2s; }
         .cat-tab-step { background: var(--yt-dark); color: white; }
         .cat-tab-step.active { background: var(--yt-light); }
         .cat-tab-item { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
         .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); }
-
         .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
         .sign-card { background: white; border-radius: 20px; padding: 14px; border: 2px solid #e2e8f0; display: flex; gap: 12px; cursor: pointer; position: relative; }
         .sign-card.selected { border-color: var(--yt-light); background-color: #F0FDF4; border-width: 2.5px; }
-        
         .img-slot { width: 85px; height: 85px; background: #f8fafc; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
         .qty-input { width: 60px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-dark); border-bottom: 2.5px solid var(--yt-light); outline: none; background: transparent; }
-
         #adminBar { display: none; background: #1e293b; padding: 10px; gap: 8px; justify-content: center; flex-wrap: wrap; }
         .admin-btn { font-size: 12px; color: white; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-weight: bold; }
         .edit-badge { position: absolute; top: -5px; left: -5px; background: #F39800; color: white; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 900; z-index: 10; }
-
         #modalOverlay, #editModalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
         #modalContent, #editModalContent { background: white; width: 100%; max-width: 480px; border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; }
         .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
-        
         .form-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 5px; outline: none; }
-        .form-input:focus { border-color: var(--yt-light); }
-
         @media print { .no-print { display: none !important; } #modalOverlay { position: absolute; display: block; background: white; } }
     </style>
 </head>
@@ -44,12 +36,12 @@
 
     <div class="sticky-header no-print">
         <div id="adminBar">
-            <button onclick="openEditModal(null)" class="admin-btn">➕ 新增標語項目</button>
-            <button onclick="exportData()" class="admin-btn">📥 匯出資料備份</button>
+            <button onclick="openEditModal(null)" class="admin-btn">➕ 新增標語</button>
+            <button onclick="exportData()" class="admin-btn">📥 匯出資料</button>
             <label class="admin-btn cursor-pointer">📤 匯入還原 <input type="file" id="importFile" class="hidden" onchange="importData(event)"></label>
         </div>
         <div class="bg-[#095744] p-4 flex justify-between items-center text-white">
-            <span class="text-xl font-black tracking-tighter">鈺通營造工安系統</span>
+            <span id="mainTitle" class="text-xl font-black tracking-tighter cursor-pointer" onclick="editMainTitle()">鈺通營造工安系統</span>
             <button onclick="toggleAdmin()" id="adminBtn" class="bg-white/20 backdrop-blur-md text-white px-4 py-1 rounded-full text-xs font-black border border-white/30">🔒 管理員</button>
         </div>
         <div class="flex items-center gap-2 p-3 bg-white border-b">
@@ -67,8 +59,7 @@
             <div class="modal-body" id="reportArea"></div>
             <div class="p-4 bg-gray-50 flex flex-col gap-2 no-print">
                 <button onclick="captureImage()" class="bg-[#F39800] text-white py-4 rounded-xl font-black shadow-lg">📸 生成圖片 (手機長按儲存)</button>
-                <button onclick="window.print()" class="bg-[#095744] text-white py-3 rounded-xl font-bold">電腦直接列印</button>
-                <button onclick="closeModal()" class="py-2 text-gray-400 font-bold">關閉</button>
+                <button onclick="closeModal()" class="py-2 text-gray-400 font-bold text-center">關閉</button>
             </div>
         </div>
     </div>
@@ -77,27 +68,27 @@
         <div id="editModalContent">
             <div class="p-6 border-b"><h3 id="editTitle" class="text-xl font-black text-[#095744]">標語設定</h3></div>
             <div class="modal-body">
-                <div class="mb-4"><label class="text-xs font-bold text-gray-400">系統編號 (自動遞增)</label><input type="text" id="editId" class="form-input bg-gray-100" readonly></div>
-                <div class="mb-4"><label class="text-xs font-bold text-gray-400">標語名稱</label><input type="text" id="editName" class="form-input" placeholder="請輸入標語內容"></div>
+                <div class="mb-4"><label class="text-xs font-bold text-gray-400">系統編號</label><input type="text" id="editId" class="form-input bg-gray-100" readonly></div>
+                <div class="mb-4"><label class="text-xs font-bold text-gray-400">標語名稱</label><input type="text" id="editName" class="form-input"></div>
                 <div class="mb-4">
-                    <label class="text-xs font-bold text-gray-400">所屬分類 (決定編號開頭)</label>
+                    <label class="text-xs font-bold text-gray-400">分類</label>
                     <select id="editCat" class="form-input"></select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="text-xs font-bold text-gray-400">規格</label><input type="text" id="editSize" class="form-input" placeholder="如 60x40"></div>
-                    <div><label class="text-xs font-bold text-gray-400">材質</label><input type="text" id="editMat" class="form-input" placeholder="如 中空板"></div>
+                    <div><label class="text-xs font-bold text-gray-400">規格</label><input type="text" id="editSize" class="form-input"></div>
+                    <div><label class="text-xs font-bold text-gray-400">材質</label><input type="text" id="editMat" class="form-input"></div>
                 </div>
             </div>
             <div class="p-4 flex gap-2">
-                <button onclick="saveEdit()" class="flex-1 bg-[#095744] text-white py-4 rounded-xl font-bold">儲存修改</button>
-                <button id="delBtn" onclick="deleteAndReorder()" class="px-5 bg-red-100 text-red-600 rounded-xl font-bold">🗑️ 刪除</button>
-                <button onclick="closeEditModal()" class="px-5 bg-gray-100 rounded-xl font-bold text-gray-500">取消</button>
+                <button onclick="saveEdit()" class="flex-1 bg-[#095744] text-white py-4 rounded-xl font-bold">儲存</button>
+                <button id="delBtn" onclick="deleteAndReorder()" class="px-5 bg-red-100 text-red-600 rounded-xl font-bold">🗑️</button>
+                <button onclick="closeEditModal()" class="px-5 bg-gray-100 rounded-xl font-bold">取消</button>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-[500] no-print flex gap-3 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-        <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-xl active:scale-95 transition-all">📋 生成採購單</button>
+    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-[500] no-print flex gap-3 shadow-xl">
+        <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl active:scale-95 transition-all">📋 生成採購單</button>
         <button onclick="resetCart()" class="flex-1 bg-gray-100 text-gray-400 rounded-2xl font-bold">清空</button>
     </nav>
 
@@ -105,32 +96,110 @@
 let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels, editingId = null;
 const IMG_PATH = "img/";
 
-// 初始標語分類規劃
-const defaultCats = {'ALL':'全部標語','A':'A.生活辦公','B':'B.安全告示','C':'C.危險警示','D':'D.禁止事項','E':'E.交通動線','F':'F.消防設施','G':'G.環境管理'};
-const defaultGuides = {'S1':{t:'工地入口'},'S2':{t:'辦公區域'},'S3':{t:'安全宣導'},'S4':{t:'動線管理'},'S5':{t:'施工現場'},'S6':{t:'環境管理'}};
-const defaultSites = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義北門住宅", "嘉義博愛安居", "嘉義民雄院區", "臺南林森圖書館"];
+const defaultCats = {
+    'ALL':'全部','A':'生活辦公','B':'告示牌類','C':'安全宣導','D':'危險禁制','E':'交通動線','F':'環境清潔','G':'消防醫務','H':'樓層指標','J':'典禮/其他'
+};
 
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db')) || [
-        {id:'A01', cat:'A', n:'辦公室 (監造/管理/統包商)', s:'60x20', m:'中空板', steps:['S2']},
-        {id:'A02', cat:'A', n:'會議室 / 休息室', s:'60x20', m:'中空板', steps:['S2']},
-        {id:'B01', cat:'B', n:'工程告示牌', s:'120x90', m:'中空板', steps:['S1']},
-        {id:'C01', cat:'C', n:'有電危險 請勿觸碰', s:'30x20', m:'中空板', steps:['S5']},
-        {id:'D01', cat:'D', n:'嚴禁煙火', s:'40x60', m:'中空板', steps:['S5']},
-        {id:'E01', cat:'E', n:'進入工區請緩慢行駛', s:'60x40', m:'中空板', steps:['S1']},
-        {id:'F01', cat:'F', n:'消防栓', s:'30x10', m:'貼紙', steps:['S2','S5']},
-        {id:'G01', cat:'G', n:'垃圾不落地 環境更美好', s:'60x40', m:'中空板', steps:['S6']}
+    // 自動分配您提供的清單
+    const rawData = [
+        {cat:'B', n:'工程告示牌', s:'120x90', m:'中空板'},
+        {cat:'C', n:'安全第一', s:'60x40', m:'中空板'},
+        {cat:'D', n:'嚴禁酒後進場', s:'60x40', m:'中空板'},
+        {cat:'E', n:'工區施工請勿停車', s:'60x40', m:'中空板'},
+        {cat:'B', n:'安衛告示牌', s:'90x90', m:'中空板'},
+        {cat:'D', n:'非工作人員禁止進入', s:'60x40', m:'中空板'},
+        {cat:'C', n:'進入工區請戴安全帽', s:'60x40', m:'中空板'},
+        {cat:'A', n:'守衛室', s:'30x10', m:'壓克力'},
+        {cat:'A', n:'工具箱會議區', s:'60x40', m:'中空板'},
+        {cat:'E', n:'汽車停放區', s:'60x40', m:'中空板'},
+        {cat:'E', n:'機車停放區', s:'60x40', m:'中空板'},
+        {cat:'E', n:'進入工區請緩慢行駛', s:'60x40', m:'中空板'},
+        {cat:'A', n:'統包商辦公室', s:'30x10', m:'壓克力'},
+        {cat:'A', n:'監造單位辦公室', s:'30x10', m:'壓克力'},
+        {cat:'A', n:'管理單位辦公室', s:'30x10', m:'壓克力'},
+        {cat:'A', n:'會議室', s:'30x10', m:'壓克力'},
+        {cat:'A', n:'倉庫', s:'30x10', m:'壓克力'},
+        {cat:'A', n:'建材展覽室', s:'30x10', m:'壓克力'},
+        {cat:'F', n:'一般垃圾', s:'30x40', m:'中空板'},
+        {cat:'F', n:'資源回收', s:'30x40', m:'中空板'},
+        {cat:'F', n:'廚餘', s:'30x40', m:'中空板'},
+        {cat:'F', n:'鐵鋁罐', s:'20x30', m:'貼紙'},
+        {cat:'F', n:'玻璃類', s:'20x30', m:'貼紙'},
+        {cat:'F', n:'塑膠類', s:'20x30', m:'貼紙'},
+        {cat:'F', n:'紙容器', s:'20x30', m:'貼紙'},
+        {cat:'F', n:'廚餘宣傳', s:'60x40', m:'中空板'},
+        {cat:'A', n:'男化妝室', s:'20x10', m:'壓克力'},
+        {cat:'A', n:'女化妝室', s:'20x10', m:'壓克力'},
+        {cat:'A', n:'休息區', s:'30x10', m:'壓克力'},
+        {cat:'G', n:'飲水機', s:'15x5', m:'貼紙'},
+        {cat:'G', n:'急救箱', s:'20x20', m:'中空板'},
+        {cat:'C', n:'工安公布宣導欄', s:'120x90', m:'中空板'},
+        {cat:'C', n:'背負式安全帶穿戴步驟', s:'90x120', m:'中空板'},
+        {cat:'C', n:'熱危害宣導', s:'60x40', m:'中空板'},
+        {cat:'C', n:'生活點滴', s:'60x40', m:'中空板'},
+        {cat:'B', n:'今日危害因素告示牌', s:'90x60', m:'白板材質'},
+        {cat:'C', n:'安全第一；品質至上', s:'120x30', m:'帆布'},
+        {cat:'C', n:'關懷標語', s:'60x40', m:'中空板'},
+        {cat:'C', n:'工安宣導', s:'60x40', m:'中空板'},
+        {cat:'F', n:'垃圾管道傾倒口', s:'40x60', m:'中空板'},
+        {cat:'F', n:'物料暫置區', s:'60x40', m:'中空板'},
+        {cat:'F', n:'營建廢棄物堆置區', s:'60x40', m:'中空板'},
+        {cat:'C', n:'施工架相關規定', s:'60x90', m:'中空板'},
+        {cat:'D', n:'非施工必要禁止進入', s:'60x40', m:'中空板'},
+        {cat:'D', n:'開口危險小心墜落', s:'60x40', m:'中空板'},
+        {cat:'D', n:'升降梯開口危險', s:'60x40', m:'中空板'},
+        {cat:'D', n:'欄杆禁止跨越或攀爬', s:'60x40', m:'中空板'},
+        {cat:'D', n:'打開柵門作業請穿戴安全帶', s:'60x40', m:'中空板'},
+        {cat:'D', n:'吊料電梯專用口', s:'60x40', m:'中空板'},
+        {cat:'D', n:'有電危險請勿觸碰', s:'30x20', m:'中空板'},
+        {cat:'D', n:'高壓電勿近', s:'40x60', m:'中空板'},
+        {cat:'D', n:'施工架嚴禁堆置物料', s:'60x40', m:'中空板'},
+        {cat:'F', n:'放置鋼筋材料', s:'60x40', m:'中空板'},
+        {cat:'E', n:'施工電梯', s:'30x10', m:'壓克力'},
+        {cat:'G', n:'滅火器', s:'10x30', m:'貼紙'},
+        {cat:'G', n:'安全出口', s:'30x10', m:'壓克力'},
+        {cat:'A', n:'小便斗', s:'10x5', m:'貼紙'},
+        {cat:'H', n:'樓梯標示', s:'20x10', m:'壓克力'},
+        {cat:'H', n:'樓層標示', s:'20x20', m:'壓克力'},
+        {cat:'C', n:'工安標語6S', s:'60x40', m:'中空板'},
+        {cat:'C', n:'存好心做好事說好話', s:'120x30', m:'帆布'},
+        {cat:'J', n:'工地/學校名稱', s:'客製', m:'不鏽鋼'},
+        {cat:'J', n:'各棟別名稱', s:'客製', m:'壓克力'},
+        {cat:'J', n:'工地上梁典禮', s:'客製', m:'帆布'}
     ];
-    guides = JSON.parse(localStorage.getItem('yt_guides')) || defaultGuides;
+
+    // 初始化資料
+    const savedDB = JSON.parse(localStorage.getItem('yt_db'));
+    if(!savedDB) {
+        activeDB = [];
+        const counts = {};
+        rawData.forEach(item => {
+            counts[item.cat] = (counts[item.cat] || 0) + 1;
+            item.id = item.cat + counts[item.cat].toString().padStart(2, '0');
+            item.steps = ['S5'];
+            activeDB.push(item);
+        });
+        saveDB();
+    } else { activeDB = savedDB; }
+
+    guides = JSON.parse(localStorage.getItem('yt_guides')) || {'S1':{t:'入口'},'S2':{t:'辦公'},'S3':{t:'宣導'},'S4':{t:'動線'},'S5':{t:'現場'},'S6':{t:'清潔'}};
     catLabels = JSON.parse(localStorage.getItem('yt_cats')) || defaultCats;
-    sites = JSON.parse(localStorage.getItem('yt_sites')) || defaultSites;
+    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["創世基金會", "嘉科實中", "北門住宅", "博愛安居", "民雄院區", "林森圖書館"];
+    const t = localStorage.getItem('yt_title'); if(t) document.getElementById('mainTitle').innerText = t;
+
     renderTabs(); renderSiteSelect(); render();
+}
+
+function editMainTitle() {
+    if(!isAdmin) return;
+    const n = prompt("修改標題：", document.getElementById('mainTitle').innerText);
+    if(n) { document.getElementById('mainTitle').innerText = n; localStorage.setItem('yt_title', n); }
 }
 
 function render() {
     const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
     let display = (currentMode === 'CAT') ? (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : activeDB.filter(x => x.steps && x.steps.includes(currentKey));
-    
     display.forEach(i => {
         const c = cart[i.id] || { sel:false, qty:1 };
         const card = document.createElement('div');
@@ -144,34 +213,16 @@ function render() {
             ${isAdmin ? `<div class="edit-badge" onclick="openEditModal('${i.id}')">✏️ 編輯</div>` : ''}
             <div class="img-slot"><img src="${IMG_PATH}${i.id}.png" onerror="this.src='${IMG_PATH}${i.id}.jpg'; this.onerror=null; this.parentElement.innerHTML='<div class=p-5 text-gray-300 text-[10px]>待補圖</div>'"></div>
             <div class="flex-1">
-                <div class="font-black text-[#095744] text-[15px] leading-tight pr-8">${i.n}</div>
-                <div class="text-[10px] text-gray-500 mt-2">規格：<span class="text-red-500 font-bold">${i.s || '現場指定'}</span> / ${i.m}</div>
+                <div class="font-black text-[#095744] text-[15px] leading-tight">${i.n}</div>
+                <div class="text-[10px] text-gray-500 mt-2">${i.s} / ${i.m}</div>
             </div>
-            <div class="absolute top-3 right-3 text-[10px] font-bold text-gray-300">#${i.id}</div>
-            <div class="absolute bottom-3 right-3 flex flex-col items-end" onclick="event.stopPropagation()">
-                <input type="number" value="${c.qty}" oninput="updateQty('${i.id}', this.value)" class="qty-input">
-            </div>`;
+            <div class="absolute bottom-3 right-3"><input type="number" value="${c.qty}" oninput="updateQty('${i.id}', this.value)" class="qty-input" onclick="event.stopPropagation()"></div>`;
         grid.appendChild(card);
     });
 }
 
-// 管理員修改分類/Step 名稱
-function editLabel(type, key) {
-    if(!isAdmin) return;
-    const oldVal = (type === 'GUIDE') ? guides[key].t : catLabels[key];
-    const newVal = prompt(`修改名稱:`, oldVal);
-    if(newVal) {
-        if(type === 'GUIDE') guides[key].t = newVal;
-        else catLabels[key] = newVal;
-        localStorage.setItem('yt_guides', JSON.stringify(guides));
-        localStorage.setItem('yt_cats', JSON.stringify(catLabels));
-        renderTabs();
-    }
-}
-
-// 刪除並自動遞補編號
 function deleteAndReorder() {
-    if (!confirm("確定刪除？同分類編號會自動遞補（例：A03 -> A02）")) return;
+    if (!confirm("確定刪除？編號將自動重排")) return;
     const item = activeDB.find(x => x.id === editingId);
     const cat = item.cat;
     const num = parseInt(editingId.replace(cat, ''));
@@ -201,6 +252,8 @@ function openEditModal(id) {
     } else {
         document.getElementById('editCat').disabled = false;
         document.getElementById('editName').value = "";
+        document.getElementById('editSize').value = "60x40";
+        document.getElementById('editMat').value = "中空板";
         document.getElementById('delBtn').style.display = 'none';
         autoId();
     }
@@ -229,68 +282,64 @@ function saveEdit() {
     saveDB(); closeEditModal(); render();
 }
 
-// 工地清單
 function addNewSite() {
-    const name = prompt("請輸入新工地名稱:");
-    if(name) {
-        sites.push(name.trim());
-        localStorage.setItem('yt_sites', JSON.stringify(sites));
-        renderSiteSelect();
-        document.getElementById('siteSelect').value = name.trim();
-    }
+    const name = prompt("新增工地名稱:");
+    if(name) { sites.push(name.trim()); localStorage.setItem('yt_sites', JSON.stringify(sites)); renderSiteSelect(); document.getElementById('siteSelect').value = name.trim(); }
 }
 
 function buildReport() {
     const sel = Object.keys(cart).filter(id => cart[id].sel);
-    if(!sel.length) return alert("尚未勾選標語");
-    let h = `<div id="captureTarget" style="background:white; padding:20px; border: 1px solid #eee; border-radius:15px;">
-        <div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:15px; margin-bottom:15px;">
-            <h2 style="margin:0; color:#095744; font-size:24px; font-weight:900;">鈺通營造工安標語採購單</h2>
-            <div style="margin-top:8px; font-weight:bold;">${document.getElementById('siteSelect').value}</div>
-            <div style="font-size:11px; color:#666; margin-top:4px;">提單人：${document.getElementById('staff').value || '現場人員'} ｜ 日期：${new Date().toLocaleDateString()}</div>
+    if(!sel.length) return alert("請選取標語");
+    let h = `<div id="captureTarget" style="background:white; padding:20px; border-radius:15px;">
+        <div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:10px; margin-bottom:15px;">
+            <h2 style="margin:0; color:#095744; font-size:20px; font-weight:900;">${document.getElementById('mainTitle').innerText} 採購單</h2>
+            <div style="margin-top:5px; font-weight:bold;">${document.getElementById('siteSelect').value}</div>
         </div>`;
     sel.forEach(id => {
         const i = activeDB.find(x => x.id === id);
-        h += `<div style="display:flex; align-items:center; gap:15px; padding:12px 0; border-bottom:1px dashed #ddd;">
-            <img src="${IMG_PATH}${i.id}.png" style="width:55px; height:55px; object-fit:contain;" onerror="this.src='${IMG_PATH}${i.id}.jpg'; this.onerror=null;">
-            <div style="flex:1;"><div style="font-weight:bold; font-size:16px;">${i.n}</div><div style="font-size:11px; color:#888;">${i.s} ｜ #${i.id}</div></div>
-            <div style="font-size:26px; font-weight:900; color:#F39800;">${cart[id].qty}</div>
+        h += `<div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed #ddd;">
+            <img src="${IMG_PATH}${i.id}.png" style="width:40px; height:40px; object-fit:contain;" onerror="this.onerror=null; this.src='https://via.placeholder.com/40?text=IMG'">
+            <div style="flex:1;"><div style="font-weight:bold; font-size:14px;">${i.n}</div><div style="font-size:10px; color:#888;">${i.s} / #${i.id}</div></div>
+            <div style="font-size:22px; font-weight:900; color:#F39800;">${cart[id].qty}</div>
         </div>`;
     });
-    h += `<div style="text-align:right; font-size:10px; color:#ccc; margin-top:15px;">*本單據由系統自動生成</div></div>`;
+    h += `</div>`;
     document.getElementById('reportArea').innerHTML = h;
     document.getElementById('modalOverlay').style.display = 'flex';
 }
 
 async function captureImage() {
-    const canvas = await html2canvas(document.getElementById('captureTarget'), { scale: 3, useCORS: true });
+    const canvas = await html2canvas(document.getElementById('captureTarget'), { scale: 3 });
     const imgData = canvas.toDataURL("image/png");
     const v = document.createElement('div');
     v.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
-    v.innerHTML = `<div style="color:white; margin-bottom:10px; font-weight:bold;">📸 生成成功！</div>
-                   <img src="${imgData}" style="max-width:100%; max-height:75%; border-radius:10px;">
-                   <div style="color:#70B934; margin-top:15px; font-weight:900; font-size:18px;">💡 請「長按圖片」儲存或分享</div>
-                   <button onclick="this.parentElement.remove()" style="margin-top:20px; background:white; padding:10px 50px; border-radius:20px; font-weight:bold;">關閉</button>`;
+    v.innerHTML = `<img src="${imgData}" style="max-width:100%; max-height:80%; border-radius:10px;"><div style="color:#70B934; margin-top:15px; font-weight:900;">💡 長按圖片儲存分享</div><button onclick="this.parentElement.remove()" style="margin-top:20px; background:white; padding:10px 40px; border-radius:20px; font-weight:bold;">關閉</button>`;
     document.body.appendChild(v);
 }
 
 function renderTabs() { 
     let h = ''; 
-    Object.keys(guides).sort().forEach(k => h += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="handleTabClick('GUIDE','${k}')" oncontextmenu="editLabel('GUIDE','${k}'); return false;">Step ${k.replace('S','')}.${guides[k].t}</div>`);
-    h += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey=='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部標語</div>`;
+    Object.keys(guides).sort().forEach(k => h += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="handleTabClick('GUIDE','${k}')" oncontextmenu="editLabel('GUIDE','${k}'); return false;">${guides[k].t}</div>`);
+    h += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey=='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部</div>`;
     Object.keys(catLabels).filter(k=>k!=='ALL').sort().forEach(k => h += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="handleTabClick('CAT','${k}')" oncontextmenu="editLabel('CAT','${k}'); return false;">${catLabels[k]}</div>`);
     document.getElementById('tabContainer').innerHTML = h; 
 }
+function editLabel(type, key) {
+    if(!isAdmin) return;
+    const old = (type === 'GUIDE') ? guides[key].t : catLabels[key];
+    const n = prompt("修改分類名稱:", old);
+    if(n) { if(type === 'GUIDE') guides[key].t = n; else catLabels[key] = n; localStorage.setItem('yt_guides', JSON.stringify(guides)); localStorage.setItem('yt_cats', JSON.stringify(catLabels)); renderTabs(); }
+}
 function handleTabClick(m, k) { currentMode = m; currentKey = k; render(); renderTabs(); }
-function toggleAdmin() { if(!isAdmin && prompt("認證")!=="751113") return; isAdmin = !isAdmin; document.getElementById('adminBtn').innerText = isAdmin?"🔓 結束":"🔒 管理員"; document.getElementById('adminBar').style.display = isAdmin?'flex':'none'; render(); renderTabs(); }
+function toggleAdmin() { if(!isAdmin && prompt("密碼")!=="751113") return; isAdmin = !isAdmin; document.getElementById('adminBtn').innerText = isAdmin?"🔓 結束":"🔒 管理員"; document.getElementById('adminBar').style.display = isAdmin?'flex':'none'; render(); renderTabs(); }
 function saveDB() { localStorage.setItem('yt_db', JSON.stringify(activeDB)); }
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
 function updateQty(id, val) { let q = parseInt(val) || 1; if(!cart[id]) cart[id] = { sel: true, qty: q }; else cart[id].qty = q; }
-function resetCart() { if(confirm("清空？")) { cart = {}; render(); } }
+function resetCart() { if(confirm("清空選取？")) { cart = {}; render(); } }
 function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
 function closeEditModal() { document.getElementById('editModalOverlay').style.display = 'none'; }
-function exportData() { const blob = new Blob([JSON.stringify({ activeDB, guides, catLabels, sites }, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `鈺通備份.json`; a.click(); }
-function importData(e) { const r = new FileReader(); r.onload = (x) => { const d = JSON.parse(x.target.result); localStorage.setItem('yt_db', JSON.stringify(d.activeDB)); location.reload(); }; r.readAsText(e.target.files[0]); }
+function exportData() { const blob = new Blob([JSON.stringify(activeDB)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `備份.json`; a.click(); }
+function importData(e) { const r = new FileReader(); r.onload = (x) => { activeDB = JSON.parse(x.target.result); saveDB(); location.reload(); }; r.readAsText(e.target.files[0]); }
 
 window.onload = init;
 </script>
