@@ -75,7 +75,7 @@ const DEFAULT_CATS = {
     'ALL':'全部', 
     'A':'A類 生活設施', 'B':'B類 安全防護', 'C':'C類 施工告示', 'D':'D類 指引警告', 
     'E':'E類 電力設備', 'F':'F類 車輛管理', 'G':'G類 環境衛生', 'H':'H類 消防救護', 
-    'I':'I類 吊掛作業', 'J':'J類 其他標語', 'K':'K類 區域清單'
+    'I':'I類 吊掛作業', 'J':'J類 其他標語', 'K':'K類 雜項清單'
 };
 
 const request = indexedDB.open("Yutong_SignSystem_V2", 1);
@@ -83,7 +83,7 @@ request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
 function init() {
-    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門住宅", "嘉義民雄院區", "臺南林森圖書館"];
+    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世", "嘉義嘉科", "嘉義博愛", "嘉義北門", "嘉義民雄", "臺南林森"];
     activeDB = JSON.parse(localStorage.getItem('yt_active_db')) || [
         {id:'A01', cat:'A', n:'飲水機', s:'30x20', m:'中空板'},
         {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}
