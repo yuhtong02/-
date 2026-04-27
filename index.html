@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 V6.3</title>
+    <title>鈺通營造工安標語系統 V6.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -15,35 +15,32 @@
         
         .cat-tab { white-space: nowrap; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; border: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
         .cat-tab.step { background-color: var(--yt-dark); color: white; border-color: var(--yt-dark); }
-        .cat-tab.active { background-color: var(--yt-light); border-color: var(--yt-light); color: white; transform: scale(1.05); }
+        .cat-tab.active { background-color: var(--yt-light); border-color: var(--yt-light); color: white; }
         
-        /* 強制電腦一排三個，手機一排一個 */
+        /* 核心修正：強制寬螢幕三欄，平板二欄，手機一欄 */
         .grid-container { 
             display: grid; 
-            gap: 10px; 
+            gap: 12px; 
             padding: 12px; 
             grid-template-columns: repeat(1, 1fr); 
         }
-        @media (min-width: 1024px) { 
-            .grid-container { grid-template-columns: repeat(3, 1fr); } 
-        }
+        @media (min-width: 640px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
 
-        .sign-card { background: white; border-radius: 12px; padding: 10px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 115px; position: relative; }
-        .sign-card.selected { border: 2.5px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .sign-card { background: white; border-radius: 12px; padding: 12px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 120px; position: relative; }
+        .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 管理員編輯框樣式 */
-        .admin-edit { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 1px 3px; width: 100%; font-size: 11px; color: #9a3412; font-weight: bold; margin-bottom: 2px; }
+        /* 管理員輸入框修正 */
+        .admin-edit { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 1px 4px; width: 80%; font-size: 12px; color: #9a3412; font-weight: bold; display: inline-block; }
         
-        .img-slot { width: 85px; height: 95px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
+        .img-slot { width: 80px; height: 95px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
         
-        .qty-input { width: 45px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; }
+        .qty-input { width: 40px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #eee; z-index: 2000; }
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 10px; }
-        .print-paper { background: white; width: 100%; max-width: 650px; border-radius: 16px; padding: 15px; max-height: 90vh; overflow-y: auto; }
         
-        /* 自動編號圓圈 */
-        .index-badge { position: absolute; top: -5px; left: -5px; background: var(--yt-dark); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; z-index: 10; }
+        /* 編號加大加亮 */
+        .index-badge { position: absolute; top: -6px; left: -6px; background: #fbbf24; color: #000; width: 28px; height: 28px; border: 2px solid var(--yt-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; z-index: 10; box-shadow: 1px 1px 4px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -65,7 +62,7 @@
         <div class="category-scroller" id="tabContainer"></div>
     </div>
 
-    <div class="grid-container max-w-7xl mx-auto" id="mainGrid"></div>
+    <div class="grid-container mx-auto" id="mainGrid"></div>
 
     <nav class="footer-nav no-print">
         <div id="adminPanel" class="hidden flex justify-center gap-2 mb-2">
@@ -73,15 +70,15 @@
             <button onclick="importData()" class="bg-purple-600 text-white px-4 py-1 rounded text-[10px] font-bold">📥 還原</button>
             <button onclick="deleteSite()" class="bg-red-500 text-white px-4 py-1 rounded text-[10px] font-bold">🗑️ 刪除工地</button>
         </div>
-        <div class="flex w-full max-w-4xl gap-2 mx-auto">
+        <div class="flex w-full max-w-6xl gap-2 mx-auto">
             <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-lg active:scale-95 transition">📋 生成採購單</button>
             <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-400 rounded-xl text-[10px] font-bold">重選</button>
             <button onclick="hardReset()" class="flex-1 bg-slate-100 text-slate-400 rounded-xl text-[10px] font-bold">清空</button>
         </div>
     </nav>
 
-    <div id="modal" class="no-print">
-        <div class="print-paper">
+    <div id="modal" class="no-print" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 10px;">
+        <div class="print-paper" style="background: white; width: 100%; max-width: 650px; border-radius: 16px; padding: 15px; max-height: 90vh; overflow-y: auto;">
             <div id="printArea"></div>
             <div class="grid grid-cols-1 gap-2 mt-4">
                 <button onclick="window.print()" class="bg-[#095744] text-white py-3 rounded-lg font-black">1. 直接列印</button>
@@ -127,7 +124,7 @@ const RAW_SIGNS = [
 let activeDB, cart = {}, sites = [], isAdmin = false, currentFilter = 'ALL';
 
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db_v63')) || RAW_SIGNS;
+    activeDB = JSON.parse(localStorage.getItem('yt_db_v64')) || RAW_SIGNS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     document.getElementById('staff').value = localStorage.getItem('yt_staff') || '';
@@ -182,16 +179,18 @@ function render() {
             <div class="flex-1 min-w-0">
                 <div class="flex flex-col h-full justify-between">
                     <div class="min-w-0">
-                        ${isAdmin ? `<input class="admin-edit" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-[13px] truncate">${item.n}</div>`}
-                        <div class="text-[10px] font-bold text-red-600 truncate">
-                            ${isAdmin ? `規：<input class="admin-edit" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : `規：${item.s}`}
+                        ${isAdmin ? `<input class="admin-edit mb-1" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-[15px] truncate">${item.n}</div>`}
+                        
+                        <div class="text-[11px] font-bold text-red-600 truncate flex items-center gap-1">
+                            規：${isAdmin ? `<input class="admin-edit" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : `<span>${item.s}</span>`}
                         </div>
-                        <div class="text-[10px] font-bold text-blue-600 truncate">
-                            ${isAdmin ? `材：<input class="admin-edit" value="${item.m||''}" oninput="updateDB('${item.id}','m',this.value)" onclick="event.stopPropagation()">` : `材：${item.m||'待定'}`}
+                        
+                        <div class="text-[11px] font-bold text-blue-600 truncate flex items-center gap-1">
+                            材：${isAdmin ? `<input class="admin-edit" value="${item.m||''}" oninput="updateDB('${item.id}','m',this.value)" onclick="event.stopPropagation()">` : `<span>${item.m||'待定'}</span>`}
                         </div>
                     </div>
                     <div class="flex items-center gap-1 self-end" onclick="event.stopPropagation()">
-                        <span class="text-[9px] font-bold text-gray-400">數量</span>
+                        <span class="text-[10px] font-bold text-gray-400">數量</span>
                         <input type="number" value="${st.qty}" oninput="updateQty('${item.id}',this.value)" class="qty-input">
                     </div>
                 </div>
@@ -222,7 +221,7 @@ function updateDB(id, field, val) {
 }
 
 function save() {
-    localStorage.setItem('yt_db_v63', JSON.stringify(activeDB));
+    localStorage.setItem('yt_db_v64', JSON.stringify(activeDB));
     localStorage.setItem('yt_cart', JSON.stringify(cart));
     localStorage.setItem('yt_staff', document.getElementById('staff').value);
     localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value);
@@ -254,7 +253,7 @@ function importData() {
 }
 
 function resetCart() { if(confirm("重選？")) { cart = {}; save(); render(); } }
-function hardReset() { if(confirm("確定要重設為初始狀態？所有修改將消失。")) { localStorage.clear(); location.reload(); } }
+function hardReset() { if(confirm("確定重置？")) { localStorage.clear(); location.reload(); } }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
 async function buildReport() {
