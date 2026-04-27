@@ -21,7 +21,7 @@
         .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); }
         
         .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
-        .sign-card { background: white; border-radius: 15px; padding: 12px; border: 1px solid #D7CCC8; display: flex; gap: 10px; cursor: pointer; position: relative; align-items: center; }
+        .sign-card { background: white; border-radius: 15px; padding: 12px; border: 1px solid #D7CCC8; display: flex; gap: 10px; cursor: pointer; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 5px 10px rgba(0,0,0,0.05); }
         
         .img-slot { width: 100px; height: 80px; background: #f8fafc; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
@@ -41,19 +41,20 @@
     <div class="sticky-header">
         <div class="header-container">
             <span class="main-title">鈺通營造工安系統</span>
-            <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">🔒 管理員</button>
+            <div class="flex gap-2">
+                <button onclick="exportJSON()" id="exportBtn" class="hidden text-[10px] bg-white/20 px-2 py-1 rounded">💾 導出</button>
+                <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">🔒 管理員</button>
+            </div>
         </div>
         <div class="grid grid-cols-2 gap-2 px-4 py-2 bg-white border-b">
-            <div class="flex gap-1">
-                <select id="siteSelect" class="flex-1 bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
-                <button onclick="editSites()" class="bg-gray-100 px-3 rounded-lg text-xs font-bold border border-gray-200 active:bg-gray-200">＋</button>
-            </div>
+            <select id="siteSelect" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
             <input type="text" id="staff" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200" placeholder="填單人員">
         </div>
         <div id="tabContainer" class="flex overflow-x-auto gap-2 p-3 bg-white scrollbar-hide"></div>
     </div>
 
     <div id="mainGrid" class="grid-container max-w-7xl mx-auto"></div>
+
     <div id="hiddenCapture"></div>
 
     <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 border-t border-gray-100 z-50 flex flex-col gap-2 shadow-lg">
@@ -65,9 +66,9 @@
     </nav>
 
     <div id="modal" onclick="closeModal()">
-        <p class="text-white mb-2 font-bold text-center">↓ 長按圖片即可儲存至手機 ↓</p>
+        <p class="text-white mb-2 font-bold">↓ 長按圖片即可儲存 ↓</p>
         <div id="imgPlaceholder" class="bg-white rounded-lg overflow-hidden shadow-2xl max-w-full overflow-y-auto" style="max-height: 70vh;" onclick="event.stopPropagation()"></div>
-        <button onclick="closeModal()" class="mt-4 bg-white px-10 py-3 rounded-xl font-bold">關閉並返回</button>
+        <button onclick="closeModal()" class="mt-4 bg-white px-8 py-3 rounded-xl font-bold">關閉</button>
     </div>
 
 <script>
@@ -75,22 +76,20 @@ let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey
 const GITHUB_BASE = "https://yuhtong02.github.io/-/img/";
 
 function init() {
-    // 優先讀取舊有資料，若完全無資料才載入預設
-    activeDB = JSON.parse(localStorage.getItem('yt_db')) || [{id:'A01', cat:'A', n:'範例標語', s:'30x15', m:'中空板'}];
-    guides = JSON.parse(localStorage.getItem('yt_guides')) || {'S1': {t:'預設流程', items:['A01']}};
-    catLabels = JSON.parse(localStorage.getItem('yt_cats')) || {'ALL':'全部標語','A':'A.生活設施','B':'B.安全防護','C':'C.危險警示','D':'D.禁止事項','E':'E.交通與動線','F':'F.設施位置','G':'G.作業規範','H':'H.宣導標語','I':'I.環境管理','J':'J.圖資與指引'};
+    activeDB = JSON.parse(localStorage.getItem('yt_db')) || [
+        {id:'A01', cat:'A', n:'飲水機', s:'30x15', m:'中空板'},
+        {id:'B01', cat:'B', n:'安全第一', s:'60x40', m:'中空板'}
+    ];
+    guides = JSON.parse(localStorage.getItem('yt_guides')) || {
+        'S1': { t: '工區大門', items: ['A01','B01'] },
+        'S2': { t: '基礎設施', items: [] }
+    };
+    catLabels = JSON.parse(localStorage.getItem('yt_cats')) || {
+        'ALL':'全部標語', 'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.危險警示', 'D':'D.禁止事項', 'E':'E.交通與動線', 'F':'F.設施位置', 'G':'G.作業規範', 'H':'H.宣導標語', 'I':'I.環境管理', 'J':'J.圖資與指引'
+    };
     sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居"];
 
     renderTabs(); renderSiteSelect(); render();
-}
-
-function editSites() {
-    const res = prompt("請修改或新增工地名稱（用逗號隔開）：", sites.join(','));
-    if(res !== null) {
-        sites = res.split(/[，,]/).map(s => s.trim()).filter(s => s);
-        localStorage.setItem('yt_sites', JSON.stringify(sites));
-        renderSiteSelect();
-    }
 }
 
 function renderTabs() {
@@ -98,7 +97,7 @@ function renderTabs() {
     Object.keys(guides).sort().forEach(k => {
         h += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="handleTabClick('GUIDE','${k}')">Step ${k.replace('S','')}.${guides[k].t}</div>`;
     });
-    h += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey=='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部標語</div>`;
+    h += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部標語</div>`;
     Object.keys(catLabels).filter(k=>k!=='ALL').sort().forEach(k => {
         h += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="handleTabClick('CAT','${k}')">${catLabels[k]}</div>`;
     });
@@ -107,9 +106,9 @@ function renderTabs() {
 
 function handleTabClick(m, k) {
     if (isAdmin && k !== 'ALL') {
-        const title = m === 'GUIDE' ? guides[k].t : catLabels[k];
-        const res = prompt("修改名稱：", title);
-        if (res) { if (m === 'GUIDE') guides[k].t = res; else catLabels[k] = res; saveData(); renderTabs(); }
+        const currentTitle = m === 'GUIDE' ? guides[k].t : catLabels[k];
+        const newTitle = prompt("修改標題名稱：", currentTitle);
+        if (newTitle) { if (m === 'GUIDE') guides[k].t = newTitle; else catLabels[k] = newTitle; saveData(); renderTabs(); }
     }
     currentMode = m; currentKey = k; render();
 }
@@ -130,7 +129,7 @@ function render() {
         
         card.innerHTML = `
             ${isAdmin ? `<div class="delete-btn" onclick="event.stopPropagation(); deleteItem('${i.id}')">✕</div>` : ''}
-            <div class="img-slot"><img src="${GITHUB_BASE}${i.id}.JPG" onerror="this.src='${GITHUB_BASE}${i.id}.jpg';"></div>
+            <div class="img-slot"><img src="${GITHUB_BASE}${i.id}.JPG" onerror="this.src='${GITHUB_BASE}${i.id}.jpg'; this.onerror=null;"></div>
             <div class="flex-1">
                 ${isAdmin ? 
                     `<input class="edit-input font-bold" value="${i.n}" onchange="updateItem('${i.id}','n',this.value)">
@@ -149,32 +148,30 @@ function render() {
     });
 }
 
-function addNewItem() {
-    const cat = prompt("分類字母 (A-J):", "A").toUpperCase();
-    if (!catLabels[cat]) return;
-    const sameCat = activeDB.filter(x => x.cat === cat);
-    const nextNum = sameCat.length > 0 ? Math.max(...sameCat.map(x => parseInt(x.id.replace(cat, "")) || 0)) + 1 : 1;
-    const newID = cat + (nextNum < 10 ? "0" + nextNum : nextNum);
-    activeDB.push({ id: newID, cat, n: "新標語", s: "60x40", m: "中空板" });
-    saveData(); render();
-}
-
+// 產生圖片功能
 async function buildReportImage() {
     const sel = activeDB.filter(i => cart[i.id]?.sel);
-    if(!sel.length) return alert("請先選取項目");
+    if(!sel.length) return alert("請先選取標語");
     const site = document.getElementById('siteSelect').value;
     const staff = document.getElementById('staff').value || "現場人員";
+    
     let h = `<div style="padding:25px; background:white; width:450px; border:5px solid #095744;">
-        <h2 style="color:#095744; text-align:center; font-size:24px; font-weight:900;">工安標語採購單</h2>
-        <p style="font-size:14px; border-bottom:1px solid #eee; padding-bottom:10px;">工地：${site} | 填單：${staff}</p>
-        <table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
+        <h2 style="color:#095744; text-align:center; font-size:26px; font-weight:900;">鈺通營造工安標語採購單</h2>
+        <div style="font-size:14px; margin-bottom:15px; border-bottom:2px solid #eee; padding-bottom:10px;">
+            工地：<b>${site}</b> | 填單：<b>${staff}</b><br>日期：${new Date().toLocaleString()}
+        </div>
+        <table style="width:100%; border-collapse:collapse;">
+    `;
     sel.forEach(i => {
-        h += `<tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 0;"><b>[${i.id}] ${i.n}</b><br><small>${i.s}</small></td>
-              <td style="text-align:right; font-size:20px; font-weight:900; color:#70B934;">x ${cart[i.id].qty}</td></tr>`;
+        h += `<tr style="border-bottom:1px solid #ddd;"><td style="padding:10px 0;"><b>[${i.id}] ${i.n}</b><br><small>${i.s} / ${i.m}</small></td>
+              <td style="text-align:right; font-size:22px; font-weight:900; color:#70B934;">x ${cart[i.id].qty}</td></tr>`;
     });
     h += `</table></div>`;
-    document.getElementById('hiddenCapture').innerHTML = h;
-    html2canvas(document.getElementById('hiddenCapture'), { scale: 2 }).then(canvas => {
+    
+    const area = document.getElementById('hiddenCapture');
+    area.innerHTML = h;
+
+    html2canvas(area, { scale: 2 }).then(canvas => {
         const img = new Image();
         img.src = canvas.toDataURL("image/png");
         img.className = "max-w-full";
@@ -201,6 +198,16 @@ function toggleStepItem(stepKey, id, isAdd) {
     saveData();
 }
 
+function addNewItem() {
+    const cat = prompt("分類字母 (A-J):", "A").toUpperCase();
+    if (!catLabels[cat]) return;
+    const sameCat = activeDB.filter(x => x.cat === cat);
+    const nextNum = sameCat.length > 0 ? Math.max(...sameCat.map(x => parseInt(x.id.replace(cat, "")) || 0)) + 1 : 1;
+    const newID = cat + (nextNum < 10 ? "0" + nextNum : nextNum);
+    activeDB.push({ id: newID, cat, n: "新標語", s: "60x40", m: "中空板" });
+    saveData(); render();
+}
+
 function toggleAdmin() {
     if(!isAdmin && prompt("管理密碼") !== "751113") return;
     isAdmin = !isAdmin;
@@ -215,6 +222,7 @@ function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = 
 function saveData() { localStorage.setItem('yt_db', JSON.stringify(activeDB)); localStorage.setItem('yt_guides', JSON.stringify(guides)); localStorage.setItem('yt_cats', JSON.stringify(catLabels)); }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 function resetCart() { if(confirm("清空？")) { cart = {}; render(); } }
+
 window.onload = init;
 </script>
 </body>
