@@ -9,32 +9,21 @@
     <style>
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 180px; }
-        
-        /* 標題與管理員按鈕優化 */
-        .header-container { background-color: var(--yt-dark); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .main-title { font-size: 1.8rem; font-weight: 900; letter-spacing: 0.1em; }
-        .admin-btn-small { background: white; color: var(--yt-dark); padding: 6px 15px; border-radius: 50px; font-size: 13px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.2s; }
-        .admin-btn-small:active { transform: scale(0.95); }
-
-        .sticky-header { position: sticky; top: 0; z-index: 1000; background: white; border-bottom: 4px solid var(--yt-dark); }
-        .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 18px; border-radius: 18px; margin: 0 15px 10px 15px; box-shadow: 0 4px 12px rgba(9, 87, 68, 0.15); }
-
-        /* 標籤樣式修正 */
-        .cat-tab-step { white-space: nowrap; padding: 10px 16px; border-radius: 12px; background: var(--yt-dark); color: white; font-size: 14px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 2px solid var(--yt-dark); }
+        .header-container { background-color: var(--yt-dark); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .main-title { font-size: 1.5rem; font-weight: 900; letter-spacing: 0.1em; }
+        .admin-btn { background: white; color: var(--yt-dark); padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 900; }
+        .sticky-header { position: sticky; top: 0; z-index: 1000; background: white; border-bottom: 3px solid var(--yt-dark); }
+        .cat-tab-step { white-space: nowrap; padding: 8px 14px; border-radius: 10px; background: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 2px solid var(--yt-dark); }
         .cat-tab-step.active { background: var(--yt-light); border-color: var(--yt-light); }
-        .cat-tab-item { white-space: nowrap; padding: 10px 18px; border-radius: 12px; background: white; color: #475569; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid #e2e8f0; flex-shrink: 0; }
+        .cat-tab-item { white-space: nowrap; padding: 8px 14px; border-radius: 10px; background: white; color: #475569; font-size: 13px; font-weight: 800; cursor: pointer; border: 2px solid #e2e8f0; flex-shrink: 0; }
         .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); }
-
-        /* 網格與卡片 */
-        .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
-        .sign-card { background: white; border-radius: 18px; padding: 15px; border: 1px solid #D7CCC8; display: flex; gap: 12px; cursor: pointer; position: relative; transition: 0.2s; }
-        .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1); }
-        
-        .img-slot { width: 120px; height: 90px; background: #f8fafc; border-radius: 12px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
+        .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+        .sign-card { background: white; border-radius: 15px; padding: 12px; border: 1px solid #D7CCC8; display: flex; gap: 10px; cursor: pointer; position: relative; }
+        .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 5px 10px rgba(0,0,0,0.05); }
+        .img-slot { width: 100px; height: 75px; background: #f8fafc; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
-        
-        .qty-input { width: 60px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; outline: none; }
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; backdrop-filter: blur(5px); }
+        .qty-input { width: 50px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; outline: none; }
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
     </style>
 </head>
 <body>
@@ -42,18 +31,11 @@
     <div class="sticky-header">
         <div class="header-container">
             <span class="main-title">鈺通營造工安系統</span>
-            <div class="flex items-center gap-2">
-                <button onclick="exportJSON()" id="exportBtn" class="hidden text-[10px] bg-white/10 px-2 py-1 rounded border border-white/20">💾 導出</button>
-                <button onclick="importJSON()" id="importBtn" class="hidden text-[10px] bg-white/10 px-2 py-1 rounded border border-white/20">📂 導入</button>
-                <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn-small">🔒 管理員</button>
-            </div>
+            <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">🔒 管理員</button>
         </div>
         
-        <div class="grid grid-cols-2 gap-3 px-4 py-2 bg-white">
-            <div class="flex gap-1">
-                <select id="siteSelect" class="flex-1 bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
-                <button onclick="addNewSite()" class="bg-[#095744] text-white px-3 rounded-lg">+</button>
-            </div>
+        <div class="grid grid-cols-2 gap-2 px-4 py-2 bg-white border-b">
+            <select id="siteSelect" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
             <input type="text" id="staff" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200" placeholder="填單人員">
         </div>
         
@@ -62,16 +44,13 @@
 
     <div id="mainGrid" class="grid-container max-w-7xl mx-auto"></div>
 
-    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 border-t border-gray-100 z-50 flex flex-col gap-2">
-        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-orange-100 text-orange-800 py-2 rounded-xl font-bold border border-orange-200">＋ 新增自定義標語</button>
-        <div class="flex gap-3 max-w-4xl mx-auto w-full">
-            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-lg active:scale-95 transition-all">📋 生成採購單</button>
-            <button onclick="resetCart()" class="flex-1 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold">清空</button>
-        </div>
+    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 border-t border-gray-100 z-50 flex gap-3">
+        <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-lg">📋 生成採購單</button>
+        <button onclick="resetCart()" class="flex-1 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold">清空</button>
     </nav>
 
     <div id="modal" onclick="closeModal()">
-        <div class="bg-white w-full max-w-xl rounded-2xl p-6 overflow-y-auto max-h-[90vh]" onclick="event.stopPropagation()">
+        <div class="bg-white w-full max-w-xl rounded-2xl p-6" onclick="event.stopPropagation()">
             <div id="printArea"></div>
             <div class="grid grid-cols-2 gap-3 mt-6">
                 <button onclick="window.print()" class="bg-[#095744] text-white py-3 rounded-xl font-black">確認列印</button>
@@ -81,103 +60,94 @@
     </div>
 
 <script>
-let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels;
+let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels;
 const GITHUB_BASE = "https://yuhtong02.github.io/-/img/";
 
-const request = indexedDB.open("Yutong_System_V8", 1);
-request.onupgradeneeded = e => e.target.result.createObjectStore("images");
-request.onsuccess = e => { db = e.target.result; init(); };
-
 function init() {
-    // 強制刷新資料機制：如果沒看到新標語，系統會自動載入最新預設值
-    const forceUpdate = true; 
-
+    // 根據表格 image_03c0f1.png 強制載入最新分類資料
     sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門住宅", "嘉義民雄院區", "臺南林森圖書館"];
     
-    if(!localStorage.getItem('yt_db') || forceUpdate) {
-        activeDB = [
-            {id:'A01', cat:'A', n:'統包商辦公室', s:'60x40', m:'中空板'},
-            {id:'A02', cat:'A', n:'監造單位辦公室', s:'60x40', m:'中空板'},
-            {id:'A03', cat:'A', n:'管理單位辦公室', s:'60x40', m:'中空板'},
-            {id:'A04', cat:'A', n:'會議室', s:'60x40', m:'中空板'},
-            {id:'A05', cat:'A', n:'倉庫', s:'60x40', m:'中空板'},
-            {id:'A06', cat:'A', n:'建材展覽室', s:'60x40', m:'中空板'},
-            {id:'A07', cat:'A', n:'休息區', s:'60x40', m:'中空板'},
-            {id:'A08', cat:'A', n:'飲水機', s:'30x15', m:'中空板'},
-            {id:'A09', cat:'A', n:'急救箱', s:'20x20', m:'貼紙'},
-            {id:'A10', cat:'A', n:'男化妝室', s:'30x15', m:'中空板'},
-            {id:'A11', cat:'A', n:'女化妝室', s:'30x15', m:'中空板'},
-            {id:'A12', cat:'A', n:'小便斗', s:'10x20', m:'貼紙'},
-            {id:'B01', cat:'B', n:'進入工區請戴安全帽', s:'60x40', m:'中空板'},
-            {id:'B02', cat:'B', n:'背負式安全帶穿戴步驟', s:'90x120', m:'中空板'},
-            {id:'B03', cat:'B', n:'施工架相關規定', s:'90x120', m:'中空板'},
-            {id:'B04', cat:'B', n:'安全出口', s:'30x15', m:'壓克力'},
-            {id:'C01', cat:'C', n:'工程告示牌', s:'120x75', m:'鋁板'},
-            {id:'C02', cat:'C', n:'安衛告示牌', s:'120x75', m:'鋁板'},
-            {id:'C03', cat:'C', n:'工地/學校名稱', s:'客製', m:'中空板'},
-            {id:'C04', cat:'C', n:'各棟別名稱', s:'客製', m:'中空板'},
-            {id:'C05', cat:'C', n:'今日危害因素告示牌', s:'90x60', m:'白板'},
-            {id:'C06', cat:'C', n:'工地上梁典禮', s:'客製', m:'紅布條'},
-            {id:'D01', cat:'D', n:'非工作人員禁止進入', s:'60x40', m:'中空板'},
-            {id:'D02', cat:'D', n:'非施工必要禁止進入', s:'60x40', m:'中空板'},
-            {id:'D03', cat:'D', n:'開口危險小心墜落', s:'60x40', m:'中空板'},
-            {id:'D04', cat:'D', n:'升降梯開口危險', s:'60x40', m:'中空板'},
-            {id:'D05', cat:'D', n:'欄杆禁止跨越或攀爬', s:'60x40', m:'中空板'},
-            {id:'D06', cat:'D', n:'打開柵門作業請穿戴背負式安全帶', s:'60x40', m:'中空板'},
-            {id:'D07', cat:'D', n:'吊料電梯專用口', s:'60x40', m:'中空板'},
-            {id:'D08', cat:'D', n:'樓梯標示', s:'30x15', m:'中空板'},
-            {id:'D09', cat:'D', n:'樓層標示', s:'30x30', m:'中空板'},
-            {id:'E01', cat:'E', n:'有電危險請勿觸碰', s:'30x20', m:'中空板'},
-            {id:'E02', cat:'E', n:'高壓電勿近', s:'30x20', m:'中空板'},
-            {id:'F01', cat:'F', n:'汽車停放區', s:'60x40', m:'中空板'},
-            {id:'F02', cat:'F', n:'機車停放區', s:'60x40', m:'中空板'},
-            {id:'F03', cat:'F', n:'工區施工請勿停車', s:'60x40', m:'中空板'},
-            {id:'F04', cat:'F', n:'進入工區請緩慢行駛', s:'60x40', m:'中空板'},
-            {id:'G01', cat:'G', n:'一般垃圾', s:'30x30', m:'中空板'},
-            {id:'G02', cat:'G', n:'資源回收', s:'30x30', m:'中空板'},
-            {id:'G03', cat:'G', n:'廚餘', s:'30x30', m:'中空板'},
-            {id:'G04', cat:'G', n:'鐵鋁罐', s:'30x30', m:'中空板'},
-            {id:'G05', cat:'G', n:'玻璃類', s:'30x30', m:'中空板'},
-            {id:'G06', cat:'G', n:'塑膠類', s:'30x30', m:'中空板'},
-            {id:'G07', cat:'G', n:'紙容器', s:'30x30', m:'中空板'},
-            {id:'G08', cat:'G', n:'廚餘宣傳', s:'60x40', m:'中空板'},
-            {id:'G09', cat:'G', n:'營建廢棄物堆置區', s:'90x60', m:'中空板'},
-            {id:'G10', cat:'G', n:'物料暫置區', s:'90x60', m:'中空板'},
-            {id:'G11', cat:'G', n:'垃圾管道傾倒口', s:'60x40', m:'中空板'},
-            {id:'H01', cat:'H', n:'滅火器', s:'10x30', m:'貼紙'},
-            {id:'J01', cat:'J', n:'安全第一', s:'60x20', m:'中空板'},
-            {id:'J02', cat:'J', n:'嚴禁酒後進場', s:'60x40', m:'中空板'},
-            {id:'J03', cat:'J', n:'工具箱會議', s:'90x60', m:'中空板'},
-            {id:'J04', cat:'J', n:'工安公布宣導欄', s:'120x90', m:'白板'},
-            {id:'J05', cat:'J', n:'熱危害宣導', s:'60x90', m:'中空板'},
-            {id:'J06', cat:'J', n:'生活點滴', s:'客製', m:'相片'},
-            {id:'J07', cat:'J', n:'安全第一；品質至上', s:'120x30', m:'中空板'},
-            {id:'J08', cat:'J', n:'關懷標語', s:'60x40', m:'中空板'},
-            {id:'J09', cat:'J', n:'工安宣導', s:'60x40', m:'中空板'},
-            {id:'J10', cat:'J', n:'工安標語6S', s:'60x40', m:'中空板'},
-            {id:'J11', cat:'J', n:'存好心做好事說好話', s:'120x30', m:'中空板'},
-            {id:'K01', cat:'K', n:'守衛室', s:'60x40', m:'中空板'},
-            {id:'K02', cat:'K', n:'施工架嚴禁堆置物料', s:'60x40', m:'中空板'},
-            {id:'K03', cat:'K', n:'放置鋼筋材料', s:'60x40', m:'中空板'},
-            {id:'K04', cat:'K', n:'施工電梯', s:'60x40', m:'中空板'}
-        ];
-        guides = {
-            'S1': { t: '工區大門配置', d: '包含工程告示牌、守衛室及入門禁令', items: ['C01','C02','C03','K01','J02','B01'] },
-            'S2': { t: '基礎設施', d: '辦公室、會議室、倉庫、生活機能區', items: ['A01','A02','A03','A04','A05','A07','A10','A11'] },
-            'S3': { t: '施工安全', d: '危害告示、防護宣導、公告欄', items: ['C05','J04','B02','B03','J10','J09'] },
-            'S4': { t: '動線管制', d: '車道、停放區、人員通道、樓層導引', items: ['F01','F02','F04','D01','D08','D09'] },
-            'S5': { t: '機具電力', d: '電力警示、電梯口、開口防護', items: ['E01','E02','K04','D04','D07','D03'] },
-            'S6': { t: '環境清潔', d: '垃圾分類、資源回收、廢棄物區', items: ['G01','G02','G03','G08','G09','G10'] }
-        };
-        catLabels = {
-            'ALL':'全部標語', 'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.施工告示', 'D':'D.指引警告', 'E':'E.電力設備', 'F':'F.車輛管理', 'G':'G.環境衛生', 'H':'H.消防救護', 'J':'J.其他標語', 'K':'K.雜項清單'
-        };
-        saveData();
-    } else {
-        activeDB = JSON.parse(localStorage.getItem('yt_db'));
-        guides = JSON.parse(localStorage.getItem('yt_guides'));
-        catLabels = JSON.parse(localStorage.getItem('yt_cats'));
-    }
+    activeDB = [
+        // A類 生活設施
+        {id:'A01', cat:'A', n:'飲水機', s:'30x15', m:'中空板'},
+        {id:'A02', cat:'A', n:'急救箱', s:'20x20', m:'貼紙'},
+        {id:'A03', cat:'A', n:'勞工休息區', s:'120x60', m:'帆布'},
+        {id:'A03-1', cat:'A', n:'勞工休息區(黃底、一字一張)', s:'120x30', m:'中空板'},
+        {id:'A04', cat:'A', n:'小便斗', s:'10x20', m:'貼紙'},
+        {id:'A05', cat:'A', n:'男生化妝室', s:'30x15', m:'中空板'},
+        {id:'A06', cat:'A', n:'女生化妝室', s:'30x15', m:'中空板'},
+        {id:'A07', cat:'A', n:'勞工休息區', s:'60x40', m:'中空板'},
+        // B類 安全防護
+        {id:'B01', cat:'B', n:'進入工地請戴安全帽', s:'60x40', m:'中空板'},
+        {id:'B02', cat:'B', n:'打開柵門作業請穿戴背負式安全帶', s:'60x40', m:'中空板'},
+        {id:'B03', cat:'B', n:'背負式安全帶穿戴步驟', s:'90x120', m:'中空板'},
+        // C類 危險警示
+        {id:'C01', cat:'C', n:'有電危險請勿觸碰', s:'30x20', m:'中空板'},
+        {id:'C02', cat:'C', n:'高壓電勿近', s:'30x20', m:'中空板'},
+        {id:'C03', cat:'C', n:'開口危險小心墜落', s:'60x40', m:'中空板'},
+        {id:'C04', cat:'C', n:'垃圾管道傾倒口', s:'60x40', m:'中空板'},
+        {id:'C05', cat:'C', n:'吊料專用電梯口', s:'60x40', m:'中空板'},
+        // D類 禁止事項
+        {id:'D01', cat:'D', n:'工區施工請勿停車', s:'60x40', m:'中空板'},
+        {id:'D02', cat:'D', n:'非工作人員禁止進入', s:'60x40', m:'中空板'},
+        {id:'D03', cat:'D', n:'非施工必要禁止進入', s:'60x40', m:'中空板'},
+        {id:'D04', cat:'D', n:'欄杆禁止跨越或攀爬', s:'60x40', m:'中空板'},
+        {id:'D05', cat:'D', n:'施工架嚴禁堆置物料', s:'60x40', m:'中空板'},
+        {id:'D06', cat:'D', n:'施工架嚴禁放置鋼筋材料', s:'60x40', m:'中空板'},
+        {id:'D07', cat:'D', n:'施工架未完成禁止使用', s:'60x40', m:'中空板'},
+        // E類 交通與動線
+        {id:'E01', cat:'E', n:'汽車停放區', s:'60x40', m:'中空板'},
+        {id:'E02', cat:'E', n:'機車停放區', s:'60x40', m:'中空板'},
+        {id:'E03', cat:'E', n:'進入工區請緩慢行駛', s:'60x40', m:'中空板'},
+        // F類 設備/設施位置
+        {id:'F01', cat:'F', n:'滅火器', s:'10x30', m:'貼紙'},
+        {id:'F02', cat:'F', n:'安全出口', s:'30x15', m:'壓克力'},
+        {id:'F03', cat:'F', n:'施工電梯', s:'60x40', m:'中空板'},
+        {id:'F04', cat:'F', n:'吊料專用電梯口', s:'60x40', m:'中空板'},
+        // G類 作業規範
+        {id:'G01', cat:'G', n:'施工架安全上下設備最大使用人數限制3人', s:'60x40', m:'中空板'},
+        {id:'G02', cat:'G', n:'施工平台梯請依照規定使用', s:'60x40', m:'中空板'},
+        {id:'G03', cat:'G', n:'安全第一+工安旗(帆布)', s:'60x90', m:'帆布'},
+        {id:'G04', cat:'G', n:'安全第一+工安旗(中空板)', s:'60x90', m:'中空板'},
+        // H類 宣導標語
+        {id:'H01', cat:'H', n:'安全第一+工安旗(帆布)', s:'60x90', m:'帆布'},
+        {id:'H02', cat:'H', n:'安全第一；品質至上', s:'120x30', m:'中空板'},
+        {id:'H03', cat:'H', n:'安全做事不喝酒', s:'60x40', m:'中空板'},
+        {id:'H04', cat:'H', n:'熱危害預防措施5步驟', s:'60x90', m:'中空板'},
+        {id:'H05', cat:'H', n:'熱衰竭/熱中暑', s:'60x90', m:'中空板'},
+        {id:'H10', cat:'H', n:'今日危害因素告示牌', s:'90x60', m:'白板'},
+        {id:'H11', cat:'H', n:'生活點滴(黃底、一字一張)', s:'120x30', m:'中空板'},
+        // I類 物料與環境管理
+        {id:'I01', cat:'I', n:'物料暫置區', s:'90x60', m:'中空板'},
+        {id:'I02', cat:'I', n:'營建廢棄物堆置區', s:'90x60', m:'中空板'},
+        {id:'I03', cat:'I', n:'工安公佈欄', s:'120x90', m:'白板'},
+        {id:'I04', cat:'I', n:'一般垃圾', s:'30x30', m:'中空板'},
+        {id:'I05', cat:'I', n:'資源回收', s:'30x30', m:'中空板'},
+        {id:'I06', cat:'I', n:'廚餘', s:'30x30', m:'中空板'},
+        {id:'I07', cat:'I', n:'鐵鋁罐', s:'30x30', m:'中空板'},
+        {id:'I08', cat:'I', n:'玻璃類', s:'30x30', m:'中空板'},
+        {id:'I09', cat:'I', n:'塑膠類', s:'30x30', m:'中空板'},
+        {id:'I10', cat:'I', n:'紙容器', s:'30x30', m:'中空板'},
+        // J類 圖資與指引
+        {id:'J01', cat:'J', n:'樓層配置圖', s:'60x40', m:'中空板'},
+        {id:'J02', cat:'J', n:'營建廢棄物堆置區', s:'90x60', m:'中空板'},
+        {id:'J03', cat:'J', n:'工地平面配置圖', s:'120x90', m:'中空板'},
+        {id:'J04', cat:'J', n:'動線指引圖', s:'60x40', m:'中空板'},
+        {id:'J05', cat:'J', n:'緊急疏散路線圖', s:'60x40', m:'中空板'}
+    ];
+
+    guides = JSON.parse(localStorage.getItem('yt_guides')) || {
+        'S1': { t: '工區大門配置', d: '包含門口基本禁令與告示', items: ['B01','D02','E03'] },
+        'S2': { t: '基礎設施', d: '辦公室與生活機能區', items: ['A01','A05','A06','A03'] },
+        'S3': { t: '施工安全', d: '現場危害提醒與看板', items: ['H10','I03','B03'] },
+        'S4': { t: '動線管制', d: '人員與車輛導引', items: ['E01','E02','J04','F02'] },
+        'S5': { t: '機具電力', d: '用電防護與電梯口', items: ['C01','C02','F03','C05'] },
+        'S6': { t: '環境清潔', d: '資源回收與物料堆放', items: ['I04','I05','I01','I02'] }
+    };
+
+    catLabels = JSON.parse(localStorage.getItem('yt_cats')) || {
+        'ALL':'全部標語', 'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.危險警示', 'D':'D.禁止事項', 'E':'E.交通與動線', 'F':'F.設施位置', 'G':'G.作業規範', 'H':'H.宣導標語', 'I':'I.環境管理', 'J':'J.圖資與指引'
+    };
 
     renderTabs(); renderSiteSelect(); render();
 }
@@ -185,56 +155,55 @@ function init() {
 function renderTabs() {
     let html = '';
     // Step 標籤
-    Object.keys(guides).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach(k => {
-        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}.${guides[k].t}</div>`;
+    Object.keys(guides).sort().forEach(k => {
+        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="handleTabClick('GUIDE','${k}')">Step ${k.replace('S','')}.${guides[k].t}</div>`;
     });
-    // 全部標語
-    html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="setFilter('CAT','ALL')">${catLabels['ALL']}</div>`;
-    // A-K 標籤
+    // 分類標籤
+    html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部標語</div>`;
     Object.keys(catLabels).filter(k=>k!=='ALL').sort().forEach(k => {
-        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="setFilter('CAT','${k}')">${catLabels[k]}</div>`;
+        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="handleTabClick('CAT','${k}')">${catLabels[k]}</div>`;
     });
     document.getElementById('tabContainer').innerHTML = html;
 }
 
+function handleTabClick(m, k) {
+    if (isAdmin && k !== 'ALL') {
+        const currentTitle = m === 'GUIDE' ? guides[k].t : catLabels[k];
+        const newTitle = prompt("修改標題名稱：", currentTitle);
+        if (newTitle) {
+            if (m === 'GUIDE') guides[k].t = newTitle;
+            else catLabels[k] = (k.length === 1 ? k + "." : "") + newTitle;
+            saveData();
+            renderTabs();
+        }
+    }
+    currentMode = m; currentKey = k;
+    document.querySelectorAll('.cat-tab-step, .cat-tab-item').forEach(el => el.classList.remove('active'));
+    render();
+}
+
 async function render() {
     const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
-    
-    if(currentMode === 'GUIDE' && guides[currentKey]) {
-        const g = guides[currentKey];
-        grid.innerHTML = `<div class="guide-box"><div><h2 class="text-xl font-black mb-1">📌 ${g.t}</h2><p class="text-xs opacity-80">${g.d}</p></div></div>`;
-    }
-
     let display = (currentMode === 'CAT') ? 
         (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : 
         activeDB.filter(x => guides[currentKey].items.includes(x.id));
     
-    display.sort((a,b) => a.id.localeCompare(b.id));
+    display.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true, sensitivity: 'base'}));
 
     for (const i of display) {
         const c = cart[i.id] || { sel:false, qty:1 };
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
-        card.onclick = () => toggleItem(i.id);
+        card.onclick = () => { cart[i.id] = {sel: !c.sel, qty: c.qty}; render(); };
         
-        // 嘗試 JPG，失敗則嘗試 jpg
-        const imgPath = `${GITHUB_BASE}${i.id}.JPG`;
-
         card.innerHTML = `
-            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px] z-20 shadow">✕</button>` : ''}
-            <div class="img-slot"><img src="${imgPath}" onerror="this.onerror=null; this.src='${GITHUB_BASE}${i.id}.jpg'; this.parentElement.innerHTML='<div class=p-4 text-[10px] text-gray-400>無照片</div>'"></div>
+            <div class="img-slot"><img src="${GITHUB_BASE}${i.id}.JPG" onerror="this.src='${GITHUB_BASE}${i.id}.jpg'; this.onerror=null; this.parentElement.innerHTML='<div class=p-4 text-[10px]>無照片</div>'"></div>
             <div class="flex-1">
-                <div class="flex justify-between items-start">
-                    <div class="font-black text-[#095744] text-md leading-tight">${i.n}</div>
-                    <span class="text-[9px] font-bold text-gray-300 ml-1">${i.id}</span>
-                </div>
-                <div class="mt-2 text-[11px] text-gray-500">
-                    <div>規格：<span class="text-red-500 font-bold">${i.s}</span></div>
-                    <div>材質：<span class="text-blue-500 font-bold">${i.m||'中空板'}</span></div>
-                </div>
+                <div class="font-black text-[#095744] text-sm">${i.n}</div>
+                <div class="text-[10px] text-gray-500 mt-1">規格：<span class="text-red-500">${i.s}</span> / 材質：<span class="text-blue-500">${i.m}</span></div>
                 <div class="flex items-center justify-between mt-2" onclick="event.stopPropagation()">
-                    <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
-                    ${isAdmin ? `<select onchange="addIntoStep(this.value, '${i.id}')" class="text-[9px] bg-orange-50 border px-1 rounded"><option>+Step</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option><option value="S6">S6</option></select>` : ''}
+                    <input type="number" value="${c.qty}" oninput="cart['${i.id}'].qty=parseInt(this.value)||1" class="qty-input">
+                    <span class="text-[10px] text-gray-300 font-bold">${i.id}</span>
                 </div>
             </div>`;
         grid.appendChild(card);
@@ -242,42 +211,26 @@ async function render() {
 }
 
 function toggleAdmin() {
-    if(!isAdmin && prompt("請輸入管理密碼") !== "751113") return;
+    if(!isAdmin && prompt("管理密碼") !== "751113") return;
     isAdmin = !isAdmin;
-    document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理模式" : "🔒 管理員";
-    document.getElementById('addItemBtn').classList.toggle('hidden', !isAdmin);
-    document.getElementById('exportBtn').classList.toggle('hidden', !isAdmin);
-    document.getElementById('importBtn').classList.toggle('hidden', !isAdmin);
-    render();
+    document.getElementById('adminBtn').innerText = isAdmin ? "🔓 編輯中" : "🔒 管理員";
+    alert(isAdmin ? "管理員模式已開啟，現在點擊上方標籤可修改標題內容。" : "已退出管理模式");
 }
-
-function setFilter(m, k) { currentMode=m; currentKey=k; renderTabs(); render(); }
-function toggleItem(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; render(); }
-function updateQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qty=parseInt(v)||1; }
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
-function addNewSite() { const n = prompt("新增工地名稱:"); if(n) { sites.push(n); saveData(); renderSiteSelect(); } }
-function addIntoStep(gk, id) { if(!guides[gk].items.includes(id)) { guides[gk].items.push(id); saveData(); alert('已加入 Step '+gk.replace('S','')); }}
 function saveData() { localStorage.setItem('yt_db', JSON.stringify(activeDB)); localStorage.setItem('yt_sites', JSON.stringify(sites)); localStorage.setItem('yt_guides', JSON.stringify(guides)); localStorage.setItem('yt_cats', JSON.stringify(catLabels)); }
-function exportJSON() { const data = { activeDB, sites, guides, catLabels }; const blob = new Blob([JSON.stringify(data)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `鈺通標語備份.json`; a.click(); }
-function importJSON() { const input = document.createElement('input'); input.type = 'file'; input.onchange = e => { const reader = new FileReader(); reader.onload = e => { const data = JSON.parse(e.target.result); activeDB = data.activeDB; sites = data.sites; guides = data.guides; catLabels = data.catLabels; saveData(); location.reload(); }; reader.readAsText(e.target.files[0]); }; input.click(); }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function resetCart() { if(confirm("確定清空已選項目？")) { cart = {}; render(); } }
-
-async function buildReport() {
+function resetCart() { if(confirm("清空選取？")) { cart = {}; render(); } }
+function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel);
-    if(!sel.length) return alert("請先選取標語項目");
-    let h = `<div style="border:3px solid #095744; padding:20px; font-family:sans-serif;">
-        <h2 style="text-align:center; color:#095744;">鈺通營造工安標語採購單</h2>
-        <p>工地：${document.getElementById('siteSelect').value} / 填單人：${document.getElementById('staff').value}</p>
-        <hr style="border:1px solid #095744;">`;
-    for(let i of sel) {
-        h += `<div style="display:flex; align-items:center; gap:15px; border-bottom:1px solid #eee; padding:10px 0;">
-            <img src="${GITHUB_BASE + i.id + '.JPG'}" style="width:60px; height:45px; object-fit:contain;" onerror="this.src='${GITHUB_BASE + i.id + '.jpg'}'">
-            <div style="flex:1;"><b>[${i.id}] ${i.n}</b><br><small>${i.s} / ${i.m||'中空板'}</small></div>
-            <div style="font-size:20px; font-weight:900; color:#70B934;">x ${cart[i.id].qty}</div>
+    if(!sel.length) return alert("請先選取標語");
+    let h = `<h2 style="color:#095744; text-align:center;">鈺通營造標語採購單</h2><p>工地：${document.getElementById('siteSelect').value}</p><hr>`;
+    sel.forEach(i => {
+        h += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;">
+            <span><b>[${i.id}] ${i.n}</b><br><small>${i.s} / ${i.m}</small></span>
+            <span style="font-size:20px; font-weight:bold; color:#70B934;">x ${cart[i.id].qty}</span>
         </div>`;
-    }
-    document.getElementById('printArea').innerHTML = h + `</div>`;
+    });
+    document.getElementById('printArea').innerHTML = h;
     document.getElementById('modal').style.display = 'flex';
 }
 window.onload = init;
