@@ -12,14 +12,12 @@
         .main-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 0.15em; color: white; text-align: center; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: white; border-bottom: 5px solid var(--yt-dark); }
         
-        /* Step 標籤樣式 */
         .cat-tab-step { white-space: nowrap; padding: 10px 18px; border-radius: 14px; background: var(--yt-dark); color: white; font-size: 14px; font-weight: 900; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; border: 2px solid var(--yt-dark); }
         .cat-tab-step::before { content: "📌"; margin-right: 6px; }
         .cat-tab-step.active { background: var(--yt-light); border-color: var(--yt-light); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        /* A-K 分類樣式 */
         .cat-tab-item { white-space: nowrap; padding: 10px 20px; border-radius: 12px; background: white; color: #475569; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid #e2e8f0; flex-shrink: 0; }
-        .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); box-shadow: inset 0 0 0 1px var(--yt-dark); }
+        .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); font-weight: 900; }
         .cat-admin { border: 2px dashed #fb923c !important; }
 
         .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
@@ -36,11 +34,11 @@
 <body>
 
     <div class="sticky-header">
-        <div class="flex flex-col md:flex-row items-center justify-between px-6 py-4 bg-[#095744] text-white">
-            <span class="main-title mb-2 md:mb-0">鈺通營造工安標語系統</span>
+        <div class="flex items-center justify-between px-6 py-4 bg-[#095744] text-white">
+            <span class="main-title">鈺通營造工安標語系統</span>
             <div class="flex gap-2">
-                <button onclick="exportJSON()" id="exportBtn" class="hidden text-xs bg-white/10 px-3 py-2 rounded-lg border border-white/20">💾 備份檔案</button>
-                <button onclick="importJSON()" id="importBtn" class="hidden text-xs bg-white/10 px-3 py-2 rounded-lg border border-white/20">📂 導入資料</button>
+                <button onclick="exportJSON()" id="exportBtn" class="hidden text-xs bg-white/10 px-3 py-2 rounded-lg border border-white/20">💾 備份</button>
+                <button onclick="importJSON()" id="importBtn" class="hidden text-xs bg-white/10 px-3 py-2 rounded-lg border border-white/20">📂 導入</button>
                 <button onclick="toggleAdmin()" id="adminBtn" class="text-xs font-black bg-white text-[#095744] px-4 py-2 rounded-full">🔒 管理員</button>
             </div>
         </div>
@@ -48,7 +46,7 @@
         <div class="grid grid-cols-2 gap-4 px-6 py-3 bg-white border-b shadow-sm">
             <div class="flex gap-1">
                 <select id="siteSelect" class="flex-1 bg-gray-50 p-2.5 rounded-xl text-sm font-black border-2 border-gray-100 outline-none"></select>
-                <button onclick="addNewSite()" class="bg-[#095744] text-white px-4 rounded-xl font-bold hover:bg-black">+</button>
+                <button onclick="addNewSite()" class="bg-[#095744] text-white px-4 rounded-xl font-bold">+</button>
             </div>
             <input type="text" id="staff" class="bg-gray-50 p-2.5 rounded-xl text-sm font-black border-2 border-gray-100 outline-none" placeholder="填單人員">
         </div>
@@ -80,7 +78,7 @@
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels;
 const GITHUB_BASE = "https://yuhtong02.github.io/-/IMG/";
 
-const request = indexedDB.open("Yutong_SignSystem_FinalV1", 1);
+const request = indexedDB.open("Yutong_SignSystem_FixedV2", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
@@ -89,22 +87,18 @@ function init() {
     
     activeDB = JSON.parse(localStorage.getItem('yt_db')) || [
         {id:'A01', cat:'A', n:'工地大門告示牌', s:'60x90', m:'中空板'},
-        {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'},
-        {id:'C01', cat:'C', n:'工程告示牌', s:'120x75', m:'鋁板'},
-        {id:'E01', cat:'E', n:'高壓電危險', s:'30x40', m:'中空板'}
+        {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}
     ];
 
-    // 確保序號 S1~S6 唯一且有標題
     guides = JSON.parse(localStorage.getItem('yt_guides')) || {
-        'S1': { t: '大門配置', items: ['A01','B01'] },
-        'S2': { t: '基礎設施', items: [] },
-        'S3': { t: '施工安全', items: [] },
-        'S4': { t: '動線管制', items: [] },
-        'S5': { t: '機具電力', items: [] },
-        'S6': { t: '環境清潔', items: [] }
+        'S1': { t: 'Step 1.工區大門配置', items: ['A01','B01'] },
+        'S2': { t: 'Step 2.基礎設施名稱', items: [] },
+        'S3': { t: 'Step 3.施工安全名稱', items: [] },
+        'S4': { t: 'Step 4.動線管制名稱', items: [] },
+        'S5': { t: 'Step 5.機具電力名稱', items: [] },
+        'S6': { t: 'Step 6.環境清潔名稱', items: [] }
     };
 
-    // A~K 分類明確英文顯示
     catLabels = JSON.parse(localStorage.getItem('yt_cats')) || {
         'ALL':'全部標語', 
         'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.施工告示', 'D':'D.指引警告', 
@@ -117,25 +111,38 @@ function init() {
 
 function renderTabs() {
     let html = '';
-    // 渲染 Step 1~6 (排除重複)
+    // 1. 先排 Step 1~6 (左側固定)
     const sortedSteps = Object.keys(guides).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
     sortedSteps.forEach(k => {
-        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="${isAdmin ? `renameStep('${k}')` : `setFilter('GUIDE','${k}')`}">Step ${k.replace('S','')}.${guides[k].t}</div>`;
+        // 直接使用資料庫裡的標題，不再額外加 Step 字眼防止重複
+        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="${isAdmin ? `renameStep('${k}')` : `setFilter('GUIDE','${k}')`}">${guides[k].t}</div>`;
     });
 
-    // 渲染 A-K 分類
-    const sortedCats = Object.keys(catLabels).sort();
+    // 2. 「全部標語」一定要放在分類的第一個
+    html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="setFilter('CAT','ALL')">${catLabels['ALL']}</div>`;
+
+    // 3. 渲染 A-K 分類 (排除 ALL)
+    const sortedCats = Object.keys(catLabels).filter(k => k !== 'ALL').sort();
     sortedCats.forEach(k => {
-        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdmin?'cat-admin':''}" onclick="${isAdmin && k !== 'ALL' ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">${catLabels[k]}</div>`;
+        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdmin?'cat-admin':''}" onclick="${isAdmin ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">${catLabels[k]}</div>`;
     });
     document.getElementById('tabContainer').innerHTML = html;
 }
 
+function renameStep(k) { 
+    const n = prompt("修改 Step 標題 (建議保留 Step X. 前綴):", guides[k].t); 
+    if(n) { guides[k].t = n; saveData(); renderTabs(); } 
+}
+
+function renameCat(k) { 
+    const n = prompt("修改分類名稱 (建議保留 A. 前綴):", catLabels[k]); 
+    if(n) { catLabels[k] = n; saveData(); renderTabs(); } 
+}
+
+// 其餘功能邏輯保持不變
 async function render() {
     const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
     let display = (currentMode === 'CAT') ? (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : activeDB.filter(x => guides[currentKey].items.includes(x.id));
-    
-    // 排序
     display.sort((a,b) => a.id.localeCompare(b.id));
 
     for (const i of display) {
@@ -168,11 +175,6 @@ async function render() {
     }
 }
 
-// 修改功能
-function renameStep(k) { const n = prompt("修改 Step 名稱:", guides[k].t); if(n) { guides[k].t = n; saveData(); renderTabs(); } }
-function renameCat(k) { const n = prompt("修改分類名稱 (建議保留英文代號, 如 A.生活設施):", catLabels[k]); if(n) { catLabels[k] = n; saveData(); renderTabs(); } }
-
-// 遞補邏輯
 async function deleteItem(id) {
     if(!confirm(`刪除 [${id}]？後方編號將連動遞補`)) return;
     let prefix = id.charAt(0), startNum = parseInt(id.slice(1));
