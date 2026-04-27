@@ -3,207 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統</title>
+    <title>鈺通營造工安標語系統 V6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 200px; touch-action: manipulation; }
-        
-        /* 頁首與導覽樣式 */
-        .sticky-header { position: sticky; top: 0; z-index: 100; background: white; border-bottom: 3px solid var(--yt-dark); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .cat-tab-item, .cat-tab-step { white-space: nowrap; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; border: 2px solid transparent; }
-        .cat-tab-step { background: var(--yt-dark); color: white; }
-        .cat-tab-step.active { background: var(--yt-light); }
-        .cat-tab-item { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
-        .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); }
-
-        /* 標語卡片優化 */
-        .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-        .sign-card { background: white; border-radius: 16px; padding: 14px; border: 2px solid transparent; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; gap: 12px; cursor: pointer; position: relative; transition: all 0.1s; }
-        .sign-card:active { transform: scale(0.97); }
-        .sign-card.selected { border-color: var(--yt-light); background: #f0fdf4; box-shadow: 0 8px 15px rgba(112, 185, 52, 0.1); }
-        
-        .img-slot { width: 80px; height: 80px; background: #f8fafc; border-radius: 10px; overflow: hidden; border: 1px solid #eee; }
+        :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; --yt-card-border: #D7CCC8; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 200px; color: #1e293b; }
+        .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 4px solid var(--yt-dark); }
+        .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 12px; background: white; -webkit-overflow-scrolling: touch; }
+        .cat-tab { white-space: nowrap; padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: 900; cursor: pointer; border: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
+        .cat-tab.step { background-color: var(--yt-dark); color: white; border-color: var(--yt-dark); }
+        .cat-tab.active { background-color: var(--yt-light); border-color: var(--yt-light); color: white; }
+        .sign-card { background: white; border-radius: 16px; padding: 15px; border: 1px solid var(--yt-card-border); display: flex; gap: 12px; cursor: pointer; position: relative; transition: all 0.2s; }
+        .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; transform: scale(1.02); }
+        .admin-edit { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 4px; width: 100%; font-size: 13px; color: #9a3412; font-weight: bold; }
+        .img-slot { width: 115px; height: 95px; background: #f1f5f9; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
-        .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-dark); border-bottom: 2px solid var(--yt-light); outline: none; background: transparent; }
-
-        /* 彈出視窗 Modal 樣式 */
-        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
-        #modalContent { background: white; width: 100%; max-width: 480px; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; border: 1px solid #ddd; }
-        .modal-body { flex: 1; overflow-y: auto; padding: 20px; background: white; }
-        .modal-footer { padding: 16px; background: #f1f5f9; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #e2e8f0; }
-        
-        /* 按鈕配色優化 */
-        .btn-print { background: #095744; color: white; padding: 14px; border-radius: 14px; font-weight: 900; text-align: center; box-shadow: 0 4px 0 #053a2d; }
-        .btn-print:active { transform: translateY(2px); box-shadow: 0 2px 0 #053a2d; }
-        .btn-image { background: #F39800; color: white; padding: 14px; border-radius: 14px; font-weight: 900; text-align: center; box-shadow: 0 4px 0 #c77c00; }
-        .btn-image:active { transform: translateY(2px); box-shadow: 0 2px 0 #c77c00; }
-        .btn-close { background: #cbd5e1; color: #334155; padding: 12px; border-radius: 14px; font-weight: bold; text-align: center; margin-top: 5px; }
-
-        .report-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px dashed #ccc; }
-        
-        @media print { 
-            .no-print { display: none !important; } 
-            #modalOverlay { position: absolute; background: white; padding: 0; display: block; } 
-            #modalContent { border: none; max-height: none; width: 100%; }
-        }
+        .qty-input { width: 55px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; }
+        .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #eee; z-index: 2000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; }
+        .print-paper { background: white; width: 100%; max-width: 600px; border-radius: 20px; padding: 20px; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
 
     <div class="sticky-header no-print">
-        <div class="bg-[#095744] p-4 flex justify-between items-center text-white">
-            <span class="text-xl font-black tracking-widest">鈺通營造工安系統</span>
-            <button onclick="toggleAdmin()" id="adminBtn" class="bg-white text-[#095744] px-4 py-1 rounded-full text-xs font-black">🔒 管理員</button>
+        <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-xl font-black text-[#095744]">鈺通營造工安標語</span>
+            <button onclick="toggleAdmin()" id="adminBtn" class="text-[10px] font-black bg-white text-[#095744] px-3 py-1.5 rounded-full border border-[#095744]/30">🔒 管理員</button>
         </div>
-        <div class="grid grid-cols-2 gap-2 p-3 bg-white border-b">
-            <select id="siteSelect" class="bg-gray-50 p-2 rounded-xl text-sm font-bold border h-11 focus:ring-2 focus:ring-[#095744] outline-none"></select>
-            <input type="text" id="staff" class="bg-gray-50 p-2 rounded-xl text-sm font-bold border h-11 outline-none" placeholder="填單人員">
-        </div>
-        <div class="flex overflow-x-auto gap-2 p-3 bg-white scrollbar-hide" id="tabContainer"></div>
-    </div>
-
-    <div id="mainGrid" class="grid-container max-w-7xl mx-auto no-print"></div>
-
-    <div id="modalOverlay">
-        <div id="modalContent">
-            <div class="modal-body" id="reportArea">
-                </div>
-            <div class="modal-footer no-print">
-                <button onclick="window.print()" class="btn-print">1. 直接列印 (電腦端使用)</button>
-                <button onclick="captureImage()" class="btn-image">2. 轉為圖片 (手機長按儲存)</button>
-                <button onclick="closeModal()" class="btn-close">返回系統</button>
+        
+        <div class="grid grid-cols-2 gap-2 px-4 pb-3">
+            <div class="relative">
+                <select id="siteSelect" class="w-full bg-white p-2 rounded-xl text-xs font-black border appearance-none" onchange="save()"></select>
+                <button id="addSiteBtn" onclick="addNewSite()" class="hidden absolute -right-2 -top-2 bg-blue-500 text-white w-5 h-5 rounded-full text-[10px]">+</button>
             </div>
+            <input type="text" id="staff" class="bg-white p-2 rounded-xl text-xs font-black border" placeholder="填單人員" oninput="save()">
         </div>
+
+        <div class="category-scroller" id="tabContainer"></div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-[500] flex flex-col gap-2 no-print shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-        <div class="flex gap-3">
-            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-xl active:scale-95 transition-all">📋 生成採購單</button>
-            <button onclick="resetCart()" class="flex-1 bg-gray-100 text-gray-400 rounded-2xl text-sm font-bold">清空</button>
+    <div class="p-4 grid gap-4 max-w-5xl mx-auto" id="mainGrid"></div>
+
+    <nav class="footer-nav no-print">
+        <div id="adminPanel" class="hidden flex justify-center gap-2 mb-3">
+            <button onclick="exportData()" class="bg-blue-500 text-white px-3 py-1 rounded text-[10px] font-bold">📤 備份設定</button>
+            <button onclick="importData()" class="bg-purple-500 text-white px-3 py-1 rounded text-[10px] font-bold">📥 還原設定</button>
+            <button onclick="deleteSite()" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">🗑️ 刪除目前工地</button>
+        </div>
+        <div class="flex w-full max-w-3xl gap-3 mx-auto">
+            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition-transform">📋 生成採購單</button>
+            <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-400 rounded-2xl text-[10px] font-bold">重選</button>
+            <button onclick="hardReset()" class="flex-1 bg-slate-100 text-slate-400 rounded-2xl text-[10px] font-bold">清空</button>
         </div>
     </nav>
 
-<script>
-let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels;
-const IMG_PATH = "img/"; 
+    <div id="modal" class="no-print">
+        <div class="print-paper">
+            <div id="printArea"></div>
+            <div class="grid grid-cols-1 gap-3 mt-6">
+                <button onclick="window.print()" class="bg-[#095744] text-white py-4 rounded-xl font-black">1. 直接列印 / PDF</button>
+                <button onclick="captureToImage()" class="bg-amber-500 text-white py-4 rounded-xl font-black">2. 轉為圖片 (長按儲存)</button>
+                <button onclick="closeModal()" class="bg-slate-200 text-slate-500 py-3 rounded-xl font-bold">返回編輯</button>
+            </div>
+        </div>
+    </div>
 
-const defaultDB = [
-    {id:'A01', cat:'A', n:'辦公室 (監造/管理/統包商)', s:'60x20', m:'中空板', steps:['S2']},
-    {id:'B01', cat:'B', n:'工程告示牌', s:'120x90', m:'中空板', steps:['S1']},
-    {id:'C01', cat:'C', n:'有電危險請勿觸碰', s:'30x20', m:'中空板', steps:['S5']},
-    {id:'E03', cat:'E', n:'進入工區請緩慢行駛', s:'60x40', m:'中空板', steps:['S1']}
+<script>
+const GITHUB_BASE = "https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/";
+const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
+
+// 1~6 步驟定義 (加入圖釘)
+const STEP_DATA = {
+    'S1': { t:'📌 Step 1 入口配置', items:['A01','A02','B01','B04','D01','E01','E04','K01'] },
+    'S2': { t:'📌 Step 2 基礎設施', items:['A03','A04','A05','A06','A07','A09','A10','A11','A12','I01','I02'] },
+    'S3': { t:'📌 Step 3 安全警示', items:['B02','B03','C01','C03','D02','D04'] },
+    'S4': { t:'📌 Step 4 動線指引', items:['E02','E03','E05','J01','J02','K05'] },
+    'S5': { t:'📌 Step 5 宣導管理', items:['B05','G01','G02','H01','H04','H06','H07'] },
+    'S6': { t:'📌 Step 6 竣工收尾', items:['K02','K03','K04','A08'] }
+};
+
+const CATEGORIES = {'ALL':'全部','A':'生活設施','B':'安全防護','C':'警示','D':'禁止','E':'交通','F':'設備','G':'規範','H':'宣導','I':'環境','J':'圖資','K':'其他'};
+
+const RAW_SIGNS = [
+    {id:'A01', cat:'A', n:'守衛室', s:'30x10'}, {id:'A02', cat:'A', n:'工具箱會議', s:'60x40'}, {id:'A03', cat:'A', n:'統包商辦公室', s:'30x10'}, {id:'A04', cat:'A', n:'監造單位辦公室', s:'30x10'}, {id:'A05', cat:'A', n:'管理單位辦公室', s:'30x10'}, {id:'A06', cat:'A', n:'會議室', s:'30x10'}, {id:'A07', cat:'A', n:'倉庫', s:'30x10'}, {id:'A08', cat:'A', n:'建材展覽室', s:'30x10'}, {id:'A09', cat:'A', n:'男化妝室', s:'20x10'}, {id:'A10', cat:'A', n:'女化妝室', s:'20x10'}, {id:'A11', cat:'A', n:'休息區', s:'30x10'}, {id:'A12', cat:'A', n:'飲水機', s:'15x5'},
+    {id:'B01', cat:'B', n:'工程告示牌', s:'120x90'}, {id:'B02', cat:'B', n:'安全第一', s:'60x40'}, {id:'B03', cat:'B', n:'安衛告示牌', s:'90x90'}, {id:'B04', cat:'B', n:'進入工區戴安全帽', s:'60x40'}, {id:'B05', cat:'B', n:'今日危害因素', s:'90x60'},
+    {id:'C01', cat:'C', n:'有電危險', s:'30x20'}, {id:'C03', cat:'C', n:'開口危險小心墜落', s:'60x40'}, 
+    {id:'D01', cat:'D', n:'嚴禁酒後進場', s:'60x40'}, {id:'D02', cat:'D', n:'非工作人員禁入', s:'60x40'}, {id:'D04', cat:'D', n:'欄杆禁止跨越', s:'60x40'},
+    {id:'E01', cat:'E', n:'施工請勿停車', s:'60x40'}, {id:'E02', cat:'E', n:'汽車停放區', s:'60x40'}, {id:'E03', cat:'E', n:'機車停放區', s:'60x40'}, {id:'E04', cat:'E', n:'緩慢行駛', s:'60x40'}, {id:'E05', cat:'E', n:'施工電梯', s:'30x10'},
+    {id:'G01', cat:'G', n:'安全帶穿戴步驟', s:'90x120'}, {id:'G02', cat:'G', n:'施工架相關規定', s:'60x90'},
+    {id:'H01', cat:'H', n:'工安公布宣導', s:'120x90'}, {id:'H04', cat:'H', n:'安全第一品質至上', s:'120x30'}, {id:'H06', cat:'H', n:'工安宣導', s:'60x40'}, {id:'H07', cat:'H', n:'工安標語6S', s:'60x40'},
+    {id:'I01', cat:'I', n:'一般垃圾', s:'30x40'}, {id:'I02', cat:'I', n:'資源回收', s:'30x40'},
+    {id:'J01', cat:'J', n:'樓梯標示', s:'20x10'}, {id:'J02', cat:'J', n:'樓層標示', s:'20x20'},
+    {id:'K01', cat:'K', n:'工地名稱', s:'客製'}, {id:'K02', cat:'K', n:'上梁典禮', s:'客製'}, {id:'K03', cat:'K', n:'急救箱', s:'20x20'}, {id:'K04', cat:'K', n:'滅火器', s:'10x30'}, {id:'K05', cat:'K', n:'安全出口', s:'30x10'}
 ];
 
+let activeDB, cart = {}, sites = [], isAdmin = false, currentFilter = 'ALL';
+
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db')) || defaultDB;
-    guides = JSON.parse(localStorage.getItem('yt_guides')) || {'S1':{t:'工地入口'},'S2':{t:'辦公區域'},'S3':{t:'安全宣導'},'S4':{t:'動線管理'},'S5':{t:'施工現場'},'S6':{t:'環境管理'}};
-    catLabels = JSON.parse(localStorage.getItem('yt_cats')) || {'ALL':'全部標語','A':'A.生活辦公','B':'B.安全告示','C':'C.危險警示','D':'D.禁止事項','E':'E.交通動線','F':'F.消防設施','G':'G.環境管理','H':'H.精神宣導','J':'J.圖資名稱'};
-    sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世基金會", "嘉義嘉科實中", "嘉義北門住宅", "嘉義博愛安居", "嘉義民雄院區", "臺南林森圖書館"];
-    renderTabs(); renderSiteSelect(); render();
+    activeDB = JSON.parse(localStorage.getItem('yt_db')) || RAW_SIGNS;
+    cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
+    sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
+    
+    document.getElementById('staff').value = localStorage.getItem('yt_staff') || '';
+    renderSites();
+    renderTabs();
+    render();
 }
+
+function renderSites() {
+    const sel = document.getElementById('siteSelect');
+    sel.innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('');
+    sel.value = localStorage.getItem('yt_current_site') || sites[0];
+}
+
+function addNewSite() {
+    const name = prompt("請輸入新工地名稱：");
+    if (name) {
+        sites.push(name);
+        localStorage.setItem('yt_sites', JSON.stringify(sites));
+        renderSites();
+        document.getElementById('siteSelect').value = name;
+        save();
+    }
+}
+
+function deleteSite() {
+    const current = document.getElementById('siteSelect').value;
+    if (confirm(`確定要刪除「${current}」嗎？`)) {
+        sites = sites.filter(s => s !== current);
+        localStorage.setItem('yt_sites', JSON.stringify(sites));
+        renderSites();
+        save();
+    }
+}
+
+function renderTabs() {
+    let h = '';
+    // Steps (📌)
+    Object.keys(STEP_DATA).forEach(k => {
+        h += `<div class="cat-tab step ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${STEP_DATA[k].t}</div>`;
+    });
+    h += `<div class="w-[2px] bg-gray-200 mx-1 flex-shrink-0"></div>`;
+    // Categories
+    Object.keys(CATEGORIES).forEach(k => {
+        h += `<div class="cat-tab ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${CATEGORIES[k]}</div>`;
+    });
+    document.getElementById('tabContainer').innerHTML = h;
+}
+
+function setFilter(f) { currentFilter = f; renderTabs(); render(); }
 
 function render() {
     const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
-    let display = (currentMode === 'CAT') ? (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : activeDB.filter(x => x.steps && x.steps.includes(currentKey));
-    display.forEach(i => {
-        const c = cart[i.id] || { sel:false, qty:1 };
+    let list = [];
+    if (STEP_DATA[currentFilter]) {
+        list = activeDB.filter(x => STEP_DATA[currentFilter].items.includes(x.id));
+    } else if (currentFilter === 'ALL') {
+        list = activeDB;
+    } else {
+        list = activeDB.filter(x => x.cat === currentFilter);
+    }
+
+    list.forEach(item => {
+        const state = cart[item.id] || { sel: false, qty: 1 };
         const card = document.createElement('div');
-        card.className = `sign-card ${c.sel ? 'selected' : ''}`;
-        card.onclick = (e) => { if(e.target.tagName !== 'INPUT') { cart[i.id] = { sel: !c.sel, qty: c.qty }; render(); } };
+        card.className = `sign-card ${state.sel ? 'selected' : ''}`;
+        card.onclick = () => toggleItem(item.id);
+        
         card.innerHTML = `
-            <div class="img-slot"><img src="${IMG_PATH}${i.id}.png" onerror="this.src='${IMG_PATH}${i.id}.jpg'; this.onerror=null; this.parentElement.innerHTML='<div class=p-5 text-[10px] text-gray-300>待補圖</div>'"></div>
-            <div class="flex-1">
-                <div class="font-black text-[#095744] text-[15px] leading-tight">${i.n}</div>
-                <div class="text-[11px] text-gray-500 mt-1">規格：<span class="text-red-500">${i.s}</span> / ${i.m}</div>
+            <div class="img-slot">
+                <img src="${GITHUB_BASE + item.id + '.jpg'}" 
+                     onerror="handleImgErr(this)">
             </div>
-            <div class="absolute bottom-3 right-3 flex flex-col items-end" onclick="event.stopPropagation()">
-                <input type="number" value="${c.qty}" oninput="updateQty('${i.id}', this.value)" class="qty-input">
-                <span class="text-[9px] text-gray-300 font-bold mt-1">${i.id}</span>
-            </div>`;
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        ${isAdmin ? 
+                            `<input class="admin-edit" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : 
+                            `<div class="font-black text-[#095744] text-sm">${item.n}</div>`
+                        }
+                        <div class="text-[11px] text-red-600 font-bold mt-1">
+                            規格：${isAdmin ? 
+                                `<input class="admin-edit" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : 
+                                item.s
+                            }
+                        </div>
+                    </div>
+                    <span class="text-[8px] bg-gray-100 px-1 rounded text-gray-400 font-mono">#${item.id}</span>
+                </div>
+                <div class="flex items-center gap-3 mt-2" onclick="event.stopPropagation()">
+                    <span class="text-[10px] font-bold text-gray-400">數量</span>
+                    <input type="number" value="${state.qty}" oninput="updateQty('${item.id}',this.value)" class="qty-input">
+                </div>
+            </div>
+        `;
         grid.appendChild(card);
     });
 }
 
-function updateQty(id, val) { 
-    let q = parseInt(val) || 1;
-    if(!cart[id]) cart[id] = { sel: true, qty: q }; else cart[id].qty = q; 
+function handleImgErr(img) {
+    if (img.src.includes('.jpg')) {
+        img.src = img.src.replace('.jpg', '.JPG');
+    } else {
+        img.onerror = null;
+        img.src = 'https://via.placeholder.com/150?text=圖片待傳';
+    }
 }
 
-function buildReport() {
-    const selIDs = Object.keys(cart).filter(id => cart[id].sel);
-    if(!selIDs.length) return alert("請先點選標語進行選取！");
+function toggleItem(id) {
+    if (!cart[id]) cart[id] = { sel: false, qty: 1 };
+    cart[id].sel = !cart[id].sel;
+    save(); render();
+}
+
+function updateQty(id, v) {
+    if (!cart[id]) cart[id] = { sel: true, qty: 1 };
+    cart[id].qty = parseInt(v) || 1;
+    save();
+}
+
+function updateDB(id, field, val) {
+    const i = activeDB.find(x => x.id === id);
+    if (i) i[field] = val;
+    save();
+}
+
+function save() {
+    localStorage.setItem('yt_db', JSON.stringify(activeDB));
+    localStorage.setItem('yt_cart', JSON.stringify(cart));
+    localStorage.setItem('yt_staff', document.getElementById('staff').value);
+    localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value);
+}
+
+function toggleAdmin() {
+    if (!isAdmin) {
+        if (prompt("輸入管理密碼") === "751113") {
+            isAdmin = true;
+            document.getElementById('adminBtn').innerText = "🔓 管理中";
+            document.getElementById('adminPanel').classList.remove('hidden');
+            document.getElementById('addSiteBtn').classList.remove('hidden');
+        }
+    } else {
+        isAdmin = false;
+        document.getElementById('adminBtn').innerText = "🔒 管理員";
+        document.getElementById('adminPanel').classList.add('hidden');
+        document.getElementById('addSiteBtn').classList.add('hidden');
+    }
+    render();
+}
+
+function exportData() {
+    const backup = { db: activeDB, sites: sites };
+    const blob = new Blob([JSON.stringify(backup)], {type: 'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `鈺通系統備份_${new Date().toLocaleDateString()}.txt`;
+    a.click();
+}
+
+function importData() {
+    const input = prompt("請貼上備份代碼");
+    if (input) {
+        try {
+            const data = JSON.parse(input);
+            activeDB = data.db;
+            sites = data.sites;
+            localStorage.setItem('yt_db', JSON.stringify(activeDB));
+            localStorage.setItem('yt_sites', JSON.stringify(sites));
+            location.reload();
+        } catch(e) { alert("格式錯誤"); }
+    }
+}
+
+function resetCart() { if(confirm("取消目前選取的項目？")) { cart = {}; save(); render(); } }
+function hardReset() { if(confirm("確定要清空所有修改並重設系統？")) { localStorage.clear(); location.reload(); } }
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+async function buildReport() {
+    const sel = activeDB.filter(i => cart[i.id]?.sel);
+    if (!sel.length) return alert("請先選取標語");
     
-    const site = document.getElementById('siteSelect').value;
-    const staff = document.getElementById('staff').value || "現場人員";
-    const date = new Date().toLocaleDateString('zh-TW');
-    
-    let h = `
-        <div id="captureTarget" style="background:white; padding:15px; border: 1px solid #eee; border-radius:10px;">
-            <div style="border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:15px; text-align:center;">
-                <h2 style="margin:0; font-size:22px; font-weight:900; color:#095744;">鈺通營造工安標語採購單</h2>
-                <div style="font-size:12px; margin-top:8px; font-weight:bold;">工地：${site}</div>
-                <div style="font-size:11px; color:#666; margin-top:4px;">填單人：${staff} ｜ 日期：${date}</div>
+    let h = `<div id="captureTarget" style="padding:20px; background:white; border:2px solid #095744;">
+        <div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:10px; margin-bottom:15px;">
+            <h1 style="font-size:24px; color:#095744; font-weight:900;">鈺通營造 標語採購單</h1>
+            <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold; font-size:14px;">
+                <span>工地：${document.getElementById('siteSelect').value}</span>
+                <span>填單人：${document.getElementById('staff').value}</span>
             </div>
-            <div>`;
+        </div>
+        <table style="width:100%; border-collapse:collapse;">`;
     
-    selIDs.forEach(id => {
-        const item = activeDB.find(x => x.id === id);
-        h += `
-            <div class="report-item">
-                <img src="${IMG_PATH}${item.id}.png" style="width:55px; height:55px; object-fit:contain;" onerror="this.src='${IMG_PATH}${item.id}.jpg'; this.onerror=null;">
-                <div style="flex:1;">
-                    <div style="font-weight:bold; font-size:15px; color:#095744;">${item.n}</div>
-                    <div style="font-size:11px; color: #666;">規格：${item.s} ｜ 編號：${item.id}</div>
-                </div>
-                <div style="font-size:22px; font-weight:900; color:#F39800; min-width:40px; text-align:right;">${cart[id].qty}</div>
-            </div>`;
+    sel.forEach(i => {
+        h += `<tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px; width:100px;"><img src="${GITHUB_BASE+i.id+'.jpg'}" style="width:90px;" onerror="handleImgErr(this)"></td>
+            <td style="padding:10px; font-size:14px;">
+                <b>${i.n}</b><br><span style="color:red; font-size:12px; font-weight:bold;">規格：${i.s}</span><br><small style="color:#999">編號：#${i.id}</small>
+            </td>
+            <td style="padding:10px; text-align:right; font-size:24px; font-weight:900; color:#095744;">${cart[i.id].qty}</td>
+        </tr>`;
     });
     
-    h += `</div></div>`;
-    document.getElementById('reportArea').innerHTML = h;
-    document.getElementById('modalOverlay').style.display = 'flex';
+    h += `</table></div>`;
+    document.getElementById('printArea').innerHTML = h;
+    document.getElementById('modal').style.display = 'flex';
 }
 
-// 轉為圖片功能 (支援手機長按)
-async function captureImage() {
-    const target = document.getElementById('captureTarget');
-    // 使用 scale: 3 提升圖片清晰度，適合手機儲存
-    const canvas = await html2canvas(target, { useCORS: true, scale: 3, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
-    
-    const viewer = document.createElement('div');
-    viewer.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
-    viewer.innerHTML = `
-        <div style="color:white; margin-bottom:15px; font-weight:bold; font-size:16px;">📸 下方為圖片檔案：</div>
-        <img src="${imgData}" style="max-width:100%; max-height:70%; border-radius:10px; box-shadow:0 0 30px rgba(0,0,0,0.5);">
-        <div style="color:#70B934; margin-top:15px; font-weight:black; font-size:18px;">💡 請「長按圖片」選擇儲存或分享</div>
-        <button onclick="this.parentElement.remove()" style="margin-top:25px; background:white; color:#333; padding:12px 40px; border-radius:15px; font-weight:bold;">關閉預覽</button>
-    `;
-    document.body.appendChild(viewer);
+function captureToImage() {
+    html2canvas(document.getElementById('captureTarget'), { useCORS: true, scale: 2 }).then(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">圖片已生成！長按圖片儲存後即可分享 LINE。</p><img src="${imgData}" style="width:100%; border:1px solid #ddd; border-radius:10px;">`;
+    });
 }
 
-function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
-function renderTabs() { 
-    let html = ''; 
-    Object.keys(guides).sort().forEach(k => { 
-        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="handleTabClick('GUIDE','${k}')">Step ${k.replace('S','')}.${guides[k].t}</div>`; 
-    }); 
-    html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部標語</div>`; 
-    Object.keys(catLabels).filter(k=>k!=='ALL').sort().forEach(k => { 
-        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="handleTabClick('CAT','${k}')">${catLabels[k]}</div>`; 
-    }); 
-    document.getElementById('tabContainer').innerHTML = html; 
-}
-function handleTabClick(m, k) { currentMode = m; currentKey = k; render(); renderTabs(); }
-function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
-function resetCart() { if(confirm("確定要清空目前的選取嗎？")) { cart = {}; render(); } }
-function toggleAdmin() { if(!isAdmin && prompt("請輸入管理員密碼")!=="751113") return; isAdmin = !isAdmin; document.getElementById('adminBtn').innerText = isAdmin?"🔓 結束管理":"🔒 管理員"; render(); }
-function editSites() { const res = prompt("修改工地選單 (請用逗號隔開):", sites.join(',')); if(res){ sites=res.split(',').map(s=>s.trim()); saveData(); renderSiteSelect(); } }
-function saveData() { localStorage.setItem('yt_sites', JSON.stringify(sites)); }
-window.onload = init;
+init();
 </script>
 </body>
 </html>
