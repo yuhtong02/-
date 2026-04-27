@@ -3,149 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造標語系統 - 專業修正版</title>
+    <title>鈺通營造工安系統 - 最終版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 120px; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 150px; }
         
-        /* 改善 1：工地名稱與填單人布局優化 (不再擠壓) */
-        .header-controls { 
-            display: flex; 
-            gap: 12px; 
-            padding: 12px; 
-            background: white; 
-            border-bottom: 2px solid var(--yt-dark);
-            overflow-x: auto;
-            align-items: center;
+        /* 改善：工地名稱強制不縮水，支援橫向捲動 */
+        .controls-header { 
+            display: flex; gap: 10px; padding: 12px; background: white; 
+            border-bottom: 3px solid var(--yt-dark); overflow-x: auto; align-items: center;
         }
         #siteSelect { 
-            min-width: 180px; /* 固定最小寬度 */
-            flex-shrink: 0; 
-            padding: 10px;
-            border: 2px solid var(--yt-dark);
-            border-radius: 12px;
-            font-weight: 900;
-            color: var(--yt-dark);
+            min-width: 200px; flex-shrink: 0; padding: 10px; 
+            border: 2px solid var(--yt-dark); border-radius: 12px; font-weight: 900; 
         }
         #staff { 
-            min-width: 100px; 
-            flex-shrink: 0;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
+            min-width: 120px; flex-shrink: 0; padding: 10px; 
+            border: 2px solid #ddd; border-radius: 12px; 
         }
 
-        /* 改善 2：分類標籤自適應 */
-        .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 12px; background: #fff; }
-        .cat-tab { 
-            white-space: nowrap; 
-            padding: 8px 16px; 
-            border-radius: 50px; 
-            border: 1px solid #e2e8f0; 
-            font-size: 13px;
-            font-weight: bold;
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .cat-tab.active { background: var(--yt-dark); color: white; border-color: var(--yt-dark); transform: scale(1.05); }
+        /* 改善：分類按鈕 */
+        .cat-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 10px; background: #fff; }
+        .cat-btn { white-space: nowrap; padding: 8px 18px; border-radius: 50px; background: #f1f5f9; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .cat-btn.active { background: var(--yt-dark); color: white; transform: scale(1.05); }
 
-        /* 改善 3：標語卡片佈局強化 */
-        .grid-container { display: grid; gap: 16px; padding: 16px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+        /* 改善：卡片佈局與 ID 顯示 */
+        .grid-container { display: grid; gap: 16px; padding: 16px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
         .sign-card { 
-            background: white; 
-            border-radius: 20px; 
-            padding: 16px; 
-            border: 1.5px solid #eee; 
-            display: flex; 
-            gap: 15px; 
-            position: relative;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            background: white; border-radius: 20px; padding: 16px; border: 2px solid #eee; 
+            display: flex; gap: 15px; position: relative; transition: all 0.2s;
         }
-        .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; }
+        .sign-card.selected { border-color: var(--yt-light); background: #f0fdf4; box-shadow: 0 4px 15px rgba(112, 185, 52, 0.1); }
         
-        .img-box { 
-            width: 130px; height: 95px; 
-            background: #f1f5f9; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            flex-shrink: 0; 
-            border: 1px solid #f1f1f1;
-        }
+        .img-box { width: 130px; height: 95px; background: #f8fafc; border-radius: 12px; overflow: hidden; flex-shrink: 0; border: 1px solid #f1f1f1; }
         .img-box img { width: 100%; height: 100%; object-fit: contain; }
         
-        .qty-input { width: 60px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #eee; background: transparent; }
+        .qty-input { width: 65px; text-align: center; font-size: 26px; font-weight: 900; color: var(--yt-light); border-bottom: 3px solid #eee; background: transparent; }
         
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 15px; }
-        .admin-edit-input { font-size: 12px; border: 1px dashed orange; padding: 2px; width: 100%; margin-top: 2px; }
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="sticky top-0 z-50 shadow-md">
-        <div class="bg-[#095744] text-white px-4 py-3 flex justify-between items-center">
-            <h1 class="font-black tracking-tighter text-xl">鈺通營造工安系統</h1>
-            <button onclick="toggleAdmin()" id="adminBtn" class="bg-white text-[#095744] px-4 py-1 rounded-full text-xs font-bold shadow-sm">🔒 管理員模式</button>
+    <div class="sticky top-0 z-50">
+        <div class="bg-[#095744] text-white px-5 py-4 flex justify-between items-center">
+            <h1 class="font-black text-xl tracking-widest italic">鈺通營造工安</h1>
+            <button onclick="toggleAdmin()" id="adminBtn" class="bg-white text-[#095744] px-4 py-1 rounded-full text-xs font-black">🔒 管理員</button>
         </div>
         
-        <div class="header-controls">
+        <div class="controls-header">
             <select id="siteSelect"></select>
             <button onclick="addSite()" class="bg-[#095744] text-white w-10 h-10 rounded-xl font-bold flex-shrink-0">+</button>
             <input type="text" id="staff" placeholder="填單人員">
         </div>
 
-        <div class="category-scroller" id="tabContainer"></div>
+        <div class="cat-scroller" id="tabContainer"></div>
     </div>
 
     <div id="mainGrid" class="grid-container"></div>
 
     <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t flex gap-3 z-40">
-        <button onclick="buildReport()" class="flex-[3] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition-transform">📋 生成採購單</button>
-        <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-500 rounded-2xl font-bold text-xs border border-red-100">重選</button>
+        <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition-transform">📋 生成採購單</button>
+        <button onclick="resetCart()" class="flex-1 bg-gray-100 text-gray-500 rounded-2xl font-bold text-xs">重置</button>
     </nav>
 
     <div id="modal" onclick="closeModal()">
         <div class="bg-white w-full max-w-xl rounded-3xl p-6 overflow-y-auto max-h-[85vh]" onclick="event.stopPropagation()">
             <div id="printArea"></div>
             <div class="grid grid-cols-2 gap-3 mt-6">
-                <button onclick="window.print()" class="bg-[#095744] text-white py-4 rounded-xl font-black text-lg">確認列印 / 存為PDF</button>
-                <button onclick="closeModal()" class="bg-gray-100 py-4 rounded-xl font-bold text-gray-500">關閉預覽</button>
+                <button onclick="window.print()" class="bg-[#095744] text-white py-4 rounded-xl font-black">列印 / 存 PDF</button>
+                <button onclick="closeModal()" class="bg-gray-100 py-4 rounded-xl font-bold text-gray-500">關閉</button>
             </div>
         </div>
     </div>
 
 <script>
-// ==================== [關鍵設定區] ====================
-const CONFIG = {
-    githubUser: "你的帳號", // 修改這裡：GitHub 使用者名稱
-    githubRepo: "你的倉庫名", // 修改這裡：GitHub 專案名稱
-    imgFolder: "IMG" // 資料夾名稱，建議全大寫
-};
+// ==================== [正式設定區] ====================
+const GITHUB_USER = "你的帳號"; // <--- 改成你的 GitHub 帳號
+const REPO_NAME = "你的倉庫名"; // <--- 改成你的專案名稱
+const BASE_IMG_URL = `https://${GITHUB_USER}.github.io/${REPO_NAME}/IMG/`;
 
-// 預設資料庫 (無痕模式會讀取這份，請確保這裡的資料是最正確的)
+// 無痕模式也會同步讀取這份預設清單
 let activeDB = [
     {id:'A01', cat:'A', n:'工地大門告示牌', s:'60x90', m:'中空板'},
     {id:'A02', cat:'A', n:'洗車台作業須知', s:'40x60', m:'中空板'},
-    {id:'B01', cat:'B', n:'進入工區戴安全帽', s:'60x40', m:'中空板'},
-    {id:'C01', cat:'C', n:'施工告示牌', s:'120x90', m:'鋁板'},
-    {id:'D01', cat:'D', n:'方向指引牌', s:'30x60', m:'中空板'}
+    {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'},
+    {id:'C01', cat:'C', n:'工程告示牌', s:'120x75', m:'鋁板'}
 ];
 
-const catLabels = {'ALL':'全部標語', 'A':'A類 生活', 'B':'B類 安全', 'C':'C類 施工', 'D':'D類 指引', 'E':'E類 電力'};
+const CAT_LABELS = {'ALL':'全部標語', 'A':'A類 生活', 'B':'B類 安全', 'C':'C類 施工', 'D':'D類 指引'};
 let sites = ["嘉義創世", "嘉義嘉科", "嘉義博愛", "嘉義北門", "嘉義民雄", "臺南林森"];
 let cart = {}, currentCat = 'ALL', isAdmin = false;
 
 // ==================== [核心邏輯區] ====================
 
 function init() {
-    // 讀取本地快取（如果有改過的話）
-    const localDB = localStorage.getItem('yt_db_v4');
-    if(localDB) activeDB = JSON.parse(localDB);
+    // 檢查本地是否有更新過的 DB
+    const savedDB = localStorage.getItem('yt_db_final');
+    if(savedDB) activeDB = JSON.parse(savedDB);
     
-    const localSites = localStorage.getItem('yt_sites_v4');
-    if(localSites) sites = JSON.parse(localSites);
+    const savedSites = localStorage.getItem('yt_sites_final');
+    if(savedSites) sites = JSON.parse(savedSites);
 
     renderTabs();
     renderSites();
@@ -157,136 +117,74 @@ function render() {
     grid.innerHTML = '';
     const filtered = currentCat === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentCat);
     
-    // 圖片路徑邏輯：直連 GitHub Pages
-    const baseUrl = `https://${CONFIG.githubUser}.github.io/${CONFIG.githubRepo}/${CONFIG.imgFolder}/`;
-
     filtered.sort((a,b) => a.id.localeCompare(b.id)).forEach(i => {
         const c = cart[i.id] || { sel: false, qty: 1 };
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
         
-        const photoUrl = `${baseUrl}${i.id}.jpg`;
+        // 強化：自動抓取 GitHub IMG 資料夾下的照片
+        const imgUrl = `${BASE_IMG_URL}${i.id}.jpg`;
 
         card.innerHTML = `
             <div class="img-box">
-                <img src="${photoUrl}" onerror="this.onerror=null; this.src='https://placehold.co/130x95?text=${i.id}'">
+                <img src="${imgUrl}" onerror="this.onerror=null; this.src='https://placehold.co/130x95?text=${i.id}'">
             </div>
             <div class="flex-1 flex flex-col justify-between">
                 <div>
-                    ${isAdmin ? 
-                        `<input class="admin-edit-input font-bold" value="${i.n}" oninput="updateItem('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : 
-                        `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`
-                    }
+                    ${isAdmin ? `<input class="border-b border-orange-300 w-full font-bold text-lg" value="${i.n}" oninput="updateItemName('${i.id}', this.value)" onclick="event.stopPropagation()">` 
+                              : `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`}
                     <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase">${i.id} | ${i.s}</div>
                 </div>
                 <div class="flex items-center gap-3" onclick="event.stopPropagation()">
-                    <span class="text-[10px] font-black text-gray-300">數量</span>
+                    <span class="text-[10px] font-bold text-gray-300">數量</span>
                     <input type="number" value="${c.qty}" oninput="updateQty('${i.id}', this.value)" class="qty-input">
                 </div>
             </div>
-            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteAndReorder('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]">✕</button>` : ''}
+            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]">✕</button>` : ''}
         `;
         grid.appendChild(card);
     });
 }
 
-function deleteAndReorder(id) {
-    if(!confirm("確定刪除並自動遞補序號？")) return;
-    const prefix = id.charAt(0);
-    activeDB = activeDB.filter(x => x.id !== id);
-    // 重新編碼
-    let count = 1;
-    activeDB.filter(x => x.id.startsWith(prefix)).forEach(item => {
-        item.id = prefix + count.toString().padStart(2, '0');
-        count++;
-    });
-    saveData();
-    render();
-}
-
-function updateQty(id, v) {
-    if(!cart[id]) cart[id] = { sel: true, qty: 1 };
-    cart[id].qty = parseInt(v) || 1;
-}
-
-function toggleItem(id) {
-    if(!cart[id]) cart[id] = { sel: false, qty: 1 };
-    cart[id].sel = !cart[id].sel;
-    render();
-}
-
-function setCat(k) { currentCat = k; renderTabs(); render(); }
-
 function renderTabs() {
-    const container = document.getElementById('tabContainer');
-    container.innerHTML = Object.entries(catLabels).map(([k, v]) => `
-        <div class="cat-tab ${currentCat === k ? 'active' : ''}" onclick="setCat('${k}')">${v}</div>
+    document.getElementById('tabContainer').innerHTML = Object.entries(CAT_LABELS).map(([k, v]) => `
+        <div class="cat-btn ${currentCat === k ? 'active' : ''}" onclick="setCat('${k}')">${v}</div>
     `).join('');
 }
 
-function renderSites() {
-    const sel = document.getElementById('siteSelect');
-    sel.innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('');
-}
-
-function addSite() {
-    const n = prompt("輸入新工地名稱:");
-    if(n) { sites.push(n); localStorage.setItem('yt_sites_v4', JSON.stringify(sites)); renderSites(); }
-}
+function setCat(k) { currentCat = k; renderTabs(); render(); }
+function toggleItem(id) { if(!cart[id]) cart[id] = { sel: false, qty: 1 }; cart[id].sel = !cart[id].sel; render(); }
+function updateQty(id, v) { if(!cart[id]) cart[id] = { sel: true, qty: 1 }; cart[id].qty = parseInt(v) || 1; }
+function updateItemName(id, val) { const item = activeDB.find(x => x.id === id); if(item) { item.n = val; saveData(); } }
+function saveData() { localStorage.setItem('yt_db_final', JSON.stringify(activeDB)); }
+function renderSites() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
+function addSite() { const n = prompt("新工地名稱:"); if(n) { sites.push(n); localStorage.setItem('yt_sites_final', JSON.stringify(sites)); renderSites(); } }
 
 function buildReport() {
     const selected = activeDB.filter(i => cart[i.id]?.sel);
-    if(!selected.length) return alert("請先選擇標語項目！");
+    if(!selected.length) return alert("尚未勾選項目！");
     
-    const siteName = document.getElementById('siteSelect').value;
-    const staffName = document.getElementById('staff').value || "未填寫";
-    const baseUrl = `https://${CONFIG.githubUser}.github.io/${CONFIG.githubRepo}/${CONFIG.imgFolder}/`;
-
-    let html = `
-        <div style="font-family: sans-serif; color: #333;">
-            <div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:10px; margin-bottom:20px;">
-                <h1 style="margin:0; color:#095744; font-size:24px;">鈺通營造工安標語採購單</h1>
-                <p style="margin:5px 0; font-size:14px;">工地：<b>${siteName}</b> | 填單人：<b>${staffName}</b></p>
-            </div>
-            <table style="width:100%; border-collapse:collapse;">
-    `;
+    let html = `<div style="padding:20px; border:5px solid #095744; border-radius:20px;">
+        <h2 style="text-align:center; color:#095744; font-size:24px;">鈺通營造採購清單</h2>
+        <p>工地：<b>${document.getElementById('siteSelect').value}</b> | 填單人：<b>${document.getElementById('staff').value || '未填'}</b></p>
+        <hr style="margin:15px 0;">`;
     
     selected.forEach(i => {
-        html += `
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:10px 0; width:70px;">
-                    <img src="${baseUrl}${i.id}.jpg" style="width:60px; height:45px; object-fit:contain;" onerror="this.style.display='none'">
-                </td>
-                <td style="padding:10px; font-size:14px;">
-                    <div style="font-weight:bold;">${i.n}</div>
-                    <div style="font-size:11px; color:#999;">${i.id} | ${i.s}</div>
-                </td>
-                <td style="padding:10px; text-align:right; font-size:20px; font-weight:900; color:#70B934;">
-                    x ${cart[i.id].qty}
-                </td>
-            </tr>
-        `;
+        html += `<div style="display:flex; align-items:center; gap:15px; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <img src="${BASE_IMG_URL}${i.id}.jpg" style="width:60px; height:45px; object-fit:contain;" onerror="this.style.display='none'">
+            <div style="flex:1;"><b>${i.n}</b><br><small>${i.id} | ${i.s}</small></div>
+            <div style="font-size:22px; font-weight:900; color:#70B934;">x ${cart[i.id].qty}</div>
+        </div>`;
     });
-    
-    document.getElementById('printArea').innerHTML = html + `</table></div>`;
+    document.getElementById('printArea').innerHTML = html + `</div>`;
     document.getElementById('modal').style.display = 'flex';
 }
 
-function toggleAdmin() {
-    isAdmin = !isAdmin;
-    document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理中 (點擊標題可改名)" : "🔒 管理員模式";
-    render();
-}
-
-function updateItem(id, field, val) {
-    const item = activeDB.find(x => x.id === id);
-    if(item) { item[field] = val; saveData(); }
-}
-
-function saveData() { localStorage.setItem('yt_db_v4', JSON.stringify(activeDB)); }
+function toggleAdmin() { isAdmin = !isAdmin; render(); }
+function deleteItem(id) { if(confirm("確定刪除？")) { activeDB = activeDB.filter(x => x.id !== id); saveData(); render(); } }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function resetCart() { if(confirm("確定清空已選項目？")) { cart = {}; render(); } }
+function resetCart() { cart = {}; render(); }
 
 window.onload = init;
 </script>
