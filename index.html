@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 V6.2</title>
+    <title>鈺通營造工安標語系統 V6.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -13,32 +13,37 @@
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 3px solid var(--yt-dark); }
         .category-scroller { display: flex; overflow-x: auto; gap: 6px; padding: 8px 12px; background: white; -webkit-overflow-scrolling: touch; }
         
-        .cat-tab { white-space: nowrap; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; border: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; gap: 3px; transition: all 0.2s; }
+        .cat-tab { white-space: nowrap; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; border: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
         .cat-tab.step { background-color: var(--yt-dark); color: white; border-color: var(--yt-dark); }
         .cat-tab.active { background-color: var(--yt-light); border-color: var(--yt-light); color: white; transform: scale(1.05); }
         
-        /* 響應式網格：手機 1 欄，電腦 3 欄 */
+        /* 強制電腦一排三個，手機一排一個 */
         .grid-container { 
             display: grid; 
-            gap: 12px; 
+            gap: 10px; 
             padding: 12px; 
             grid-template-columns: repeat(1, 1fr); 
         }
-        @media (min-width: 768px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { 
+            .grid-container { grid-template-columns: repeat(3, 1fr); } 
+        }
 
-        .sign-card { background: white; border-radius: 12px; padding: 10px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 105px; position: relative; }
+        .sign-card { background: white; border-radius: 12px; padding: 10px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 115px; position: relative; }
         .sign-card.selected { border: 2.5px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         
-        .admin-edit { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 1px 3px; width: 100%; font-size: 11px; color: #9a3412; font-weight: bold; margin-bottom: 1px; }
+        /* 管理員編輯框樣式 */
+        .admin-edit { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 1px 3px; width: 100%; font-size: 11px; color: #9a3412; font-weight: bold; margin-bottom: 2px; }
         
-        .img-slot { width: 85px; height: 85px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
+        .img-slot { width: 85px; height: 95px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
         
         .qty-input { width: 45px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #eee; z-index: 2000; }
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 10px; }
         .print-paper { background: white; width: 100%; max-width: 650px; border-radius: 16px; padding: 15px; max-height: 90vh; overflow-y: auto; }
+        
+        /* 自動編號圓圈 */
+        .index-badge { position: absolute; top: -5px; left: -5px; background: var(--yt-dark); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; z-index: 10; }
     </style>
 </head>
 <body>
@@ -64,12 +69,12 @@
 
     <nav class="footer-nav no-print">
         <div id="adminPanel" class="hidden flex justify-center gap-2 mb-2">
-            <button onclick="exportData()" class="bg-blue-600 text-white px-4 py-1 rounded text-[10px] font-bold">📤 備份設定</button>
-            <button onclick="importData()" class="bg-purple-600 text-white px-4 py-1 rounded text-[10px] font-bold">📥 還原設定</button>
+            <button onclick="exportData()" class="bg-blue-600 text-white px-4 py-1 rounded text-[10px] font-bold">📤 備份</button>
+            <button onclick="importData()" class="bg-purple-600 text-white px-4 py-1 rounded text-[10px] font-bold">📥 還原</button>
             <button onclick="deleteSite()" class="bg-red-500 text-white px-4 py-1 rounded text-[10px] font-bold">🗑️ 刪除工地</button>
         </div>
         <div class="flex w-full max-w-4xl gap-2 mx-auto">
-            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-lg active:scale-95 transition-transform">📋 生成採購單</button>
+            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-lg active:scale-95 transition">📋 生成採購單</button>
             <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-400 rounded-xl text-[10px] font-bold">重選</button>
             <button onclick="hardReset()" class="flex-1 bg-slate-100 text-slate-400 rounded-xl text-[10px] font-bold">清空</button>
         </div>
@@ -90,7 +95,6 @@
 const GITHUB_BASE = "https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/";
 const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
 
-// 分類與步驟
 const STEP_DATA = {
     'S1': { t:'📌 Step 1 入口', items:['A01','A02','B01','B04','D01','E01','E04','K01'] },
     'S2': { t:'📌 Step 2 基礎', items:['A03','A04','A05','A06','A07','A09','A10','A11','A12','I01','I02'] },
@@ -108,7 +112,7 @@ const CATEGORIES = {
 };
 
 const RAW_SIGNS = [
-    {id:'A01', cat:'A', n:'守衛室', s:'30x10', m:'PVC噴漆'}, {id:'A02', cat:'A', n:'工具箱會議', s:'60x40', m:'中空板'}, {id:'A03', cat:'A', n:'統包商辦公室', s:'30x10', m:'PVC噴漆'}, {id:'A04', cat:'A', n:'監造單位', s:'30x10', m:'PVC'}, {id:'A05', cat:'A', n:'管理單位', s:'30x10', m:'PVC'}, {id:'A06', cat:'A', n:'會議室', s:'30x10', m:'PVC'}, {id:'A07', cat:'A', n:'倉庫', s:'30x10', m:'PVC'}, {id:'A08', cat:'A', n:'建材展覽室', s:'30x10', m:'PVC'}, {id:'A09', cat:'A', n:'男化妝室', s:'20x10', m:'PVC'}, {id:'A10', cat:'A', n:'女化妝室', s:'20x10', m:'PVC'}, {id:'A11', cat:'A', n:'休息區', s:'30x10', m:'PVC'}, {id:'A12', cat:'A', n:'飲水機', s:'15x5', m:'PVC'},
+    {id:'A01', cat:'A', n:'守衛室', s:'30x10', m:'PVC噴漆'}, {id:'A02', cat:'A', n:'工具箱會議', s:'60x40', m:'中空板'}, {id:'A03', cat:'A', n:'統包商辦公室', s:'30x10', m:'PVC'}, {id:'A04', cat:'A', n:'監造單位', s:'30x10', m:'PVC'}, {id:'A05', cat:'A', n:'管理單位', s:'30x10', m:'PVC'}, {id:'A06', cat:'A', n:'會議室', s:'30x10', m:'PVC'}, {id:'A07', cat:'A', n:'倉庫', s:'30x10', m:'PVC'}, {id:'A08', cat:'A', n:'建材展覽室', s:'30x10', m:'PVC'}, {id:'A09', cat:'A', n:'男化妝室', s:'20x10', m:'PVC'}, {id:'A10', cat:'A', n:'女化妝室', s:'20x10', m:'PVC'}, {id:'A11', cat:'A', n:'休息區', s:'30x10', m:'PVC'}, {id:'A12', cat:'A', n:'飲水機', s:'15x5', m:'PVC'},
     {id:'B01', cat:'B', n:'工程告示牌', s:'120x90', m:'鍍鋅鐵板'}, {id:'B02', cat:'B', n:'安全第一', s:'60x40', m:'中空板'}, {id:'B03', cat:'B', n:'安衛告示牌', s:'90x90', m:'鍍鋅鐵板'}, {id:'B04', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}, {id:'B05', cat:'B', n:'今日危害因素', s:'90x60', m:'白板'},
     {id:'C01', cat:'C', n:'有電危險', s:'30x20', m:'中空板'}, {id:'C03', cat:'C', n:'小心墜落', s:'60x40', m:'中空板'}, 
     {id:'D01', cat:'D', n:'嚴禁酒後', s:'60x40', m:'中空板'}, {id:'D02', cat:'D', n:'人員禁入', s:'60x40', m:'中空板'}, {id:'D04', cat:'D', n:'禁止跨越', s:'60x40', m:'中空板'},
@@ -123,7 +127,7 @@ const RAW_SIGNS = [
 let activeDB, cart = {}, sites = [], isAdmin = false, currentFilter = 'ALL';
 
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db_v62')) || RAW_SIGNS;
+    activeDB = JSON.parse(localStorage.getItem('yt_db_v63')) || RAW_SIGNS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     document.getElementById('staff').value = localStorage.getItem('yt_staff') || '';
@@ -167,24 +171,29 @@ function render() {
     let list = STEP_DATA[currentFilter] ? activeDB.filter(x => STEP_DATA[currentFilter].items.includes(x.id)) : 
                (currentFilter === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentFilter));
 
-    list.forEach(item => {
+    list.forEach((item, index) => {
         const st = cart[item.id] || { sel: false, qty: 1 };
         const card = document.createElement('div');
         card.className = `sign-card ${st.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(item.id);
         card.innerHTML = `
+            <div class="index-badge">${index + 1}</div>
             <div class="img-slot"><img src="${GITHUB_BASE + item.id + '.jpg'}" onerror="handleImgErr(this)"></div>
             <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-start">
-                    <div class="flex-1 truncate">
+                <div class="flex flex-col h-full justify-between">
+                    <div class="min-w-0">
                         ${isAdmin ? `<input class="admin-edit" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-[13px] truncate">${item.n}</div>`}
-                        <div class="text-[10px] font-bold text-red-600 truncate">規：${isAdmin ? `<input class="admin-edit" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : item.s}</div>
-                        <div class="text-[10px] font-bold text-blue-600 truncate">材：${isAdmin ? `<input class="admin-edit" value="${item.m||''}" oninput="updateDB('${item.id}','m',this.value)" onclick="event.stopPropagation()">` : (item.m||'待定')}</div>
+                        <div class="text-[10px] font-bold text-red-600 truncate">
+                            ${isAdmin ? `規：<input class="admin-edit" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : `規：${item.s}`}
+                        </div>
+                        <div class="text-[10px] font-bold text-blue-600 truncate">
+                            ${isAdmin ? `材：<input class="admin-edit" value="${item.m||''}" oninput="updateDB('${item.id}','m',this.value)" onclick="event.stopPropagation()">` : `材：${item.m||'待定'}`}
+                        </div>
                     </div>
-                </div>
-                <div class="absolute bottom-2 right-2 flex items-center gap-1" onclick="event.stopPropagation()">
-                    <span class="text-[9px] font-bold text-gray-400">數量</span>
-                    <input type="number" value="${st.qty}" oninput="updateQty('${item.id}',this.value)" class="qty-input">
+                    <div class="flex items-center gap-1 self-end" onclick="event.stopPropagation()">
+                        <span class="text-[9px] font-bold text-gray-400">數量</span>
+                        <input type="number" value="${st.qty}" oninput="updateQty('${item.id}',this.value)" class="qty-input">
+                    </div>
                 </div>
             </div>
             <span class="absolute top-1 right-1 text-[7px] text-gray-300 font-mono">#${item.id}</span>
@@ -213,7 +222,7 @@ function updateDB(id, field, val) {
 }
 
 function save() {
-    localStorage.setItem('yt_db_v62', JSON.stringify(activeDB));
+    localStorage.setItem('yt_db_v63', JSON.stringify(activeDB));
     localStorage.setItem('yt_cart', JSON.stringify(cart));
     localStorage.setItem('yt_staff', document.getElementById('staff').value);
     localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value);
@@ -221,23 +230,31 @@ function save() {
 
 function toggleAdmin() {
     if (!isAdmin) {
-        if (prompt("密碼") === "751113") { isAdmin = true; document.getElementById('adminBtn').innerText = "🔓 管理中"; document.getElementById('adminPanel').classList.remove('hidden'); }
-    } else { isAdmin = false; document.getElementById('adminBtn').innerText = "🔒 管理員"; document.getElementById('adminPanel').classList.add('hidden'); }
+        if (prompt("輸入管理密碼") === "751113") { 
+            isAdmin = true; 
+            document.getElementById('adminBtn').innerText = "🔓 管理中"; 
+            document.getElementById('adminPanel').classList.remove('hidden'); 
+        }
+    } else { 
+        isAdmin = false; 
+        document.getElementById('adminBtn').innerText = "🔒 管理員"; 
+        document.getElementById('adminPanel').classList.add('hidden'); 
+    }
     render();
 }
 
 function exportData() {
     const blob = new Blob([JSON.stringify({ db: activeDB, sites: sites })], {type: 'text/plain'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `鈺通備份.txt`; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `鈺通標語備份.txt`; a.click();
 }
 
 function importData() {
-    const input = prompt("貼上內容");
+    const input = prompt("貼上備份內容");
     if (input) { try { const d = JSON.parse(input); activeDB = d.db; sites = d.sites; save(); location.reload(); } catch(e) { alert("錯誤"); } }
 }
 
 function resetCart() { if(confirm("重選？")) { cart = {}; save(); render(); } }
-function hardReset() { if(confirm("重設？")) { localStorage.clear(); location.reload(); } }
+function hardReset() { if(confirm("確定要重設為初始狀態？所有修改將消失。")) { localStorage.clear(); location.reload(); } }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
 async function buildReport() {
