@@ -34,12 +34,14 @@
         <div class="header-container">
             <span class="main-title">鈺通營造工安系統</span>
             <div class="flex gap-2">
-                <button onclick="exportJSON()" id="exportBtn" class="hidden text-[10px] bg-white/20 px-2 py-1 rounded">💾 導出</button>
                 <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">🔒 管理員</button>
             </div>
         </div>
         <div class="grid grid-cols-2 gap-2 px-4 py-2 bg-white border-b">
-            <select id="siteSelect" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
+            <div class="flex gap-1">
+                <select id="siteSelect" class="flex-1 bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200 outline-none"></select>
+                <button onclick="editSites()" class="bg-gray-100 px-3 rounded-lg text-xs font-bold border border-gray-200 active:bg-gray-200">＋</button>
+            </div>
             <input type="text" id="staff" class="bg-gray-50 p-2 rounded-lg text-sm font-bold border border-gray-200" placeholder="填單人員">
         </div>
         <div class="flex overflow-x-auto gap-2 p-3 bg-white scrollbar-hide" id="tabContainer"></div>
@@ -69,7 +71,6 @@
 let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels;
 const GITHUB_BASE = "https://yuhtong02.github.io/-/img/";
 
-// --- 這裡是你所有的預設資料，修改這裡，傳網址給別人才會生效 ---
 const defaultDB = [
     {id:'A01', cat:'A', n:'飲水機', s:'30x15', m:'中空板'},
     {id:'A02', cat:'A', n:'急救箱', s:'20x20', m:'貼紙'},
@@ -97,7 +98,6 @@ const defaultCats = {
 };
 
 function init() {
-    // 優先讀取 LocalStorage，如果沒有（對方第一次開啟），就讀取上面寫死的 default
     activeDB = JSON.parse(localStorage.getItem('yt_db')) || defaultDB;
     guides = JSON.parse(localStorage.getItem('yt_guides')) || defaultGuides;
     catLabels = JSON.parse(localStorage.getItem('yt_cats')) || defaultCats;
@@ -106,8 +106,14 @@ function init() {
     renderTabs(); renderSiteSelect(); render();
 }
 
-// (其餘功能函數如 render, toggleAdmin, updateItem, buildReport 等保持不變...)
-// ... [其餘程式碼與上一版相同] ...
+function editSites() {
+    const res = prompt("請修改工地名單（多筆請用逗號隔開）：", sites.join(', '));
+    if (res !== null) {
+        sites = res.split(/[，,]/).map(s => s.trim()).filter(s => s);
+        localStorage.setItem('yt_sites', JSON.stringify(sites));
+        renderSiteSelect();
+    }
+}
 
 function renderTabs() {
     let html = '';
@@ -197,7 +203,6 @@ function toggleAdmin() {
 
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
 function saveData() { localStorage.setItem('yt_db', JSON.stringify(activeDB)); localStorage.setItem('yt_guides', JSON.stringify(guides)); localStorage.setItem('yt_cats', JSON.stringify(catLabels)); localStorage.setItem('yt_sites', JSON.stringify(sites)); }
-function exportJSON() { const blob = new Blob([JSON.stringify({activeDB, guides, catLabels, sites})], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `備份.json`; a.click(); }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 function resetCart() { if(confirm("清空？")) { cart = {}; render(); } }
 function buildReport() {
