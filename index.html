@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 (分類回歸版)</title>
+    <title>鈺通營造工安標語系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg) !important; padding-bottom: 180px; overflow-x: hidden; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 4px solid var(--yt-dark) !important; }
-        .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 12px 15px; background: white; border-bottom: 1px solid #D7CCC8 !important; }
+        .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 12px 15px; background: white; border-bottom: 1px solid #D7CCC8 !important; -webkit-overflow-scrolling: touch; }
         .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background-color: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 1px solid var(--yt-dark) !important; display: flex; align-items: center; }
         .cat-tab-step::before { content: "📌"; margin-right: 4px; }
         .cat-tab-step.active { background-color: var(--yt-light); border-color: var(--yt-light) !important; }
@@ -71,7 +71,6 @@
 <script>
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels, curEditImgId;
 
-// 預設分類 (回歸原本的 A-K 完整分類)
 const DEFAULT_CATS = {
     'ALL':'全部', 
     'A':'A類 生活設施', 'B':'B類 安全防護', 'C':'C類 施工告示', 'D':'D類 指引警告', 
@@ -97,7 +96,6 @@ function init() {
         'S5': { t: 'Step 5. 機具電力', d: '開關箱與操作守則', items: [] },
         'S6': { t: 'Step 6. 環境清潔', d: '垃圾分類與洗車台', items: [] }
     };
-    // 優先讀取紀錄，若無則用預設值
     catLabels = JSON.parse(localStorage.getItem('yt_cat_labels')) || DEFAULT_CATS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     
@@ -130,13 +128,14 @@ async function render() {
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
         
-        // 優先找手動上傳的，沒有的話嘗試 GitHub 大寫 IMG/A01.jpg
+        // 強效圖片路徑修正邏輯
         const imgSrc = localImg || `IMG/${i.id}.jpg`;
+        const idLower = i.id.toLowerCase();
 
         card.innerHTML = `
             ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20">✕</button>` : ''}
             <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
-                <img src="${imgSrc}" onerror="this.onerror=null; this.src='img/${i.id.toLowerCase()}.jpg'; this.onerror=function(){this.src='https://placehold.co/150x100?text=${i.id}';}">
+                <img src="${imgSrc}" onerror="this.onerror=null; this.src='img/${idLower}.jpg'; this.onerror=function(){this.src='IMG/${i.id}.JPG'; this.onerror=function(){this.src='https://placehold.co/150x100?text=${i.id}';}}">
             </div>
             <div class="flex-1">
                 <div class="flex justify-between items-start">
@@ -159,17 +158,12 @@ async function render() {
 
 function renderTabs() {
     let html = '';
-    // Step 標籤
     Object.keys(guides).sort().forEach(k => {
         html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}</div>`;
     });
-    // 分類標籤 (回歸 A-K)
     Object.keys(catLabels).forEach(k => {
         const isAdminStyle = isAdmin && k !== 'ALL' ? 'border-dashed border-orange-400 bg-orange-50' : '';
-        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdminStyle}" 
-                     onclick="${isAdmin && k !== 'ALL' ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">
-                     ${catLabels[k]}
-                 </div>`;
+        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdminStyle}" onclick="${isAdmin && k !== 'ALL' ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">${catLabels[k]}</div>`;
     });
     document.getElementById('tabContainer').innerHTML = html;
 }
@@ -191,9 +185,9 @@ async function dbGet(k) { return new Promise(r => { const t = db.transaction("im
 async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
 async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
 function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveDB(); }}
-function hardReset() { if(confirm("確定重設所有資料？")) { localStorage.clear(); location.reload(); }}
+function hardReset() { if(confirm("確定還原？")) { localStorage.clear(); location.reload(); }}
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function resetCart() { if(confirm("清空目前選擇？")) { cart = {}; autoSave(); render(); } }
+function resetCart() { if(confirm("清空？")) { cart = {}; autoSave(); render(); } }
 
 async function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
