@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通標語系統 V6.9.2 - 橫式照片版</title>
+    <title>鈺通標語系統 V6.9.3 - 管理功能修正</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -15,23 +15,17 @@
         .cat-tab { white-space: nowrap; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; border: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
         .cat-tab.step { background-color: var(--yt-dark); color: white; border-color: var(--yt-dark); }
         .cat-tab.active { background-color: var(--yt-light); border-color: var(--yt-light); color: white; }
-        .tab-edit-input { background: rgba(255,255,255,0.2); color: inherit; border: 1px dashed #fbbf24; font-size: 11px; width: 90px; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
         .admin-edit { background: #fff7ed; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 1px 4px; font-size: 11px; color: #9a3412; font-weight: bold; width: 100%; }
         .grid-container { display: grid; gap: 10px; padding: 10px; grid-template-columns: repeat(1, 1fr); }
         @media (min-width: 640px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
-        
-        /* 核心修改：卡片變扁，高度降低 */
-        .sign-card { background: white; border-radius: 12px; padding: 10px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 105px; position: relative; overflow: hidden;}
+        .sign-card { background: white; border-radius: 12px; padding: 10px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; cursor: pointer; transition: all 0.2s; height: 115px; position: relative; overflow: hidden;}
         .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
-        /* 核心修改：照片框變橫向 */
-        .img-slot { width: 130px; height: 85px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
-        .img-slot img { width: 100%; height: 100%; object-fit: contain; } /* object-fit: contain 確保橫式照片完整顯示不裁切 */
-        
-        .index-badge { position: absolute; top: -6px; left: -6px; background: #fbbf24; color: #000; min-width: 28px; height: 28px; border: 2px solid var(--yt-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; z-index: 10; box-shadow: 2px 2px 4px rgba(0,0,0,0.15); }
+        .img-slot { width: 130px; height: 95px; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #eee; }
+        .img-slot img { width: 100%; height: 100%; object-fit: contain; }
+        .index-badge { position: absolute; top: -6px; left: -6px; background: #fbbf24; color: #000; min-width: 28px; height: 28px; border: 2px solid var(--yt-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; z-index: 10; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #eee; z-index: 2000; }
-        .qty-input { width: 40px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; padding: 0;}
+        .qty-input { width: 45px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; }
     </style>
 </head>
 <body>
@@ -99,12 +93,11 @@ const DEFAULT_CATEGORIES = {
 };
 
 const RAW_SIGNS = [
-    {id:'A01', cat:'A', n:'守衛室', s:'30x10', m:'PVC噴漆'}, {id:'A02', cat:'A', n:'工具箱會議', s:'60x40', m:'中空板'}, {id:'B01', cat:'B', n:'工程告示牌', s:'120x90', m:'鍍鋅鐵板'}, {id:'B04', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}, {id:'D01', cat:'D', n:'嚴禁酒後', s:'60x40', m:'中空板'}, {id:'E01', cat:'E', n:'請勿停車', s:'60x40', m:'中空板'}, {id:'E04', cat:'E', n:'緩慢行駛', s:'60x40', m:'中空板'}, {id:'K01', cat:'K', n:'工地名稱', s:'客製', m:'帆布'},
-    {id:'A03', cat:'A', n:'統包商辦公室', s:'30x10', m:'PVC'}, {id:'A04', cat:'A', n:'監造單位', s:'30x10', m:'PVC'}, {id:'A05', cat:'A', n:'管理單位', s:'30x10', m:'PVC'}, {id:'A06', cat:'A', n:'會議室', s:'30x10', m:'PVC'}, {id:'A07', cat:'A', n:'倉庫', s:'30x10', m:'PVC'}, {id:'A08', cat:'A', n:'建材展覽室', s:'30x10', m:'PVC'}, {id:'A09', cat:'A', n:'男化妝室', s:'20x10', m:'PVC'}, {id:'A10', cat:'A', n:'女化妝室', s:'20x10', m:'PVC'}, {id:'A11', cat:'A', n:'休息區', s:'30x10', m:'PVC'}, {id:'A12', cat:'A', n:'飲水機', s:'15x5', m:'PVC'}
+    {id:'A01', cat:'A', n:'守衛室', s:'30x10', m:'PVC噴漆'}, {id:'A02', cat:'A', n:'工具箱會議', s:'60x40', m:'中空板'}, {id:'B01', cat:'B', n:'工程告示牌', s:'120x90', m:'鍍鋅鐵板'}, {id:'B04', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}, {id:'D01', cat:'D', n:'嚴禁酒後', s:'60x40', m:'中空板'}, {id:'E01', cat:'E', n:'請勿停車', s:'60x40', m:'中空板'}, {id:'E04', cat:'E', n:'緩慢行駛', s:'60x40', m:'中空板'}, {id:'K01', cat:'K', n:'工地名稱', s:'客製', m:'帆布'}
 ];
 
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db_v692')) || RAW_SIGNS;
+    activeDB = JSON.parse(localStorage.getItem('yt_db_v693')) || RAW_SIGNS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     config = JSON.parse(localStorage.getItem('yt_config')) || { title: "鈺通營造工安標語" };
@@ -172,9 +165,9 @@ function render() {
                         <div class="text-[9px] font-bold text-gray-400 font-mono uppercase mb-[-2px]">ID: ${item.id}</div>
                         ${isAdmin ? `<input class="admin-edit mb-0.5" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-[14px] truncate leading-tight">${item.n}</div>`}
                         
-                        <div class="flex gap-x-2 text-[10px] font-bold leading-tight mt-0.5">
-                            <div class="text-red-600 truncate flex-1">規：${isAdmin ? `<input class="admin-edit p-0 px-1" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)" onclick="event.stopPropagation()">` : item.s}</div>
-                            <div class="text-blue-600 truncate flex-1">材：${isAdmin ? `<input class="admin-edit p-0 px-1" value="${item.m}" oninput="updateDB('${item.id}','m',this.value)" onclick="event.stopPropagation()">` : item.m}</div>
+                        <div class="flex gap-x-1 text-[10px] font-bold leading-tight mt-0.5" onclick="event.stopPropagation()">
+                            <div class="text-red-600 truncate flex-1">規：${isAdmin ? `<input class="admin-edit" style="width:100%" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)">` : item.s}</div>
+                            <div class="text-blue-600 truncate flex-1">材：${isAdmin ? `<input class="admin-edit" style="width:100%" value="${item.m}" oninput="updateDB('${item.id}','m',this.value)">` : item.m}</div>
                         </div>
 
                         ${isAdmin ? `
@@ -199,6 +192,11 @@ function render() {
     });
 }
 
+function updateDB(id, field, val) {
+    const i = activeDB.find(x => x.id === id); 
+    if (i) { i[field] = val; save(); }
+}
+
 function moveToStep(id, targetStep) {
     Object.keys(stepData).forEach(k => { stepData[k].items = stepData[k].items.filter(i => i !== id); });
     if (targetStep) stepData[targetStep].items.push(id);
@@ -220,12 +218,8 @@ function updateQty(id, v) {
     cart[id].qty = parseInt(v) || 1; save();
 }
 
-function updateDB(id, field, val) {
-    const i = activeDB.find(x => x.id === id); if (i) i[field] = val; save();
-}
-
 function save() {
-    localStorage.setItem('yt_db_v692', JSON.stringify(activeDB));
+    localStorage.setItem('yt_db_v693', JSON.stringify(activeDB));
     localStorage.setItem('yt_cart', JSON.stringify(cart));
     localStorage.setItem('yt_staff', document.getElementById('staff').value);
     localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value);
@@ -248,7 +242,7 @@ function exportData() {
 
 function importData() {
     const input = prompt("貼上備份內容");
-    if (input) { try { const d = JSON.parse(input); activeDB = d.db; sites = d.sites; config = d.config; stepData = d.stepData; cats = d.cats; save(); location.reload(); } catch(e) { alert("格式錯誤"); } }
+    if (input) { try { const d = JSON.parse(input); activeDB = d.db; sites = d.sites; config = d.config; stepData = d.stepData; cats = d.cats; save(); location.reload(); } catch(e) { alert("出錯"); } }
 }
 
 function resetCart() { if(confirm("重選？")) { cart = {}; save(); render(); } }
@@ -279,7 +273,7 @@ function buildReport() {
 
 function captureToImage() {
     html2canvas(document.getElementById('captureTarget'), { useCORS: true, scale: 2 }).then(canvas => {
-        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; font-size:12px; margin-bottom:5px;">長按儲存圖片</p><img src="${canvas.toDataURL("image/png")}" style="width:100%;">`;
+        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; font-size:12px; margin-bottom:5px;">長按存圖</p><img src="${canvas.toDataURL("image/png")}" style="width:100%;">`;
     });
 }
 init();
