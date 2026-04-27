@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 (完整版)</title>
+    <title>鈺通營造工安標語系統 (修正版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -12,7 +12,9 @@
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg) !important; padding-bottom: 180px; color: #1e293b; overflow-x: hidden; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 4px solid var(--yt-dark) !important; }
         .category-scroller { display: flex; overflow-x: auto; gap: 10px; padding: 15px; background: white; border-bottom: 1px solid #D7CCC8 !important; }
-        .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background-color: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 1px solid var(--yt-dark) !important; }
+        .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background-color: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 1px solid var(--yt-dark) !important; display: flex; align-items: center; }
+        /* 修正：把圖釘📌加回來 */
+        .cat-tab-step::before { content: "📌"; margin-right: 4px; }
         .cat-tab-step.active { background-color: var(--yt-light); border-color: var(--yt-light) !important; }
         .cat-tab-item { white-space: nowrap; padding: 8px 18px; border-radius: 10px; background-color: white; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0 !important; flex-shrink: 0; }
         .cat-tab-item.active { background-color: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark) !important; font-weight: 900; }
@@ -71,7 +73,8 @@
 const CAT_LABELS = {'ALL':'全部','A':'A類','B':'B類','C':'C類','D':'D類','E':'E類','F':'F類','G':'G類','H':'H類','I':'I類','J':'J類','K':'K類'};
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, curEditImgId;
 
-const request = indexedDB.open("Yutong_SignSystem_Updated", 1);
+// 修正：將 IndexedDB 名稱改回最當初的版本 (例如 V2)，解決照片消失問題
+const request = indexedDB.open("Yutong_SignSystem_V2", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
@@ -80,11 +83,12 @@ function init() {
     activeDB = JSON.parse(localStorage.getItem('yt_active_db')) || [{id:'A01', cat:'A', n:'飲水機', s:'30x20', m:'中空板'}];
     guides = JSON.parse(localStorage.getItem('yt_guides')) || {
         'S1': { t: 'Step 1. 大門與管制', d: '告示牌、門禁管制', items: ['A01'] },
-        'S2': { t: 'Step 2. 生活設施', d: '辦公區、休息室', items: [] }
+        'S2': { t: 'Step 2. 生活設施', d: '辦公區、休息室', items: [] },
+        'S3': { t: 'Step 3. 安全防護', d: '施工警示', items: [] },
+        'S4': { t: 'Step 4. 動線指引', d: '車輛/人員路徑', items: [] }
     };
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     
-    // 讀取暫存資訊
     if(localStorage.getItem('yt_lastSite')) document.getElementById('siteSelect').value = localStorage.getItem('yt_lastSite');
     if(localStorage.getItem('yt_lastStaff')) document.getElementById('staff').value = localStorage.getItem('yt_lastStaff');
 
@@ -109,10 +113,14 @@ async function render() {
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
+        
+        // 優化：優先讀取資料庫圖，沒圖則抓 img 資料夾 (統一小寫 jpg)
+        const imgSrc = localImg || `img/${i.id.toLowerCase()}.jpg`;
+
         card.innerHTML = `
             ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20">✕</button>` : ''}
             <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
-                <img src="${localImg || 'img/'+i.id+'.jpg'}" onerror="this.src='https://placehold.co/150x100?text=${i.id}';">
+                <img src="${imgSrc}" onerror="this.src='https://placehold.co/150x100?text=${i.id}';">
             </div>
             <div class="flex-1">
                 <div class="flex justify-between">
@@ -132,7 +140,6 @@ async function render() {
     }
 }
 
-// 核心重排功能 (帶圖片轉移)
 async function addNewItem() {
     let prefix = currentKey !== 'ALL' && currentMode === 'CAT' ? currentKey : 'A';
     let max = 0;
@@ -151,8 +158,8 @@ async function addNewItem() {
                 let oldID = item.id;
                 let nextID = prefix + (parseInt(oldID.slice(1)) + 1).toString().padStart(2, '0');
                 let imgData = await dbGet(oldID);
-                if(imgData) await dbSet(nextID, imgData); // 圖片跟著跳號
-                if(cart[oldID]) { cart[nextID] = cart[oldID]; delete cart[oldID]; } // 數量跟著跳號
+                if(imgData) await dbSet(nextID, imgData);
+                if(cart[oldID]) { cart[nextID] = cart[oldID]; delete cart[oldID]; }
                 item.id = nextID;
             }
         }
@@ -191,14 +198,15 @@ async function dbGet(k) { return new Promise(r => { const t = db.transaction("im
 async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
 async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
 function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveDB(); }}
-function hardReset() { if(confirm("確定還原？")) { localStorage.clear(); location.reload(); }}
+function hardReset() { if(confirm("確定還原預設？")) { localStorage.clear(); location.reload(); }}
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
+// 修正：採購單生成圖片功能補強
 async function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
     if(!sel.length) return alert("請勾選標語");
     
-    let h = `<div style="border:2px solid #095744; padding:15px; background:white;">
+    let h = `<div id="captureTarget" style="border:2px solid #095744; padding:15px; background:white;">
         <h2 style="text-align:center; color:#095744; font-size:22px; font-weight:900; border-bottom:2px solid #095744; padding-bottom:10px; margin-bottom:10px;">鈺通營造工安標語採購單</h2>
         <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:15px; font-size:13px;">
             <span>工地：${document.getElementById('siteSelect').value}</span>
@@ -207,15 +215,26 @@ async function buildReport() {
         <table style="width:100%; border-collapse:collapse;">`;
     
     for(let i of sel) {
-        const img = await dbGet(i.id) || 'img/'+i.id+'.jpg';
+        // 重要：採購單也要顯示IndexedDB的照片或實體照片
+        const localImg = await dbGet(i.id);
+        const img = localImg || `img/${i.id.toLowerCase()}.jpg`;
         h += `<tr style="border-bottom:1px solid #eee;">
             <td style="padding:10px 0; width:80px;"><img src="${img}" style="width:70px; height:50px; object-fit:contain;" onerror="this.src='https://placehold.co/70x50?text=無圖';"></td>
             <td style="padding:10px; font-size:14px;"><b>[${i.id}] ${i.n}</b><br><small style="color:gray;">${i.s} / ${i.m||'中空板'}</small></td>
             <td style="padding:10px; text-align:right; font-size:20px; color:#70B934; font-weight:900;">x ${cart[i.id].qty}</td>
         </tr>`;
     }
-    document.getElementById('printArea').innerHTML = h + `</table></div>`;
+    document.getElementById('printArea').innerHTML = h + `</table><button onclick="captureToImage()" class="no-print w-full mt-4 bg-amber-500 text-white py-2 rounded-lg font-bold">轉存為圖片 (長按儲存)</button></div>`;
     document.getElementById('modal').style.display = 'flex';
+}
+
+function captureToImage() {
+    const target = document.getElementById('captureTarget');
+    // 隱藏採購單內的「轉存圖片」按鈕本身，避免被截圖進去
+    target.querySelector('button').style.display = 'none';
+    html2canvas(target, { useCORS: true, scale: 2 }).then(canvas => {
+        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; text-align:center;">圖片已生成！長按圖片儲存。</p><img src="${canvas.toDataURL()}" style="width:100%; border:1px solid #ddd;">`;
+    });
 }
 </script>
 </body>
