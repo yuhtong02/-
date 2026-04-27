@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語採購系統 V7.0.5</title>
+    <title>鈺通營造工安標語採購系統 V7.0.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -12,27 +12,33 @@
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 160px; color: #1e293b; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 3px solid var(--yt-dark); }
         
-        /* 寬度優化：分類格加寬與間距調整 */
+        /* 頂部選單滾動與寬度 */
         .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; background: white; -webkit-overflow-scrolling: touch; }
-        .cat-tab { min-width: 110px; text-align: center; white-space: nowrap; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 900; cursor: pointer; border: 1.5px solid #e2e8f0; flex-shrink: 0; }
+        .cat-tab { min-width: 120px; text-align: center; white-space: nowrap; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 900; cursor: pointer; border: 1.5px solid #e2e8f0; flex-shrink: 0; }
         .cat-tab.step { background-color: var(--yt-dark); color: white; border-color: var(--yt-dark); }
-        .cat-tab.active { background-color: var(--yt-light); color: white; border-color: var(--yt-light); box-shadow: 0 4px 6px -1px rgba(112, 185, 52, 0.2); }
+        .cat-tab.active { background-color: var(--yt-light); color: white; border-color: var(--yt-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
-        .sign-card { background: white; border-radius: 12px; padding: 10px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; height: 115px; position: relative; }
+        /* 卡片與圖片放大 */
+        .sign-card { background: white; border-radius: 14px; padding: 12px; border: 1px solid var(--yt-card-border); display: flex; gap: 12px; height: 135px; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; }
         
-        .touch-zone { width: 130px; height: 95px; flex-shrink: 0; position: relative; cursor: pointer; }
-        .img-slot { width: 100%; height: 100%; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; }
+        /* 圖片區域放大 */
+        .touch-zone { width: 150px; height: 110px; flex-shrink: 0; position: relative; cursor: pointer; }
+        .img-slot { width: 100%; height: 100%; background: #f8fafc; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
-        .check-badge { position: absolute; top: -6px; left: -6px; width: 26px; height: 26px; background: white; border: 2px solid #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; z-index: 10; color: transparent; }
+        
+        .check-badge { position: absolute; top: -8px; left: -8px; width: 30px; height: 30px; background: white; border: 2px solid #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; z-index: 10; color: transparent; }
         .selected .check-badge { background: var(--yt-light); border-color: white; color: white; }
         
         .edit-zone { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
-        .admin-input { background: #fff7ed !important; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 4px; font-size: 11px; color: #9a3412; font-weight: 900; width: 100%; outline: none; }
-        .id-edit { color: #095744; font-weight: 900; text-decoration: underline; }
         
-        .qty-input { width: 50px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; outline: none; }
-        .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #eee; z-index: 2000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
+        /* 標語名稱加大 */
+        .sign-name { font-size: 18px; font-weight: 900; color: var(--yt-dark); line-height: 1.2; margin-bottom: 4px; }
+        .admin-input-name { background: #fff7ed !important; border: 1.5px dashed #fb923c !important; border-radius: 4px; padding: 4px 6px; font-size: 16px; color: #9a3412; font-weight: 900; width: 100%; outline: none; }
+        
+        .spec-text { font-size: 11px; font-weight: bold; }
+        .qty-input { width: 60px; text-align: center; font-size: 32px; font-weight: 900; color: var(--yt-light); border-bottom: 3px solid #ddd; background: transparent; outline: none; }
+        .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #eee; z-index: 2000; }
     </style>
 </head>
 <body>
@@ -52,7 +58,7 @@
         <div id="tabContainer" class="category-scroller"></div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-2" id="mainGrid"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3" id="mainGrid"></div>
 
     <nav class="footer-nav no-print">
         <div id="adminPanel" class="hidden flex justify-center gap-2 mb-2">
@@ -92,6 +98,8 @@ const RAW_SIGNS = [
     {id:'K01', cat:'K', n:'守衛室', s:'30x10', m:'PVC'}
 ];
 
+// 分類與順序定義
+const CAT_KEYS = ['A','B','C','D','E','F','G','H','I','J','K'];
 const DEFAULT_CATEGORIES = { 
     'A':'A. 生活設施', 'B':'B. 安全防護', 'C':'C. 危險警示', 'D':'D. 禁止事項', 
     'E':'E. 交通與動線', 'F':'F. 設備設施位置', 'G':'G. 作業規範', 'H':'H. 宣導標語', 
@@ -108,7 +116,7 @@ const DEFAULT_STEP_DATA = {
 };
 
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db_v705')) || RAW_SIGNS;
+    activeDB = JSON.parse(localStorage.getItem('yt_db_v706')) || RAW_SIGNS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     config = JSON.parse(localStorage.getItem('yt_config')) || { title: "鈺通營造工安標語採購系統" };
@@ -127,16 +135,15 @@ function updateTitleUI() {
 
 function renderTabs() {
     let h = '';
-    // Step 1-6 優先
+    // 1. Step 1-6 
     Object.keys(stepData).sort().forEach(k => { 
         h += `<div class="cat-tab step ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${isAdmin ? `<input class="bg-transparent text-white w-24 text-center font-black" value="${stepData[k].t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">` : stepData[k].t}</div>`; 
     });
-    // A-K 類緊接其後
-    Object.keys(cats).sort().forEach(k => { 
-        if(k==='ALL') return;
+    // 2. A-K 分類
+    CAT_KEYS.forEach(k => {
         h += `<div class="cat-tab ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${isAdmin ? `<input class="bg-transparent text-black w-24 text-center font-black" value="${cats[k]}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()">` : cats[k]}</div>`; 
     });
-    // 「全部」放在最後
+    // 3. 全部標語置後
     h += `<div class="cat-tab ${currentFilter==='ALL'?'active':''}" onclick="setFilter('ALL')">${cats['ALL']}</div>`;
     document.getElementById('tabContainer').innerHTML = h;
 }
@@ -159,20 +166,14 @@ function render() {
                 <div class="img-slot"><img src="${GITHUB_BASE + item.id + '.jpg'}" onerror="handleImgErr(this)"></div>
             </div>
             <div class="edit-zone">
-                <div>
-                    <div class="text-[9px] font-bold text-gray-400">
-                        ${isAdmin ? `ID: <input class="id-edit bg-transparent border-none w-10 p-0" value="${item.id}" onchange="updateItemID('${item.id}', this.value)">` : `ID: ${item.id}`}
+                <div class="min-w-0">
+                    <div class="text-[10px] font-bold text-gray-400">
+                        ${isAdmin ? `ID: <input class="bg-transparent border-none w-12 font-black text-[#095744] underline" value="${item.id}" onchange="updateItemID('${item.id}', this.value)">` : `ID: ${item.id}`}
                     </div>
-                    ${isAdmin ? `<input class="admin-input mb-1" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)">` : `<div class="font-black text-[14px] text-[#095744] truncate">${item.n}</div>`}
-                    <div class="flex gap-1">
-                        <div class="flex-1 flex items-center min-w-0">
-                            <span class="text-[9px] font-bold text-red-600 mr-0.5">規:</span>
-                            ${isAdmin ? `<input class="admin-input" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)">` : `<span class="text-[9px] font-bold text-red-600 truncate">${item.s}</span>`}
-                        </div>
-                        <div class="flex-1 flex items-center min-w-0">
-                            <span class="text-[9px] font-bold text-blue-600 mr-0.5">材:</span>
-                            ${isAdmin ? `<input class="admin-input" value="${item.m}" oninput="updateDB('${item.id}','m',this.value)">` : `<span class="text-[9px] font-bold text-blue-600 truncate">${item.m}</span>`}
-                        </div>
+                    ${isAdmin ? `<input class="admin-input-name" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)">` : `<div class="sign-name truncate">${item.n}</div>`}
+                    <div class="flex flex-col">
+                        <span class="spec-text text-red-600">規：${isAdmin ? `<input class="bg-transparent border-b w-16" value="${item.s}" oninput="updateDB('${item.id}','s',this.value)">` : item.s}</span>
+                        <span class="spec-text text-blue-600">材：${isAdmin ? `<input class="bg-transparent border-b w-16" value="${item.m}" oninput="updateDB('${item.id}','m',this.value)">` : item.m}</span>
                     </div>
                 </div>
                 <div class="flex items-center justify-end">
@@ -183,39 +184,23 @@ function render() {
     });
 }
 
-// 核心改動：直接修改 ID 自動跳轉分類
 function updateItemID(oldID, newID) {
     newID = newID.toUpperCase().trim();
     if (activeDB.some(x => x.id === newID)) return alert("ID 重複了！");
     const item = activeDB.find(x => x.id === oldID);
     if (!item) return;
-
     const newCat = newID.charAt(0);
-    if (!cats[newCat]) return alert("無此分類代碼（請用 A-K）");
-
-    // 1. 更新 ID 與 分類
-    item.id = newID;
-    item.cat = newCat;
-
-    // 2. 同步更新 StepData 內的編號
-    Object.keys(stepData).forEach(k => {
-        stepData[k].items = stepData[k].items.map(id => id === oldID ? newID : id);
-    });
-
-    // 3. 同步更新購物車
-    if (cart[oldID]) {
-        cart[newID] = cart[oldID];
-        delete cart[oldID];
-    }
-
-    save();
-    render();
+    if (!cats[newCat]) return alert("請使用 A-K 開頭的編號");
+    item.id = newID; item.cat = newCat;
+    Object.keys(stepData).forEach(k => { stepData[k].items = stepData[k].items.map(id => id === oldID ? newID : id); });
+    if (cart[oldID]) { cart[newID] = cart[oldID]; delete cart[oldID]; }
+    save(); render();
 }
 
 function updateDB(id, f, v) { const i = activeDB.find(x => x.id === id); if (i) { i[f] = v; save(); } }
 function toggleItem(id) { if (!cart[id]) cart[id] = { sel: false, qty: 1 }; cart[id].sel = !cart[id].sel; save(); render(); }
 function updateQty(id, v) { if (!cart[id]) cart[id] = { sel: true, qty: 1 }; cart[id].qty = parseInt(v) || 1; save(); }
-function handleImgErr(i) { if (i.src.includes('.jpg')) { i.src = i.src.replace('.jpg', '.JPG'); } else { i.onerror = null; i.src = 'https://via.placeholder.com/150?text=無照片'; } }
+function handleImgErr(i) { if (i.src.includes('.jpg')) { i.src = i.src.replace('.jpg', '.JPG'); } else { i.onerror = null; i.src = 'https://via.placeholder.com/200?text=無照片'; } }
 
 function renderSites() {
     const sel = document.getElementById('siteSelect');
@@ -226,7 +211,7 @@ function addNewSite() { const n = prompt("新增工地："); if(n){sites.push(n)
 function deleteSite() { if(confirm("刪除此工地？")){sites=sites.filter(s=>s!==document.getElementById('siteSelect').value); renderSites(); save();} }
 
 function save() {
-    localStorage.setItem('yt_db_v705', JSON.stringify(activeDB));
+    localStorage.setItem('yt_db_v706', JSON.stringify(activeDB));
     localStorage.setItem('yt_cart', JSON.stringify(cart));
     localStorage.setItem('yt_staff', document.getElementById('staff').value);
     localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value);
@@ -246,18 +231,18 @@ function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel);
     if (!sel.length) return alert("請先選取項目");
     let h = `<div id="captureTarget" style="padding:20px; background:white; border:4px solid #095744; border-radius:10px;">
-        <h2 style="text-align:center; color:#095744; margin-bottom:15px; font-weight:900;">${config.title}</h2>
+        <h2 style="text-align:center; color:#095744; margin-bottom:15px; font-weight:900; font-size:24px;">${config.title}</h2>
         <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
             <span>工地：${document.getElementById('siteSelect').value}</span>
-            <span>填單：${document.getElementById('staff').value}</span>
+            <span>負責人：${document.getElementById('staff').value}</span>
         </div>
         <table style="width:100%; border-collapse:collapse;">`;
     sel.forEach((i, idx) => {
         h += `<tr style="border-bottom:1px solid #eee;">
-                <td style="padding:10px; font-weight:bold;">${idx+1}</td>
-                <td style="padding:10px;"><img src="${GITHUB_BASE+i.id+'.jpg'}" style="width:60px;" onerror="handleImgErr(this)"></td>
-                <td style="padding:10px; font-size:13px;"><b>[${i.id}] ${i.n}</b><br><span style="color:#666;">規：${i.s} / 材：${i.m}</span></td>
-                <td style="padding:10px; text-align:right; font-size:24px; font-weight:900; color:#095744;">${cart[i.id].qty}</td>
+                <td style="padding:10px; font-weight:bold; font-size:16px;">${idx+1}</td>
+                <td style="padding:10px;"><img src="${GITHUB_BASE+i.id+'.jpg'}" style="width:80px;" onerror="handleImgErr(this)"></td>
+                <td style="padding:10px; font-size:15px;"><b>[${i.id}] ${i.n}</b><br><span style="color:#666; font-size:12px;">規：${i.s} / 材：${i.m}</span></td>
+                <td style="padding:10px; text-align:right; font-size:32px; font-weight:900; color:#095744;">${cart[i.id].qty}</td>
               </tr>`;
     });
     document.getElementById('printArea').innerHTML = h + `</table></div>`;
@@ -266,7 +251,7 @@ function buildReport() {
 
 function captureToImage() {
     html2canvas(document.getElementById('captureTarget'), { useCORS: true }).then(canvas => {
-        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">✓ 截圖成功！長按圖片即可存檔。</p><img src="${canvas.toDataURL("image/png")}" style="width:100%; border:1px solid #ddd;">`;
+        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">✓ 截圖成功！請長按圖片儲存分享。</p><img src="${canvas.toDataURL("image/png")}" style="width:100%; border:1px solid #ddd;">`;
     });
 }
 
@@ -276,11 +261,11 @@ function exportData() {
 }
 
 function importData() {
-    const j = prompt("請貼上備份代碼：");
+    const j = prompt("貼上備份代碼：");
     if (j) { try { const d=JSON.parse(j); activeDB=d.db; sites=d.sites; config=d.config; stepData=d.stepData; cats=d.cats; save(); location.reload(); } catch(e){alert("格式錯誤");} }
 }
 
-function resetCart() { if(confirm("確定重選？")) { cart = {}; save(); render(); } }
+function resetCart() { if(confirm("全部重選？")) { cart = {}; save(); render(); } }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 init();
 </script>
