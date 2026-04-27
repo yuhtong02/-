@@ -9,47 +9,42 @@
     <style>
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 200px; }
-        .main-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 0.15em; color: white; text-align: center; }
+        .main-header { font-size: 2.25rem; font-weight: 900; letter-spacing: 0.2em; color: white; text-align: center; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: white; border-bottom: 5px solid var(--yt-dark); }
-        
-        .cat-tab-step { white-space: nowrap; padding: 10px 18px; border-radius: 14px; background: var(--yt-dark); color: white; font-size: 14px; font-weight: 900; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; border: 2px solid var(--yt-dark); transition: 0.2s; }
+        .guide-box { grid-column: 1 / -1; background: linear-gradient(135deg, #095744 0%, #1a7a63 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(9, 87, 68, 0.2); }
+        .cat-tab-step { white-space: nowrap; padding: 10px 18px; border-radius: 14px; background: var(--yt-dark); color: white; font-size: 14px; font-weight: 900; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; border: 2px solid var(--yt-dark); }
         .cat-tab-step::before { content: "📌"; margin-right: 6px; }
         .cat-tab-step.active { background: var(--yt-light); border-color: var(--yt-light); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
         .cat-tab-item { white-space: nowrap; padding: 10px 20px; border-radius: 12px; background: white; color: #475569; font-size: 14px; font-weight: 800; cursor: pointer; border: 2px solid #e2e8f0; flex-shrink: 0; }
-        .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); font-weight: 900; }
-        .cat-admin { border: 2px dashed #fb923c !important; background: #fff7ed; }
-
+        .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); }
         .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
         .sign-card { background: white; border-radius: 20px; padding: 18px; border: 1px solid #D7CCC8; display: flex; gap: 16px; cursor: pointer; position: relative; }
         .sign-card.selected { border: 4px solid var(--yt-light); background: #f0fdf4; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        
         .img-slot { width: 140px; height: 100px; background: #f1f5f9; border-radius: 14px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
-        
         .qty-input { width: 70px; text-align: center; font-size: 28px; font-weight: 900; color: var(--yt-light); border-bottom: 3px solid #ddd; background: transparent; outline: none; }
-        .admin-edit { background: #fff7ed; border: 1px dashed #fb923c; border-radius: 6px; padding: 4px; font-size: 13px; width: 100%; font-weight: bold; color: #9a3412; }
+        .admin-edit-input { background: rgba(255,255,255,0.1); border-bottom: 1px dashed white; width: 100%; outline: none; }
         #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
     </style>
 </head>
 <body>
 
     <div class="sticky-header">
-        <div class="flex items-center justify-between px-6 py-4 bg-[#095744] text-white">
-            <span class="main-title">鈺通營造工安標語系統</span>
-            <div class="flex gap-2">
-                <button onclick="exportJSON()" id="exportBtn" class="hidden text-xs bg-white/10 px-3 py-2 rounded-lg border border-white/20">💾 備份</button>
-                <button onclick="importJSON()" id="importBtn" class="hidden text-xs bg-white/10 px-3 py-2 rounded-lg border border-white/20">📂 導入</button>
+        <div class="flex flex-col items-center justify-center px-6 py-5 bg-[#095744] text-white">
+            <h1 class="main-header">鈺通營造工安標語系統</h1>
+            <div class="flex gap-3 mt-3">
+                <button onclick="exportJSON()" id="exportBtn" class="hidden text-xs bg-white/10 px-3 py-1.5 rounded-lg border border-white/20">💾 導出備份</button>
+                <button onclick="importJSON()" id="importBtn" class="hidden text-xs bg-white/10 px-3 py-1.5 rounded-lg border border-white/20">📂 導入資料</button>
                 <button onclick="toggleAdmin()" id="adminBtn" class="text-xs font-black bg-white text-[#095744] px-4 py-2 rounded-full shadow-lg">🔒 管理員</button>
             </div>
         </div>
         
         <div class="grid grid-cols-2 gap-4 px-6 py-3 bg-white border-b shadow-sm">
             <div class="flex gap-1">
-                <select id="siteSelect" class="flex-1 bg-gray-50 p-2.5 rounded-xl text-sm font-black border-2 border-gray-100 outline-none focus:border-[#095744]"></select>
-                <button onclick="addNewSite()" class="bg-[#095744] text-white px-4 rounded-xl font-bold hover:bg-black">+</button>
+                <select id="siteSelect" class="flex-1 bg-gray-50 p-2.5 rounded-xl text-sm font-black border-2 border-gray-100 outline-none"></select>
+                <button onclick="addNewSite()" class="bg-[#095744] text-white px-4 rounded-xl font-bold">+</button>
             </div>
-            <input type="text" id="staff" class="bg-gray-50 p-2.5 rounded-xl text-sm font-black border-2 border-gray-100 outline-none focus:border-[#095744]" placeholder="填單人員名字">
+            <input type="text" id="staff" class="bg-gray-50 p-2.5 rounded-xl text-sm font-black border-2 border-gray-100 outline-none" placeholder="填單人員名字">
         </div>
         
         <div class="flex overflow-x-auto gap-3 p-4 bg-white scrollbar-hide" id="tabContainer"></div>
@@ -58,10 +53,10 @@
     <div id="mainGrid" class="grid-container max-w-7xl mx-auto"></div>
 
     <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t-2 border-gray-100 z-50 shadow-2xl flex flex-col gap-3 backdrop-blur-md">
-        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-orange-100 text-orange-800 py-3 rounded-2xl font-black border-2 border-orange-200 hover:bg-orange-200 transition-colors">➕ 插入新標語 (序號自動遞補)</button>
+        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full bg-orange-100 text-orange-800 py-3 rounded-2xl font-black border-2 border-orange-200">➕ 插入標語</button>
         <div class="flex gap-4 max-w-5xl mx-auto w-full">
-            <button onclick="buildReport()" class="flex-[5] bg-[#095744] text-white py-5 rounded-2xl font-black text-2xl shadow-xl active:scale-95 transition-all">📋 生成採購單</button>
-            <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-500 rounded-2xl text-xs font-black border border-red-100">清空重選</button>
+            <button onclick="buildReport()" class="flex-[5] bg-[#095744] text-white py-5 rounded-2xl font-black text-2xl shadow-xl">📋 生成採購單</button>
+            <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-500 rounded-2xl text-xs font-black border border-red-100">清空</button>
         </div>
     </nav>
 
@@ -69,43 +64,103 @@
         <div class="bg-white w-full max-w-2xl rounded-3xl p-8 overflow-y-auto max-h-[85vh] shadow-2xl" onclick="event.stopPropagation()">
             <div id="printArea"></div>
             <div class="grid grid-cols-2 gap-4 mt-8">
-                <button onclick="window.print()" class="bg-[#095744] text-white py-4 rounded-2xl font-black text-lg">列印本單 / 儲存PDF</button>
-                <button onclick="closeModal()" class="bg-gray-100 py-4 rounded-2xl font-bold text-gray-500">關閉預覽</button>
+                <button onclick="window.print()" class="bg-[#095744] text-white py-4 rounded-2xl font-black">列印 / 儲存PDF</button>
+                <button onclick="closeModal()" class="bg-gray-100 py-4 rounded-2xl font-bold text-gray-500">返回</button>
             </div>
         </div>
     </div>
 
 <script>
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels;
-// 修正路徑為小寫 img，並移除結尾斜槓方便拼接
 const GITHUB_BASE = "https://yuhtong02.github.io/-/img/";
 
-const request = indexedDB.open("Yutong_SignSystem_FinalV5", 1);
+const request = indexedDB.open("Yutong_Sign_System_Final_V7", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
 
 function init() {
     sites = JSON.parse(localStorage.getItem('yt_sites')) || ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門住宅", "嘉義民雄院區", "臺南林森圖書館"];
     
+    // 預填標語資料 (自動歸類)
     activeDB = JSON.parse(localStorage.getItem('yt_db')) || [
-        {id:'A01', cat:'A', n:'工地大門告示牌', s:'60x90', m:'中空板'},
-        {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}
+        {id:'A01', cat:'A', n:'統包商辦公室', s:'60x40', m:'中空板'},
+        {id:'A02', cat:'A', n:'監造單位辦公室', s:'60x40', m:'中空板'},
+        {id:'A03', cat:'A', n:'管理單位辦公室', s:'60x40', m:'中空板'},
+        {id:'A04', cat:'A', n:'會議室', s:'60x40', m:'中空板'},
+        {id:'A05', cat:'A', n:'倉庫', s:'60x40', m:'中空板'},
+        {id:'A06', cat:'A', n:'建材展覽室', s:'60x40', m:'中空板'},
+        {id:'A07', cat:'A', n:'休息區', s:'60x40', m:'中空板'},
+        {id:'A08', cat:'A', n:'飲水機', s:'30x15', m:'中空板'},
+        {id:'A09', cat:'A', n:'急救箱', s:'20x20', m:'貼紙'},
+        {id:'A10', cat:'A', n:'男化妝室', s:'30x15', m:'中空板'},
+        {id:'A11', cat:'A', n:'女化妝室', s:'30x15', m:'中空板'},
+        {id:'A12', cat:'A', n:'小便斗', s:'10x20', m:'貼紙'},
+        {id:'B01', cat:'B', n:'進入工區請戴安全帽', s:'60x40', m:'中空板'},
+        {id:'B02', cat:'B', n:'背負式安全帶穿戴步驟', s:'90x120', m:'中空板'},
+        {id:'B03', cat:'B', n:'施工架相關規定', s:'90x120', m:'中空板'},
+        {id:'B04', cat:'B', n:'安全出口', s:'30x15', m:'壓克力'},
+        {id:'C01', cat:'C', n:'工程告示牌', s:'120x75', m:'鋁板'},
+        {id:'C02', cat:'C', n:'安衛告示牌', s:'120x75', m:'鋁板'},
+        {id:'C03', cat:'C', n:'工地/學校名稱', s:'客製', m:'中空板'},
+        {id:'C04', cat:'C', n:'各棟別名稱', s:'客製', m:'中空板'},
+        {id:'C05', cat:'C', n:'今日危害因素告示牌', s:'90x60', m:'白板'},
+        {id:'C06', cat:'C', n:'工地上梁典禮', s:'客製', m:'紅布條'},
+        {id:'D01', cat:'D', n:'非工作人員禁止進入', s:'60x40', m:'中空板'},
+        {id:'D02', cat:'D', n:'非施工必要禁止進入', s:'60x40', m:'中空板'},
+        {id:'D03', cat:'D', n:'開口危險小心墜落', s:'60x40', m:'中空板'},
+        {id:'D04', cat:'D', n:'升降梯開口危險', s:'60x40', m:'中空板'},
+        {id:'D05', cat:'D', n:'欄杆禁止跨越或攀爬', s:'60x40', m:'中空板'},
+        {id:'D06', cat:'D', n:'打開柵門作業請穿戴背負式安全帶', s:'60x40', m:'中空板'},
+        {id:'D07', cat:'D', n:'吊料電梯專用口', s:'60x40', m:'中空板'},
+        {id:'D08', cat:'D', n:'樓梯標示', s:'30x15', m:'中空板'},
+        {id:'D09', cat:'D', n:'樓層標示', s:'30x30', m:'中空板'},
+        {id:'E01', cat:'E', n:'有電危險請勿觸碰', s:'30x20', m:'中空板'},
+        {id:'E02', cat:'E', n:'高壓電勿近', s:'30x20', m:'中空板'},
+        {id:'F01', cat:'F', n:'汽車停放區', s:'60x40', m:'中空板'},
+        {id:'F02', cat:'F', n:'機車停放區', s:'60x40', m:'中空板'},
+        {id:'F03', cat:'F', n:'工區施工請勿停車', s:'60x40', m:'中空板'},
+        {id:'F04', cat:'F', n:'進入工區請緩慢行駛', s:'60x40', m:'中空板'},
+        {id:'G01', cat:'G', n:'一般垃圾', s:'30x30', m:'中空板'},
+        {id:'G02', cat:'G', n:'資源回收', s:'30x30', m:'中空板'},
+        {id:'G03', cat:'G', n:'廚餘', s:'30x30', m:'中空板'},
+        {id:'G04', cat:'G', n:'鐵鋁罐', s:'30x30', m:'中空板'},
+        {id:'G05', cat:'G', n:'玻璃類', s:'30x30', m:'中空板'},
+        {id:'G06', cat:'G', n:'塑膠類', s:'30x30', m:'中空板'},
+        {id:'G07', cat:'G', n:'紙容器', s:'30x30', m:'中空板'},
+        {id:'G08', cat:'G', n:'廚餘宣傳', s:'60x40', m:'中空板'},
+        {id:'G09', cat:'G', n:'營建廢棄物堆置區', s:'90x60', m:'中空板'},
+        {id:'G10', cat:'G', n:'物料暫置區', s:'90x60', m:'中空板'},
+        {id:'G11', cat:'G', n:'垃圾管道傾倒口', s:'60x40', m:'中空板'},
+        {id:'H01', cat:'H', n:'滅火器', s:'10x30', m:'貼紙'},
+        {id:'J01', cat:'J', n:'安全第一', s:'60x20', m:'中空板'},
+        {id:'J02', cat:'J', n:'嚴禁酒後進場', s:'60x40', m:'中空板'},
+        {id:'J03', cat:'J', n:'工具箱會議', s:'90x60', m:'中空板'},
+        {id:'J04', cat:'J', n:'工安公布宣導欄', s:'120x90', m:'白板'},
+        {id:'J05', cat:'J', n:'熱危害宣導', s:'60x90', m:'中空板'},
+        {id:'J06', cat:'J', n:'生活點滴', s:'客製', m:'相片'},
+        {id:'J07', cat:'J', n:'安全第一；品質至上', s:'120x30', m:'中空板'},
+        {id:'J08', cat:'J', n:'關懷標語', s:'60x40', m:'中空板'},
+        {id:'J09', cat:'J', n:'工安宣導', s:'60x40', m:'中空板'},
+        {id:'J10', cat:'J', n:'工安標語6S', s:'60x40', m:'中空板'},
+        {id:'J11', cat:'J', n:'存好心做好事說好話', s:'120x30', m:'中空板'},
+        {id:'K01', cat:'K', n:'守衛室', s:'60x40', m:'中空板'},
+        {id:'K02', cat:'K', n:'施工架嚴禁堆置物料', s:'60x40', m:'中空板'},
+        {id:'K03', cat:'K', n:'放置鋼筋材料', s:'60x40', m:'中空板'},
+        {id:'K04', cat:'K', n:'施工電梯', s:'60x40', m:'中空板'}
     ];
 
+    // 智慧指引 Step 1~6 預設關聯
     guides = JSON.parse(localStorage.getItem('yt_guides')) || {
-        'S1': { t: '工區大門配置', items: ['A01','B01'] },
-        'S2': { t: '基礎設施', items: [] },
-        'S3': { t: '施工安全', items: [] },
-        'S4': { t: '動線管制', items: [] },
-        'S5': { t: '機具電力', items: [] },
-        'S6': { t: '環境清潔', items: [] }
+        'S1': { t: '工區大門配置', d: '包含工程告示牌、守衛室及基本入門禁令', items: ['C01','C02','C03','K01','J02','B01'] },
+        'S2': { t: '基礎設施', d: '辦公室、會議室、倉庫、化妝室等生活機能區', items: ['A01','A02','A03','A04','A05','A07','A10','A11'] },
+        'S3': { t: '施工安全', d: '危害告示、防護宣導及各項工安公佈欄', items: ['C05','J04','B02','B03','J10','J09'] },
+        'S4': { t: '動線管制', d: '車道、停放區、人員通道及樓層導引', items: ['F01','F02','F04','D01','D08','D09'] },
+        'S5': { t: '機具電力', d: '電力警示、電梯口及開口防護警告', items: ['E01','E02','K04','D04','D07','D03'] },
+        'S6': { t: '環境清潔', d: '垃圾分類、資源回收及廢棄物堆置區', items: ['G01','G02','G03','G08','G09','G10'] }
     };
 
     catLabels = JSON.parse(localStorage.getItem('yt_cats')) || {
-        'ALL':'全部標語', 
-        'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.施工告示', 'D':'D.指引警告', 
-        'E':'E.電力設備', 'F':'F.車輛管理', 'G':'G.環境衛生', 'H':'H.消防救護', 
-        'I':'I.吊掛作業', 'J':'J.其他標語', 'K':'K.雜項清單'
+        'ALL':'全部標語', 'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.施工告示', 'D':'D.指引警告', 'E':'E.電力設備', 'F':'F.車輛管理', 'G':'G.環境衛生', 'H':'H.消防救護', 'I':'I.吊掛作業', 'J':'J.其他標語', 'K':'K.雜項清單'
     };
 
     renderTabs(); renderSiteSelect(); render();
@@ -113,142 +168,99 @@ function init() {
 
 function renderTabs() {
     let html = '';
-    // 1. Step 排序 (S1~S6)
-    const sortedSteps = Object.keys(guides).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
-    sortedSteps.forEach(k => {
-        const stepNum = k.replace('S','');
-        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="${isAdmin ? `renameStep('${k}')` : `setFilter('GUIDE','${k}')`}">Step ${stepNum}.${guides[k].t}</div>`;
+    Object.keys(guides).sort((a,b)=>a.localeCompare(b, undefined, {numeric:true})).forEach(k => {
+        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}.${guides[k].t}</div>`;
     });
-
-    // 2. 「全部標語」固定在分類的第一位
     html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="setFilter('CAT','ALL')">${catLabels['ALL']}</div>`;
-
-    // 3. A~K 分類排序 (排除 ALL)
-    const sortedCats = Object.keys(catLabels).filter(k => k !== 'ALL').sort();
-    sortedCats.forEach(k => {
-        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdmin?'cat-admin':''}" onclick="${isAdmin ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">${catLabels[k]}</div>`;
+    Object.keys(catLabels).filter(k=>k!=='ALL').sort().forEach(k => {
+        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdmin?'cat-admin':''}" onclick="${isAdmin?`renameCat('${k}')`:`setFilter('CAT','${k}')`}">${catLabels[k]}</div>`;
     });
-    
     document.getElementById('tabContainer').innerHTML = html;
 }
 
 async function render() {
     const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
-    let display = (currentMode === 'CAT') ? (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : activeDB.filter(x => guides[currentKey].items.includes(x.id));
+    if(currentMode === 'GUIDE' && guides[currentKey]) {
+        const g = guides[currentKey];
+        grid.innerHTML = `<div class="guide-box"><div>${isAdmin ? `<input class="admin-edit-input text-2xl font-black mb-1" value="${g.t}" oninput="updateGuide('${currentKey}','t',this.value)">` : `<h2 class="text-2xl font-black mb-1">Step ${currentKey.replace('S','')}. ${g.t}</h2>`}${isAdmin ? `<input class="admin-edit-input text-sm opacity-80" value="${g.d}" oninput="updateGuide('${currentKey}','d',this.value)">` : `<p class="text-sm opacity-80">${g.d}</p>`}</div></div>`;
+    }
+
+    let display = (currentMode === 'CAT') ? 
+        (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : 
+        activeDB.filter(x => guides[currentKey].items.includes(x.id));
     
     display.sort((a,b) => a.id.localeCompare(b.id));
 
     for (const i of display) {
         const c = cart[i.id] || { sel:false, qty:1 };
-        const localImg = await dbGet(i.id);
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
-        
-        // 核心修正：嘗試載入 .JPG (大寫)，若失敗再換 .jpg (小寫)
-        const imgSrc = localImg || `${GITHUB_BASE}${i.id}.JPG`;
+        const imgPath = `${GITHUB_BASE}${i.id}.JPG`;
 
         card.innerHTML = `
             ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-3 -right-3 bg-red-600 text-white w-8 h-8 rounded-full text-sm z-20 shadow-md">✕</button>` : ''}
-            <div class="img-slot">
-                <img src="${imgSrc}" onerror="this.onerror=null; this.src='${GITHUB_BASE}${i.id}.jpg'; this.parentElement.innerHTML='<div class=p-4 text-xs>未找到圖片</div>'">
-            </div>
+            <div class="img-slot"><img src="${imgPath}" onerror="this.onerror=null; this.src='${GITHUB_BASE}${i.id}.jpg'; this.parentElement.innerHTML='<div class=p-4 text-xs>無照片</div>'"></div>
             <div class="flex-1">
                 <div class="flex justify-between items-start mb-1">
-                    <div class="flex-1">${isAdmin ? `<input class="admin-edit" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`}</div>
+                    <div class="flex-1">${isAdmin ? `<input class="bg-orange-50 w-full font-bold" value="${i.n}" oninput="updateI('${i.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="font-black text-[#095744] text-lg leading-tight">${i.n}</div>`}</div>
                     <span class="text-[10px] font-bold text-gray-400 ml-2">${i.id}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mt-2 text-xs">
-                    <div>規格：${isAdmin ? `<input class="admin-edit" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : `<span class="text-red-600 font-black">${i.s}</span>`}</div>
-                    <div>材質：${isAdmin ? `<input class="admin-edit" value="${i.m||''}" oninput="updateI('${i.id}','m',this.value)" onclick="event.stopPropagation()">` : `<span class="text-blue-600 font-black">${i.m||'中空板'}</span>`}</div>
+                    <div>規格：${isAdmin ? `<input class="border-b w-full" value="${i.s}" oninput="updateI('${i.id}','s',this.value)">` : `<span class="text-red-600 font-black">${i.s}</span>`}</div>
+                    <div>材質：${isAdmin ? `<input class="border-b w-full" value="${i.m||''}" oninput="updateI('${i.id}','m',this.value)">` : `<span class="text-blue-600 font-black">${i.m||'中空板'}</span>`}</div>
                 </div>
                 <div class="flex items-center gap-4 mt-3" onclick="event.stopPropagation()">
-                    <span class="text-xs font-black text-gray-400">採購數量</span>
+                    <span class="text-xs font-black text-gray-400">數量</span>
                     <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
-                    ${isAdmin && currentMode === 'CAT' ? `<select onchange="addIntoStep(this.value, '${i.id}')" class="text-[10px] bg-orange-50 border-orange-200 border px-2 py-1 rounded-lg"><option>+ STEP</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option><option value="S6">S6</option></select>` : ''}
+                    ${isAdmin ? `<select onchange="addIntoStep(this.value, '${i.id}')" class="text-[10px] bg-orange-50 px-1 py-1 rounded"><option>+Step</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option><option value="S6">S6</option></select>` : ''}
                 </div>
             </div>`;
         grid.appendChild(card);
     }
 }
 
-function renameStep(k) { const n = prompt("修改 Step 標題 (不需輸入Step數字):", guides[k].t); if(n) { guides[k].t = n; saveData(); renderTabs(); } }
-function renameCat(k) { const n = prompt("修改分類名稱 (建議保留英文序號):", catLabels[k]); if(n) { catLabels[k] = n; saveData(); renderTabs(); } }
-
-// 其他後台邏輯...
-async function deleteItem(id) {
-    if(!confirm(`刪除 [${id}]？後方編號將連動遞補`)) return;
-    let prefix = id.charAt(0), startNum = parseInt(id.slice(1));
-    activeDB = activeDB.filter(x => x.id !== id);
-    let targets = activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) > startNum).sort((a,b) => parseInt(a.id.slice(1)) - parseInt(b.id.slice(1)));
-    for(let item of targets) {
-        let oldID = item.id, newID = prefix + (parseInt(oldID.slice(1)) - 1).toString().padStart(2, '0');
-        let img = await dbGet(oldID); if(img) await dbSet(newID, img); item.id = newID;
-    }
-    saveData(); render();
-}
-
+function updateGuide(key, field, val) { guides[key][field] = val; saveData(); }
+function renameCat(k) { const n = prompt("修改:", catLabels[k]); if(n) { catLabels[k] = n; saveData(); renderTabs(); }}
+async function deleteItem(id) { if(!confirm(`刪除 [${id}]？`)) return; activeDB = activeDB.filter(x => x.id !== id); saveData(); render(); }
 async function addNewItem() {
     let prefix = (currentMode === 'CAT' && currentKey !== 'ALL') ? currentKey : 'A';
-    let max = 0; activeDB.filter(i => i.id.startsWith(prefix)).forEach(i => { let n = parseInt(i.id.slice(1)); if(n>max) max=n; });
-    let inputID = prompt("插入編號 (例如 "+prefix+"05):", prefix + (max + 1).toString().padStart(2, '0')).toUpperCase();
-    if(!inputID) return;
-    let startNum = parseInt(inputID.slice(1));
-    let targets = activeDB.filter(x => x.id.startsWith(prefix) && parseInt(x.id.slice(1)) >= startNum).sort((a,b) => parseInt(b.id.slice(1)) - parseInt(a.id.slice(1)));
-    for(let item of targets) {
-        let oldID = item.id, nextID = prefix + (parseInt(oldID.slice(1)) + 1).toString().padStart(2, '0');
-        let img = await dbGet(oldID); if(img) await dbSet(nextID, img); item.id = nextID;
-    }
-    activeDB.push({id: inputID, cat: prefix, n: "新項目", s: "60x40", m: "中空板"});
-    saveData(); render();
+    let inputID = prompt("編號:", prefix + "01"); if(!inputID) return;
+    activeDB.push({id: inputID, cat: prefix, n: "新項目", s: "60x40", m: "中空板"}); saveData(); render();
 }
-
-function toggleAdmin() {
-    if(!isAdmin && prompt("管理密碼") !== "751113") return;
-    isAdmin = !isAdmin;
-    document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理模式" : "🔒 管理員";
-    document.getElementById('addItemBtn').classList.toggle('hidden', !isAdmin);
-    document.getElementById('exportBtn').classList.toggle('hidden', !isAdmin);
-    document.getElementById('importBtn').classList.toggle('hidden', !isAdmin);
-    renderTabs(); render();
-}
-
+function toggleAdmin() { if(!isAdmin && prompt("密碼") !== "751113") return; isAdmin = !isAdmin; document.getElementById('adminBtn').innerText = isAdmin ? "🔓 管理模式" : "🔒 管理員"; document.getElementById('addItemBtn').classList.toggle('hidden', !isAdmin); document.getElementById('exportBtn').classList.toggle('hidden', !isAdmin); document.getElementById('importBtn').classList.toggle('hidden', !isAdmin); renderTabs(); render(); }
 function setFilter(m, k) { currentMode=m; currentKey=k; renderTabs(); render(); }
 function toggleItem(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; render(); }
 function updateQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qty=parseInt(v)||1; }
 function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveData(); }}
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
-function addNewSite() { const n = prompt("新工地名稱:"); if(n) { sites.push(n); saveData(); renderSiteSelect(); } }
+function addNewSite() { const n = prompt("新工地:"); if(n) { sites.push(n); saveData(); renderSiteSelect(); } }
 function addIntoStep(gk, id) { if(!guides[gk].items.includes(id)) { guides[gk].items.push(id); saveData(); alert('已加入 Step '+gk.replace('S','')); }}
 function saveData() { localStorage.setItem('yt_db', JSON.stringify(activeDB)); localStorage.setItem('yt_sites', JSON.stringify(sites)); localStorage.setItem('yt_guides', JSON.stringify(guides)); localStorage.setItem('yt_cats', JSON.stringify(catLabels)); }
 function exportJSON() { const data = { activeDB, sites, guides, catLabels }; const blob = new Blob([JSON.stringify(data)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `鈺通備份.json`; a.click(); }
 function importJSON() { const input = document.createElement('input'); input.type = 'file'; input.onchange = e => { const reader = new FileReader(); reader.onload = e => { const data = JSON.parse(e.target.result); activeDB = data.activeDB; sites = data.sites; guides = data.guides; catLabels = data.catLabels; saveData(); location.reload(); }; reader.readAsText(e.target.files[0]); }; input.click(); }
-async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
-async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function resetCart() { if(confirm("確定清空？")) { cart = {}; render(); } }
-
+function resetCart() { if(confirm("清空？")) { cart = {}; render(); } }
 async function buildReport() {
-    const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
-    if(!sel.length) return alert("請勾選標語項目");
-    let h = `<div style="border:5px solid #095744; padding:30px; font-family:sans-serif; background:white;">
-        <h1 style="text-align:center; color:#095744; margin-bottom:5px; font-size:28px; font-weight:900;">鈺通營造工安標語採購單</h1>
-        <div style="display:flex; justify-content:space-between; font-weight:bold; border-bottom:3px solid #095744; padding-bottom:10px; font-size:18px;">
+    const sel = activeDB.filter(i => cart[i.id]?.sel);
+    if(!sel.length) return alert("請選標語");
+    let h = `<div style="border:5px solid #095744; padding:30px;">
+        <h1 style="text-align:center; color:#095744; font-size:28px;">鈺通營造工安標語採購單</h1>
+        <div style="display:flex; justify-content:space-between; font-weight:bold; border-bottom:3px solid #095744; padding-bottom:10px;">
             <span>工地：${document.getElementById('siteSelect').value}</span>
             <span>填單人：${document.getElementById('staff').value}</span>
         </div>`;
     for(let i of sel) {
-        const localImg = await dbGet(i.id);
-        const imgSrc = localImg || `${GITHUB_BASE}${i.id}.JPG`;
         h += `<div style="display:flex; align-items:center; gap:20px; border-bottom:1px solid #eee; padding:15px 0;">
-            <img src="${imgSrc}" style="width:80px; height:60px; object-fit:contain;" onerror="this.src='${GITHUB_BASE}${i.id}.jpg'">
-            <div style="flex:1;"><b style="font-size:18px; color:#095744;">[${i.id}] ${i.n}</b><br><small style="color:gray">${i.s} / ${i.m||'中空板'}</small></div>
+            <img src="${GITHUB_BASE + i.id + '.JPG'}" style="width:80px; height:60px; object-fit:contain;" onerror="this.src='${GITHUB_BASE + i.id + '.jpg'}'">
+            <div style="flex:1;"><b style="font-size:18px;">[${i.id}] ${i.n}</b><br><small>${i.s} / ${i.m||'中空板'}</small></div>
             <div style="font-size:30px; font-weight:900; color:#70B934;">x ${cart[i.id].qty}</div>
         </div>`;
     }
     document.getElementById('printArea').innerHTML = h + `</div>`;
     document.getElementById('modal').style.display = 'flex';
 }
+window.onload = init;
 </script>
 </body>
 </html>
