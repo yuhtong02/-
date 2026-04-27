@@ -11,36 +11,44 @@
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 200px; touch-action: manipulation; }
         
-        /* 頁首與導覽 */
-        .sticky-header { position: sticky; top: 0; z-index: 100; background: white; border-bottom: 3px solid var(--yt-dark); }
+        /* 頁首與導覽樣式 */
+        .sticky-header { position: sticky; top: 0; z-index: 100; background: white; border-bottom: 3px solid var(--yt-dark); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .cat-tab-item, .cat-tab-step { white-space: nowrap; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; border: 2px solid transparent; }
         .cat-tab-step { background: var(--yt-dark); color: white; }
         .cat-tab-step.active { background: var(--yt-light); }
         .cat-tab-item { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
         .cat-tab-item.active { background: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark); }
 
-        /* 卡片設計 */
+        /* 標語卡片優化 */
         .grid-container { display: grid; gap: 12px; padding: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-        .sign-card { background: white; border-radius: 16px; padding: 14px; border: 2px solid transparent; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; gap: 12px; cursor: pointer; position: relative; }
-        .sign-card.selected { border-color: var(--yt-light); background: #f0fdf4; }
+        .sign-card { background: white; border-radius: 16px; padding: 14px; border: 2px solid transparent; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; gap: 12px; cursor: pointer; position: relative; transition: all 0.1s; }
+        .sign-card:active { transform: scale(0.97); }
+        .sign-card.selected { border-color: var(--yt-light); background: #f0fdf4; box-shadow: 0 8px 15px rgba(112, 185, 52, 0.1); }
+        
         .img-slot { width: 80px; height: 80px; background: #f8fafc; border-radius: 10px; overflow: hidden; border: 1px solid #eee; }
         .img-slot img { width: 100%; height: 100%; object-fit: contain; }
-        .qty-input { width: 60px; text-align: center; font-size: 20px; font-weight: 900; color: var(--yt-dark); border-bottom: 2px solid var(--yt-light); outline: none; }
+        .qty-input { width: 60px; text-align: center; font-size: 22px; font-weight: 900; color: var(--yt-dark); border-bottom: 2px solid var(--yt-light); outline: none; background: transparent; }
 
-        /* 仿截圖中的 Modal 樣式 */
-        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
-        #modalContent { background: white; width: 100%; max-width: 500px; border-radius: 25px; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
-        .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
-        .modal-footer { padding: 15px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+        /* 彈出視窗 Modal 樣式 */
+        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 15px; }
+        #modalContent { background: white; width: 100%; max-width: 480px; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; border: 1px solid #ddd; }
+        .modal-body { flex: 1; overflow-y: auto; padding: 20px; background: white; }
+        .modal-footer { padding: 16px; background: #f1f5f9; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #e2e8f0; }
         
-        .btn-print { background: #095744; color: white; padding: 14px; border-radius: 12px; font-weight: bold; text-align: center; }
-        .btn-image { background: #F39800; color: white; padding: 14px; border-radius: 12px; font-weight: bold; text-align: center; }
-        .btn-close { background: #E2E8F0; color: #64748B; padding: 12px; border-radius: 12px; font-weight: bold; text-align: center; }
+        /* 按鈕配色優化 */
+        .btn-print { background: #095744; color: white; padding: 14px; border-radius: 14px; font-weight: 900; text-align: center; box-shadow: 0 4px 0 #053a2d; }
+        .btn-print:active { transform: translateY(2px); box-shadow: 0 2px 0 #053a2d; }
+        .btn-image { background: #F39800; color: white; padding: 14px; border-radius: 14px; font-weight: 900; text-align: center; box-shadow: 0 4px 0 #c77c00; }
+        .btn-image:active { transform: translateY(2px); box-shadow: 0 2px 0 #c77c00; }
+        .btn-close { background: #cbd5e1; color: #334155; padding: 12px; border-radius: 14px; font-weight: bold; text-align: center; margin-top: 5px; }
 
-        /* 採購單表格內樣式 */
-        .report-item { display: flex; align-items: center; gap: 15px; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .report-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px dashed #ccc; }
         
-        @media print { .no-print { display: none !important; } #modalOverlay { position: absolute; background: white; padding: 0; } #modalContent { box-shadow: none; max-height: none; } .modal-footer { display: none; } }
+        @media print { 
+            .no-print { display: none !important; } 
+            #modalOverlay { position: absolute; background: white; padding: 0; display: block; } 
+            #modalContent { border: none; max-height: none; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -48,11 +56,11 @@
     <div class="sticky-header no-print">
         <div class="bg-[#095744] p-4 flex justify-between items-center text-white">
             <span class="text-xl font-black tracking-widest">鈺通營造工安系統</span>
-            <button onclick="toggleAdmin()" id="adminBtn" class="bg-white text-[#095744] px-3 py-1 rounded-full text-xs font-black">🔒 管理員</button>
+            <button onclick="toggleAdmin()" id="adminBtn" class="bg-white text-[#095744] px-4 py-1 rounded-full text-xs font-black">🔒 管理員</button>
         </div>
         <div class="grid grid-cols-2 gap-2 p-3 bg-white border-b">
-            <select id="siteSelect" class="bg-gray-50 p-2 rounded-xl text-sm font-bold border h-11"></select>
-            <input type="text" id="staff" class="bg-gray-50 p-2 rounded-xl text-sm font-bold border h-11" placeholder="填單人員">
+            <select id="siteSelect" class="bg-gray-50 p-2 rounded-xl text-sm font-bold border h-11 focus:ring-2 focus:ring-[#095744] outline-none"></select>
+            <input type="text" id="staff" class="bg-gray-50 p-2 rounded-xl text-sm font-bold border h-11 outline-none" placeholder="填單人員">
         </div>
         <div class="flex overflow-x-auto gap-2 p-3 bg-white scrollbar-hide" id="tabContainer"></div>
     </div>
@@ -64,16 +72,16 @@
             <div class="modal-body" id="reportArea">
                 </div>
             <div class="modal-footer no-print">
-                <button onclick="window.print()" class="btn-print">1. 直接列印 / PDF</button>
+                <button onclick="window.print()" class="btn-print">1. 直接列印 (電腦端使用)</button>
                 <button onclick="captureImage()" class="btn-image">2. 轉為圖片 (手機長按儲存)</button>
-                <button onclick="closeModal()" class="btn-close">返回編輯</button>
+                <button onclick="closeModal()" class="btn-close">返回系統</button>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-[1000] flex flex-col gap-2 no-print shadow-lg">
+    <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t z-[500] flex flex-col gap-2 no-print shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
         <div class="flex gap-3">
-            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-xl active:scale-95">📋 生成採購單</button>
+            <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-xl active:scale-95 transition-all">📋 生成採購單</button>
             <button onclick="resetCart()" class="flex-1 bg-gray-100 text-gray-400 rounded-2xl text-sm font-bold">清空</button>
         </div>
     </nav>
@@ -106,13 +114,13 @@ function render() {
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = (e) => { if(e.target.tagName !== 'INPUT') { cart[i.id] = { sel: !c.sel, qty: c.qty }; render(); } };
         card.innerHTML = `
-            <div class="img-slot"><img src="${IMG_PATH}${i.id}.png" onerror="this.src='${IMG_PATH}${i.id}.jpg'; this.onerror=null; this.parentElement.innerHTML='<div class=p-5 text-xs text-gray-300>無圖</div>'"></div>
+            <div class="img-slot"><img src="${IMG_PATH}${i.id}.png" onerror="this.src='${IMG_PATH}${i.id}.jpg'; this.onerror=null; this.parentElement.innerHTML='<div class=p-5 text-[10px] text-gray-300>待補圖</div>'"></div>
             <div class="flex-1">
-                <div class="font-black text-[#095744] text-[15px]">${i.n}</div>
+                <div class="font-black text-[#095744] text-[15px] leading-tight">${i.n}</div>
                 <div class="text-[11px] text-gray-500 mt-1">規格：<span class="text-red-500">${i.s}</span> / ${i.m}</div>
             </div>
-            <div class="absolute bottom-3 right-3 flex flex-col items-end">
-                <input type="number" value="${c.qty}" oninput="updateQty('${i.id}', this.value)" class="qty-input" onclick="event.stopPropagation()">
+            <div class="absolute bottom-3 right-3 flex flex-col items-end" onclick="event.stopPropagation()">
+                <input type="number" value="${c.qty}" oninput="updateQty('${i.id}', this.value)" class="qty-input">
                 <span class="text-[9px] text-gray-300 font-bold mt-1">${i.id}</span>
             </div>`;
         grid.appendChild(card);
@@ -126,16 +134,18 @@ function updateQty(id, val) {
 
 function buildReport() {
     const selIDs = Object.keys(cart).filter(id => cart[id].sel);
-    if(!selIDs.length) return alert("請先點選標語！");
+    if(!selIDs.length) return alert("請先點選標語進行選取！");
     
     const site = document.getElementById('siteSelect').value;
     const staff = document.getElementById('staff').value || "現場人員";
+    const date = new Date().toLocaleDateString('zh-TW');
     
     let h = `
-        <div id="captureTarget" style="background:white; padding:10px;">
+        <div id="captureTarget" style="background:white; padding:15px; border: 1px solid #eee; border-radius:10px;">
             <div style="border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:15px; text-align:center;">
-                <h2 style="margin:0; font-size:20px; font-weight:900;">鈺通營造工安標語採購單</h2>
-                <div style="font-size:12px; margin-top:5px;">工地：${site} | 填單：${staff}</div>
+                <h2 style="margin:0; font-size:22px; font-weight:900; color:#095744;">鈺通營造工安標語採購單</h2>
+                <div style="font-size:12px; margin-top:8px; font-weight:bold;">工地：${site}</div>
+                <div style="font-size:11px; color:#666; margin-top:4px;">填單人：${staff} ｜ 日期：${date}</div>
             </div>
             <div>`;
     
@@ -143,12 +153,12 @@ function buildReport() {
         const item = activeDB.find(x => x.id === id);
         h += `
             <div class="report-item">
-                <img src="${IMG_PATH}${item.id}.png" style="width:50px; height:50px; object-fit:contain;" onerror="this.src='${IMG_PATH}${item.id}.jpg'; this.onerror=null;">
+                <img src="${IMG_PATH}${item.id}.png" style="width:55px; height:55px; object-fit:contain;" onerror="this.src='${IMG_PATH}${item.id}.jpg'; this.onerror=null;">
                 <div style="flex:1;">
-                    <div style="font-weight:bold; font-size:14px;">${item.n}</div>
+                    <div style="font-weight:bold; font-size:15px; color:#095744;">${item.n}</div>
                     <div style="font-size:11px; color: #666;">規格：${item.s} ｜ 編號：${item.id}</div>
                 </div>
-                <div style="font-size:20px; font-weight:900;">${cart[id].qty}</div>
+                <div style="font-size:22px; font-weight:900; color:#F39800; min-width:40px; text-align:right;">${cart[id].qty}</div>
             </div>`;
     });
     
@@ -157,30 +167,41 @@ function buildReport() {
     document.getElementById('modalOverlay').style.display = 'flex';
 }
 
-// 轉為圖片的功能
+// 轉為圖片功能 (支援手機長按)
 async function captureImage() {
     const target = document.getElementById('captureTarget');
-    const canvas = await html2canvas(target, { useCORS: true, scale: 2 });
+    // 使用 scale: 3 提升圖片清晰度，適合手機儲存
+    const canvas = await html2canvas(target, { useCORS: true, scale: 3, backgroundColor: "#ffffff" });
     const imgData = canvas.toDataURL("image/png");
     
-    // 生成一個全屏預覽讓手機能長按
     const viewer = document.createElement('div');
-    viewer.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:3000; display:flex; flex-direction:column; align-items:center; justify-content:center;";
+    viewer.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
     viewer.innerHTML = `
-        <div style="padding:10px; font-weight:bold; color:red;">長按下方圖片即可儲存或分享</div>
-        <img src="${imgData}" style="max-width:90%; box-shadow:0 0 20px rgba(0,0,0,0.2);">
-        <button onclick="this.parentElement.remove()" style="margin-top:20px; background:#666; color:white; padding:10px 30px; border-radius:10px;">關閉預覽</button>
+        <div style="color:white; margin-bottom:15px; font-weight:bold; font-size:16px;">📸 下方為圖片檔案：</div>
+        <img src="${imgData}" style="max-width:100%; max-height:70%; border-radius:10px; box-shadow:0 0 30px rgba(0,0,0,0.5);">
+        <div style="color:#70B934; margin-top:15px; font-weight:black; font-size:18px;">💡 請「長按圖片」選擇儲存或分享</div>
+        <button onclick="this.parentElement.remove()" style="margin-top:25px; background:white; color:#333; padding:12px 40px; border-radius:15px; font-weight:bold;">關閉預覽</button>
     `;
     document.body.appendChild(viewer);
 }
 
 function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
-function renderTabs() { /* 保持原樣 */ let html = ''; Object.keys(guides).sort().forEach(k => { html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="handleTabClick('GUIDE','${k}')">Step ${k.replace('S','')}.${guides[k].t}</div>`; }); html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部</div>`; Object.keys(catLabels).filter(k=>k!=='ALL').sort().forEach(k => { html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="handleTabClick('CAT','${k}')">${catLabels[k]}</div>`; }); document.getElementById('tabContainer').innerHTML = html; }
+function renderTabs() { 
+    let html = ''; 
+    Object.keys(guides).sort().forEach(k => { 
+        html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="handleTabClick('GUIDE','${k}')">Step ${k.replace('S','')}.${guides[k].t}</div>`; 
+    }); 
+    html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey==='ALL'?'active':''}" onclick="handleTabClick('CAT','ALL')">全部標語</div>`; 
+    Object.keys(catLabels).filter(k=>k!=='ALL').sort().forEach(k => { 
+        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''}" onclick="handleTabClick('CAT','${k}')">${catLabels[k]}</div>`; 
+    }); 
+    document.getElementById('tabContainer').innerHTML = html; 
+}
 function handleTabClick(m, k) { currentMode = m; currentKey = k; render(); renderTabs(); }
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
-function resetCart() { if(confirm("清空目前選取？")) { cart = {}; render(); } }
-function toggleAdmin() { if(!isAdmin && prompt("密碼")!=="751113") return; isAdmin = !isAdmin; document.getElementById('adminBtn').innerText = isAdmin?"🔓 結束":"🔒 管理員"; render(); }
-function editSites() { const res = prompt("編輯名單(逗號分隔):", sites.join(',')); if(res){ sites=res.split(',').map(s=>s.trim()); saveData(); renderSiteSelect(); } }
+function resetCart() { if(confirm("確定要清空目前的選取嗎？")) { cart = {}; render(); } }
+function toggleAdmin() { if(!isAdmin && prompt("請輸入管理員密碼")!=="751113") return; isAdmin = !isAdmin; document.getElementById('adminBtn').innerText = isAdmin?"🔓 結束管理":"🔒 管理員"; render(); }
+function editSites() { const res = prompt("修改工地選單 (請用逗號隔開):", sites.join(',')); if(res){ sites=res.split(',').map(s=>s.trim()); saveData(); renderSiteSelect(); } }
 function saveData() { localStorage.setItem('yt_sites', JSON.stringify(sites)); }
 window.onload = init;
 </script>
