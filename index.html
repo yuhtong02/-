@@ -26,7 +26,6 @@
         .edit-input { background: #fff7ed; border: 1px solid #ffedd5; border-radius: 4px; padding: 2px 4px; width: 100%; font-size: 12px; margin-bottom: 2px; }
         .delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; z-index: 10; }
         
-        /* 列印專用樣式 */
         @media print {
             body * { visibility: hidden; }
             #printSection, #printSection * { visibility: visible; }
@@ -44,7 +43,7 @@
             <div class="flex gap-2">
                 <div id="adminTools" class="hidden flex gap-1">
                     <button onclick="exportData()" class="text-[10px] bg-white/20 px-2 py-1 rounded">💾 備份</button>
-                    <button onclick="importData()" class="text-[10px] bg-white/20 px-2 py-1 rounded">📂 还原</button>
+                    <button onclick="importData()" class="text-[10px] bg-white/20 px-2 py-1 rounded">📂 還原</button>
                 </div>
                 <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">🔒 管理員</button>
             </div>
@@ -60,7 +59,6 @@
     </div>
 
     <div id="mainGrid" class="grid-container max-w-7xl mx-auto no-print"></div>
-
     <div id="printSection"></div>
 
     <nav class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 border-t border-gray-100 z-50 flex flex-col gap-2 no-print">
@@ -76,19 +74,83 @@ let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey
 const GITHUB_BASE = "https://yuhtong02.github.io/-/img/";
 
 const defaultDB = [
-    {id:'A01', cat:'A', n:'飲水機', s:'30x15', m:'中空板', steps:['S2']},
-    {id:'A02', cat:'A', n:'急救箱', s:'20x20', m:'貼紙', steps:['S2']},
-    {id:'B01', cat:'B', n:'進入工地請戴安全帽', s:'60x40', m:'中空板', steps:['S1']},
-    {id:'H01', cat:'H', n:'安全第一；品質至上', s:'120x30', m:'中空板', steps:['S3']}
+    // A.生活與辦公設施
+    {id:'A01', cat:'A', n:'辦公室 (監造/管理/統包商)', s:'60x20', m:'中空板', steps:['S2']},
+    {id:'A02', cat:'A', n:'會議室', s:'60x20', m:'中空板', steps:['S2']},
+    {id:'A03', cat:'A', n:'倉庫', s:'60x20', m:'中空板', steps:['S2']},
+    {id:'A04', cat:'A', n:'建材展覽室', s:'60x20', m:'中空板', steps:['S2']},
+    {id:'A05', cat:'A', n:'休息區', s:'120x60', m:'帆布', steps:['S2']},
+    {id:'A06', cat:'A', n:'飲水機', s:'30x15', m:'中空板', steps:['S2']},
+    {id:'A07', cat:'A', n:'急救箱', s:'20x20', m:'貼紙', steps:['S2']},
+    {id:'A08', cat:'A', n:'男/女化妝室', s:'30x15', m:'中空板', steps:['S2']},
+    {id:'A09', cat:'A', n:'小便斗', s:'10x10', m:'貼紙', steps:['S2']},
+    {id:'A10', cat:'A', n:'守衛室', s:'60x40', m:'中空板', steps:['S1']},
+    {id:'A11', cat:'A', n:'工具箱會議', s:'90x60', m:'中空板', steps:['S1']},
+
+    // B.安全防護與告示
+    {id:'B01', cat:'B', n:'工程告示牌', s:'120x90', m:'中空板', steps:['S1']},
+    {id:'B02', cat:'B', n:'安衛告示牌', s:'90x60', m:'中空板', steps:['S1']},
+    {id:'B03', cat:'B', n:'今日危害因素告示牌', s:'90x60', m:'白板材', steps:['S1']},
+    {id:'B04', cat:'B', n:'工安公布宣導欄', s:'180x90', m:'帆布', steps:['S1']},
+    {id:'B05', cat:'B', n:'背負式安全帶穿戴步驟', s:'60x90', m:'中空板', steps:['S3']},
+    {id:'B06', cat:'B', n:'熱危害宣導', s:'60x40', m:'中空板', steps:['S3']},
+    {id:'B07', cat:'B', n:'進入工區請戴安全帽', s:'60x40', m:'中空板', steps:['S1']},
+    {id:'B08', cat:'B', n:'嚴禁酒後進場', s:'60x40', m:'中空板', steps:['S1']},
+
+    // C.危險警示
+    {id:'C01', cat:'C', n:'有電危險請勿觸碰', s:'30x20', m:'中空板', steps:['S5']},
+    {id:'C02', cat:'C', n:'高壓電勿近', s:'40x30', m:'中空板', steps:['S5']},
+    {id:'C03', cat:'C', n:'開口危險小心墜落', s:'60x40', m:'中空板', steps:['S5']},
+    {id:'C04', cat:'C', n:'升降梯開口危險', s:'60x40', m:'中空板', steps:['S5']},
+
+    // D.禁止事項
+    {id:'D01', cat:'D', n:'非工作人員禁止進入', s:'60x40', m:'中空板', steps:['S1','S4']},
+    {id:'D02', cat:'D', n:'欄杆禁止跨越或攀爬', s:'40x30', m:'中空板', steps:['S5']},
+    {id:'D03', cat:'D', n:'施工架嚴禁堆置物料', s:'60x40', m:'中空板', steps:['S5']},
+    {id:'D04', cat:'D', n:'非施工必要禁止進入', s:'60x40', m:'中空板', steps:['S4']},
+
+    // E.交通與動線
+    {id:'E01', cat:'E', n:'汽車停放區', s:'60x40', m:'中空板', steps:['S4']},
+    {id:'E02', cat:'E', n:'機車停放區', s:'60x40', m:'中空板', steps:['S4']},
+    {id:'E03', cat:'E', n:'進入工區請緩慢行駛', s:'60x40', m:'中空板', steps:['S1']},
+    {id:'E04', cat:'E', n:'工區施工請勿停車', s:'60x40', m:'中空板', steps:['S1']},
+
+    // F.設施位置與消防
+    {id:'F01', cat:'F', n:'滅火器', s:'10x30', m:'貼紙', steps:['S2','S5']},
+    {id:'F02', cat:'F', n:'安全出口', s:'30x15', m:'中空板', steps:['S4']},
+    {id:'F03', cat:'F', n:'施工電梯', s:'60x40', m:'中空板', steps:['S5']},
+    {id:'F04', cat:'F', n:'吊料電梯專用口', s:'60x40', m:'中空板', steps:['S5']},
+
+    // G.環境管理與垃圾
+    {id:'G01', cat:'G', n:'一般垃圾/資源回收/廚餘', s:'40x20', m:'中空板', steps:['S6']},
+    {id:'G02', cat:'G', n:'鐵鋁罐/玻璃類/塑膠類/紙容器', s:'30x10', m:'貼紙', steps:['S6']},
+    {id:'G03', cat:'G', n:'垃圾管道傾倒口', s:'60x40', m:'中空板', steps:['S6']},
+    {id:'G04', cat:'G', n:'物料暫置區', s:'90x60', m:'中空板', steps:['S6']},
+    {id:'G05', cat:'G', n:'放置鋼筋材料', s:'90x60', m:'中空板', steps:['S6']},
+    {id:'G06', cat:'G', n:'營建廢棄物堆置區', s:'90x60', m:'中空板', steps:['S6']},
+
+    // H.宣導標語
+    {id:'H01', cat:'H', n:'安全第一；品質至上', s:'120x30', m:'中空板', steps:['S3']},
+    {id:'H02', cat:'H', n:'存好心做好事說好話', s:'120x30', m:'中空板', steps:['S3']},
+    {id:'H03', cat:'H', n:'工安標語6S', s:'60x90', m:'中空板', steps:['S3']},
+    {id:'H04', cat:'H', n:'關懷標語/生活點滴', s:'60x40', m:'中空板', steps:['S3']},
+
+    // J.圖資與名稱
+    {id:'J01', cat:'J', n:'樓層標示/樓梯標示', s:'30x30', m:'中空板', steps:['S4']},
+    {id:'J02', cat:'J', n:'工地/學校名稱', s:'180x40', m:'帆布', steps:['S1']},
+    {id:'J03', cat:'J', n:'各棟別名稱', s:'60x20', m:'中空板', steps:['S2']},
+    {id:'J04', cat:'J', n:'工地上梁典禮', s:'200x60', m:'帆布', steps:['S1']}
 ];
+
 const defaultGuides = {
-    'S1': { t: '工區大門配置' }, 'S2': { t: '基礎設施' }, 'S3': { t: '施工安全' },
-    'S4': { t: '動線管制' }, 'S5': { t: '機具電力' }, 'S6': { t: '環境清潔' }
+    'S1': { t: '工地入口/大門' }, 'S2': { t: '辦公與生活區' }, 'S3': { t: '安全宣導區' },
+    'S4': { t: '交通與動線管理' }, 'S5': { t: '施工現場/危險點' }, 'S6': { t: '資材與環境管理' }
 };
 const defaultCats = {
-    'ALL':'全部標語', 'A':'A.生活設施', 'B':'B.安全防護', 'C':'C.危險警示', 'D':'D.禁止事項', 'E':'E.交通與動線', 'F':'F.設施位置', 'G':'G.作業規範', 'H':'H.宣導標語', 'I':'I.環境管理', 'J':'J.圖資與指引'
+    'ALL':'全部標語', 'A':'A.生活與辦公', 'B':'B.安全告示', 'C':'C.危險警示', 'D':'D.禁止事項', 'E':'E.交通動線', 'F':'F.消防設施', 'G':'G.環境管理', 'H':'H.精神宣導', 'J':'J.圖資名稱'
 };
 
+// ... 原有的 JS 邏輯不變 (init, renderTabs, handleTabClick, render, updateItemStep, updateItem, deleteItem, addNewItem, toggleAdmin, editSites, renderSiteSelect, saveData, exportData, importData, buildReport, resetCart)
 function init() {
     activeDB = JSON.parse(localStorage.getItem('yt_db')) || defaultDB;
     guides = JSON.parse(localStorage.getItem('yt_guides')) || defaultGuides;
@@ -136,7 +198,6 @@ function render() {
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => { if(!isAdmin) { cart[i.id] = {sel: !c.sel, qty: c.qty}; render(); } };
         
-        // Step 多選邏輯
         let stepOptions = Object.keys(guides).map(sk => 
             `<label class="flex items-center gap-1"><input type="checkbox" ${i.steps?.includes(sk)?'checked':''} onchange="updateItemStep('${i.id}','${sk}',this.checked)"> ${sk}</label>`
         ).join('');
@@ -232,11 +293,13 @@ function importData() {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = f => {
-            const data = JSON.parse(f.target.result);
-            if(data.activeDB) {
-                activeDB = data.activeDB; guides = data.guides; catLabels = data.catLabels; sites = data.sites;
-                saveData(); location.reload();
-            }
+            try {
+                const data = JSON.parse(f.target.result);
+                if(data.activeDB) {
+                    activeDB = data.activeDB; guides = data.guides; catLabels = data.catLabels; sites = data.sites;
+                    saveData(); location.reload();
+                }
+            } catch(e) { alert("檔案格式錯誤"); }
         };
         reader.readAsText(file);
     };
@@ -246,11 +309,9 @@ function importData() {
 function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel);
     if(!sel.length) return alert("請選取標語");
-    
     const site = document.getElementById('siteSelect').value;
     const staff = document.getElementById('staff').value || "現場人員";
     const date = new Date().toLocaleString();
-
     let h = `
         <div style="border: 2px solid #000; padding: 20px; color: #000;">
             <h1 style="text-align:center; margin:0; font-size:24px;">鈺通營造工安標語採購單</h1>
@@ -266,30 +327,13 @@ function buildReport() {
                     </tr>
                 </thead>
                 <tbody>`;
-    
     sel.forEach(i => {
-        h += `
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 10px 8px;">
-                    <b style="font-size: 16px;">[${i.id}] ${i.n}</b><br>
-                    <small>規格：${i.s} / 材質：${i.m}</small>
-                </td>
-                <td style="text-align:center; font-size: 20px; font-weight: bold;">${cart[i.id].qty}</td>
-            </tr>`;
+        h += `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px 8px;"><b style="font-size: 16px;">[${i.id}] ${i.n}</b><br><small>規格：${i.s} / 材質：${i.m}</small></td><td style="text-align:center; font-size: 20px; font-weight: bold;">${cart[i.id].qty}</td></tr>`;
     });
-
-    h += `</tbody></table>
-            <div style="margin-top: 30px; text-align: right; font-size: 12px;">列印時間：${date}</div>
-        </div>
-        <div class="no-print" style="margin-top:20px; display:flex; gap:10px;">
-            <button onclick="window.print()" style="flex:1; background:#095744; color:white; padding:15px; border-radius:10px; font-weight:bold;">確認列印 / 另存 PDF</button>
-            <button onclick="document.getElementById('printSection').style.display='none'" style="flex:1; background:#eee; padding:15px; border-radius:10px;">取消</button>
-        </div>`;
-
+    h += `</tbody></table><div style="margin-top: 30px; text-align: right; font-size: 12px;">列印時間：${date}</div></div>
+        <div class="no-print" style="margin-top:20px; display:flex; gap:10px;"><button onclick="window.print()" style="flex:1; background:#095744; color:white; padding:15px; border-radius:10px; font-weight:bold;">確認列印 / 另存 PDF</button><button onclick="document.getElementById('printSection').style.display='none'" style="flex:1; background:#eee; padding:15px; border-radius:10px;">取消</button></div>`;
     const ps = document.getElementById('printSection');
-    ps.innerHTML = h;
-    ps.style.display = 'block';
-    window.scrollTo(0, 0);
+    ps.innerHTML = h; ps.style.display = 'block'; window.scrollTo(0, 0);
 }
 
 function resetCart() { if(confirm("清空選取？")) { cart = {}; render(); } }
