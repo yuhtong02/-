@@ -17,7 +17,7 @@
         .system-title { font-size: 20px; font-weight: 900; color: var(--yt-dark); }
         .input-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; padding: 0 15px 10px; }
         .category-scroller { display: flex; overflow-x: auto; gap: 10px; padding: 15px; background: white; border-bottom: 1px solid #D7CCC8 !important; -webkit-overflow-scrolling: touch; }
-        .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background-color: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; border: 1px solid var(--yt-dark) !important; }
+        .cat-tab-step { white-space: nowrap; padding: 8px 16px; border-radius: 12px; background-color: var(--yt-dark); color: white; font-size: 13px; font-weight: 900; cursor: pointer; flex-shrink: 0; border: 1px solid var(--yt-dark) !important; }
         .cat-tab-step.active { background: var(--yt-light); border-color: var(--yt-light) !important; }
         .cat-tab-item { white-space: nowrap; padding: 8px 18px; border-radius: 10px; background-color: white; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0 !important; flex-shrink: 0; }
         .cat-tab-item.active { background-color: var(--yt-btn-bg); color: var(--yt-dark); border-color: var(--yt-dark) !important; font-weight: 900; }
@@ -54,7 +54,6 @@
     <div class="grid-container max-w-7xl mx-auto" id="mainGrid"></div>
 
     <nav class="footer-nav no-print">
-        <button id="addItemBtn" onclick="addNewItem()" class="hidden w-full max-w-3xl bg-amber-50 text-amber-700 py-2 mb-2 rounded-xl font-black text-sm mx-auto">➕ 新增標語項目</button>
         <div class="flex w-full max-w-3xl gap-3 px-4 mx-auto">
             <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-2xl font-black text-xl shadow-lg">📋 生成採購單</button>
             <button onclick="resetCart()" class="flex-1 bg-red-50 text-red-400 rounded-2xl text-[10px] font-bold">重選</button>
@@ -72,8 +71,6 @@
             </div>
         </div>
     </div>
-
-    <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhoto(this)">
 
 <script>
 if (/Line/i.test(navigator.userAgent)) document.getElementById('lineAlert').style.display = 'block';
@@ -97,11 +94,7 @@ const RAW_SIGNS = [
     {id:'K01', cat:'K', n:'工地/學校名稱', s:'客製'}, {id:'K02', cat:'K', n:'工地上梁典禮', s:'客製'}, {id:'K03', cat:'K', n:'急救箱', s:'20x20'}, {id:'K04', cat:'K', n:'滅火器', s:'10x30'}, {id:'K05', cat:'K', n:'安全出口', s:'30x10'}
 ];
 
-let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, curEditImgId;
-
-const request = indexedDB.open("Yutong_V46", 1);
-request.onupgradeneeded = e => e.target.result.createObjectStore("images");
-request.onsuccess = e => { db = e.target.result; init(); };
+let activeDB, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides;
 
 function init() {
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
@@ -120,23 +113,20 @@ function renderTabs() {
     document.getElementById('tabContainer').innerHTML = html;
 }
 
-async function render() {
+function render() {
     const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
     let display = (currentMode === 'CAT') ? (currentKey === 'ALL' ? activeDB : activeDB.filter(x => x.cat === currentKey)) : activeDB.filter(x => guides[currentKey]?.items.includes(x.id));
     
-    for (const i of display) {
+    display.forEach(i => {
         const c = cart[i.id] || { sel:false, qty:1 };
-        const localImg = await dbGet(i.id);
         const githubImg = GITHUB_BASE + i.id + '.jpg'; 
-
         const card = document.createElement('div');
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
         card.innerHTML = `
-            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteItem('${i.id}')" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs z-20">✕</button>` : ''}
-            <div class="img-slot" onclick="handleImgClick(event, '${i.id}')">
-                <img src="${localImg || githubImg}" 
-                     onerror="if(this.src.includes('.jpg')){this.src=this.src.replace('.jpg','.JPG')}else{this.src='https://via.placeholder.com/150?text=無圖'}">
+            <div class="img-slot">
+                <img src="${githubImg}" 
+                     onerror="handleImgError(this)">
             </div>
             <div class="flex-1">
                 <div class="flex justify-between">
@@ -144,13 +134,22 @@ async function render() {
                     <span class="text-[9px] bg-slate-100 p-1 rounded ml-1">${i.id}</span>
                 </div>
                 <div class="text-[12px] font-bold text-red-700 mt-1">規格：${isAdmin ? `<input class="admin-input" value="${i.s}" oninput="updateI('${i.id}','s',this.value)" onclick="event.stopPropagation()">` : i.s}</div>
-                ${isAdmin ? `<button onclick="event.stopPropagation(); ${currentMode==='GUIDE'?'unlink':'linkToStep'}('${i.id}')" class="text-[10px] text-blue-500 underline mt-1">${currentMode==='GUIDE'?'移除':'➕ 加入步驟'}</button>` : ''}
                 <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
                     <span class="text-[10px] font-bold text-slate-400">數量</span>
                     <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
                 </div>
             </div>`;
         grid.appendChild(card);
+    });
+}
+
+// 核心：防閃退圖片處理邏輯
+function handleImgError(img) {
+    if (img.src.includes('.jpg')) {
+        img.src = img.src.replace('.jpg', '.JPG');
+    } else {
+        img.onerror = null; // 停止重試，避免閃退
+        img.src = 'https://via.placeholder.com/150?text=圖片待傳';
     }
 }
 
@@ -158,45 +157,34 @@ function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { 
 function setFilter(m, k) { currentMode=m; currentKey=k; renderTabs(); render(); }
 function toggleItem(id) { if(!cart[id]) cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; autoSave(); render(); }
 function updateQty(id, v) { if(!cart[id]) cart[id]={sel:true,qty:1}; cart[id].qty=parseInt(v)||1; autoSave(); }
-function toggleAdmin() { if(!isAdmin) { if(prompt("管理密碼")==="751113"){ isAdmin=true; document.getElementById('adminBtn').innerText="🔓 管理中"; document.getElementById('addItemBtn').classList.remove('hidden'); } } else { isAdmin=false; document.getElementById('adminBtn').innerText="🔒 管理員"; document.getElementById('addItemBtn').classList.add('hidden'); } renderTabs(); render(); }
-function linkToStep(id) { const s = prompt("加入哪個 Step? (S1-S6)"); if(guides[s]){ if(!guides[s].items.includes(id)) guides[s].items.push(id); localStorage.setItem('yt_guides', JSON.stringify(guides)); alert("已加入 Step"); }}
-function unlink(id) { guides[currentKey].items = guides[currentKey].items.filter(x => x !== id); localStorage.setItem('yt_guides', JSON.stringify(guides)); render(); }
+function toggleAdmin() { if(!isAdmin) { if(prompt("管理密碼")==="751113"){ isAdmin=true; document.getElementById('adminBtn').innerText="🔓 管理中"; } } else { isAdmin=false; document.getElementById('adminBtn').innerText="🔒 管理員"; } render(); }
 function autoSave() { localStorage.setItem('yt_staff', document.getElementById('staff').value); localStorage.setItem('yt_site', document.getElementById('siteSelect').value); localStorage.setItem('yt_cart', JSON.stringify(cart)); }
-function resetCart() { if(confirm("重置目前選取項目？")){ cart={}; autoSave(); render(); } }
-function hardReset() { if(confirm("警告：這將還原為 GitHub 原始清單，您的自定義修改會消失。確定？")){ localStorage.clear(); location.reload(); }}
+function resetCart() { if(confirm("重置選取？")){ cart={}; autoSave(); render(); } }
+function hardReset() { if(confirm("將重啟並從 GitHub 載入最新清單？")){ localStorage.clear(); location.reload(); }}
 function renderSiteSelect() { document.getElementById('siteSelect').innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join(''); }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function addNewItem() { const id = prompt("新編號(如 A14)"); if(id){ activeDB.push({id, cat: id.charAt(0).toUpperCase(), n:"新項目", s:"規格"}); localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); render(); }}
-function deleteItem(id) { activeDB = activeDB.filter(x => x.id !== id); localStorage.setItem('yt_active_db', JSON.stringify(activeDB)); render(); }
 
 async function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel); if(!sel.length) return alert("請選取標語");
     let h = `<div id="captureTarget" style="background:white; padding:20px; border:2px solid #095744;"><div style="text-align:center; border-bottom:3px solid #095744; padding-bottom:10px;"><h1 style="color:#095744">鈺通營造 標語採購單</h1><div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold"><span>工地：${document.getElementById('siteSelect').value}</span><span>填單人：${document.getElementById('staff').value}</span></div></div><table style="width:100%; border-collapse:collapse; margin-top:10px;">`;
-    for(const i of sel) { 
-        const local = await dbGet(i.id);
-        const img = local || GITHUB_BASE+i.id+'.jpg'; 
+    sel.forEach(i => { 
         h += `<tr style="border-bottom:1px solid #eee">
-            <td style="padding:10px; width:110px">
-                <img src="${img}" style="width:100px" onerror="if(this.src.includes('.jpg')){this.src=this.src.replace('.jpg','.JPG')}else{this.src='https://via.placeholder.com/100'}">
-            </td>
+            <td style="padding:10px; width:110px"><img src="${GITHUB_BASE+i.id+'.jpg'}" style="width:100px" onerror="handleImgError(this)"></td>
             <td style="padding:10px"><b>${i.n}</b><br><small>規格：${i.s}</small><br><small>編號：#${i.id}</small></td>
             <td style="padding:10px; text-align:right; font-size:20px"><b>${cart[i.id].qty}</b></td>
         </tr>`; 
-    }
+    });
     document.getElementById('printArea').innerHTML = h + `</table></div>`; document.getElementById('modal').style.display='flex';
 }
 
 function captureToImage() {
     html2canvas(document.getElementById('captureTarget'), { useCORS: true, scale: 2 }).then(canvas => {
         const imgData = canvas.toDataURL("image/png");
-        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">圖片已生成！請長按圖片選擇「儲存圖片」。</p><img src="${imgData}" style="width:100%; border:1px solid #ddd;">`;
+        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">圖片已生成！請長按圖片儲存。</p><img src="${imgData}" style="width:100%; border:1px solid #ddd;">`;
     });
 }
 
-function handleImgClick(e, id) { if(isAdmin) { e.stopPropagation(); curEditImgId = id; document.getElementById('photoInput').click(); }}
-async function dbGet(k) { return new Promise(r => { const t = db.transaction("images").objectStore("images").get(k); t.onsuccess = () => r(t.result); }); }
-async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
-async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
+init();
 </script>
 </body>
 </html>
