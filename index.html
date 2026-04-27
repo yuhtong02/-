@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語採購系統 V7.0.4</title>
+    <title>鈺通營造工安標語採購系統 V7.0.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,10 +11,12 @@
         :root { --yt-dark: #095744; --yt-light: #70B934; --yt-bg: #FFFBEC; --yt-card-border: #D7CCC8; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--yt-bg); padding-bottom: 160px; color: #1e293b; }
         .sticky-header { position: sticky; top: 0; z-index: 1000; background: var(--yt-bg); border-bottom: 3px solid var(--yt-dark); }
-        .category-scroller { display: flex; overflow-x: auto; gap: 6px; padding: 8px 12px; background: white; -webkit-overflow-scrolling: touch; }
-        .cat-tab { white-space: nowrap; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; border: 1px solid #e2e8f0; }
-        .cat-tab.step { background-color: var(--yt-dark); color: white; }
-        .cat-tab.active { background-color: var(--yt-light); color: white; border-color: var(--yt-light); }
+        
+        /* 寬度優化：分類格加寬與間距調整 */
+        .category-scroller { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; background: white; -webkit-overflow-scrolling: touch; }
+        .cat-tab { min-width: 110px; text-align: center; white-space: nowrap; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 900; cursor: pointer; border: 1.5px solid #e2e8f0; flex-shrink: 0; }
+        .cat-tab.step { background-color: var(--yt-dark); color: white; border-color: var(--yt-dark); }
+        .cat-tab.active { background-color: var(--yt-light); color: white; border-color: var(--yt-light); box-shadow: 0 4px 6px -1px rgba(112, 185, 52, 0.2); }
         
         .sign-card { background: white; border-radius: 12px; padding: 10px; border: 1px solid var(--yt-card-border); display: flex; gap: 10px; height: 115px; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light); background: #f0fdf4; }
@@ -27,6 +29,8 @@
         
         .edit-zone { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
         .admin-input { background: #fff7ed !important; border: 1px dashed #fb923c !important; border-radius: 4px; padding: 2px 4px; font-size: 11px; color: #9a3412; font-weight: 900; width: 100%; outline: none; }
+        .id-edit { color: #095744; font-weight: 900; text-decoration: underline; }
+        
         .qty-input { width: 50px; text-align: center; font-size: 24px; font-weight: 900; color: var(--yt-light); border-bottom: 2px solid #ddd; background: transparent; outline: none; }
         .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px; border-top: 1px solid #eee; z-index: 2000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
     </style>
@@ -36,7 +40,7 @@
     <div class="sticky-header no-print">
         <div class="flex items-center justify-between px-4 py-2">
             <div id="mainTitleContainer"></div>
-            <button onclick="toggleAdmin()" id="adminBtn" class="text-[10px] font-black bg-white text-[#095744] px-3 py-1.5 rounded-full border">🔒 管理員模式</button>
+            <button onclick="toggleAdmin()" id="adminBtn" class="text-[10px] font-black bg-white text-[#095744] px-3 py-1.5 rounded-full border shadow-sm">🔒 管理員模式</button>
         </div>
         <div class="grid grid-cols-2 gap-2 px-4 pb-2">
             <div class="flex gap-1">
@@ -52,9 +56,9 @@
 
     <nav class="footer-nav no-print">
         <div id="adminPanel" class="hidden flex justify-center gap-2 mb-2">
-            <button onclick="exportData()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold">📤 備份</button>
-            <button onclick="importData()" class="bg-purple-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold">📥 還原</button>
-            <button onclick="deleteSite()" class="bg-red-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold">🗑️ 刪除工地</button>
+            <button onclick="exportData()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold shadow">📤 備份</button>
+            <button onclick="importData()" class="bg-purple-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold shadow">📥 還原</button>
+            <button onclick="deleteSite()" class="bg-red-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold shadow">🗑️ 刪除工地</button>
         </div>
         <div class="flex w-full max-w-6xl gap-2 mx-auto">
             <button onclick="buildReport()" class="flex-[4] bg-[#095744] text-white py-4 rounded-xl font-black text-xl shadow-lg">📋 生成採購單</button>
@@ -75,57 +79,36 @@
 
 <script>
 const GITHUB_BASE = "https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/";
-let activeDB, cart = {}, sites = [], isAdmin = false, currentFilter = 'ALL', config = {}, stepData = {}, cats = {};
+let activeDB, cart = {}, sites = [], isAdmin = false, currentFilter = 'S1', config = {}, stepData = {}, cats = {};
 
 const DEFAULT_SITES = ["嘉義創世基金會", "嘉義嘉科實中", "嘉義博愛安居", "嘉義北門集合住宅", "嘉義民雄院區", "臺南林森圖書館"];
 
-// 根據你的圖表建立初始資料庫
 const RAW_SIGNS = [
     {id:'A01', cat:'A', n:'男化妝室', s:'30x10', m:'PVC'},
     {id:'A02', cat:'A', n:'女化妝室', s:'30x10', m:'PVC'},
-    {id:'A03', cat:'A', n:'小便斗', s:'30x10', m:'PVC'},
-    {id:'A04', cat:'A', n:'休息區', s:'60x40', m:'中空板'},
     {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'},
     {id:'C01', cat:'C', n:'開口危險小心墜落', s:'60x40', m:'中空板'},
-    {id:'D01', cat:'D', n:'嚴禁酒後進場', s:'60x40', m:'中空板'},
-    {id:'E01', cat:'E', n:'安全出口', s:'30x10', m:'PVC'},
-    {id:'F01', cat:'F', n:'急救箱', s:'20x20', m:'貼紙'},
-    {id:'F02', cat:'F', n:'滅火器', s:'20x20', m:'貼紙'},
-    {id:'G01', cat:'G', n:'工具箱會議', s:'60x40', m:'中空板'},
-    {id:'H01', cat:'H', n:'安全第一', s:'60x40', m:'中空板'},
-    {id:'I01', cat:'I', n:'物料暫置區', s:'60x40', m:'中空板'},
     {id:'J01', cat:'J', n:'工程告示牌', s:'120x90', m:'鍍鋅鐵板'},
     {id:'K01', cat:'K', n:'守衛室', s:'30x10', m:'PVC'}
 ];
 
-// 圖表對應的 11 大類
 const DEFAULT_CATEGORIES = { 
-    'ALL':'全部標語', 
-    'A':'A. 生活設施', 
-    'B':'B. 安全防護', 
-    'C':'C. 危險警示', 
-    'D':'D. 禁止事項', 
-    'E':'E. 交通與動線',
-    'F':'F. 設備設施位置',
-    'G':'G. 作業規範',
-    'H':'H. 宣導標語',
-    'I':'I. 物料環境管理',
-    'J':'J. 圖資與指引',
-    'K':'K. 區域單位標示'
+    'A':'A. 生活設施', 'B':'B. 安全防護', 'C':'C. 危險警示', 'D':'D. 禁止事項', 
+    'E':'E. 交通與動線', 'F':'F. 設備設施位置', 'G':'G. 作業規範', 'H':'H. 宣導標語', 
+    'I':'I. 物料環境管理', 'J':'J. 圖資與指引', 'K':'K. 區域單位標示', 'ALL':'全部標語' 
 };
 
-// Step 1~6 的工進分配
 const DEFAULT_STEP_DATA = { 
-    'S1': { t:'📌 Step 1 入口', items:['J01','K01','B01','D01','E01'] }, 
-    'S2': { t:'📌 Step 2 基礎', items:['G01','I01','F02'] },
-    'S3': { t:'📌 Step 3 結構', items:['C01','B01'] },
-    'S4': { t:'📌 Step 4 裝修', items:['A01','A02','F01'] },
-    'S5': { t:'📌 Step 5 景觀', items:['E01','H01'] },
+    'S1': { t:'📌 Step 1 入口', items:['J01','K01','B01'] }, 
+    'S2': { t:'📌 Step 2 基礎', items:['B01'] },
+    'S3': { t:'📌 Step 3 結構', items:['C01'] },
+    'S4': { t:'📌 Step 4 裝修', items:['A01','A02'] },
+    'S5': { t:'📌 Step 5 景觀', items:['E01'] },
     'S6': { t:'📌 Step 6 完工', items:['K01'] }
 };
 
 function init() {
-    activeDB = JSON.parse(localStorage.getItem('yt_db_v704')) || RAW_SIGNS;
+    activeDB = JSON.parse(localStorage.getItem('yt_db_v705')) || RAW_SIGNS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     sites = JSON.parse(localStorage.getItem('yt_sites')) || DEFAULT_SITES;
     config = JSON.parse(localStorage.getItem('yt_config')) || { title: "鈺通營造工安標語採購系統" };
@@ -142,19 +125,19 @@ function updateTitleUI() {
         `<span class="text-lg font-black text-[#095744]">${config.title}</span>`;
 }
 
-function renderSites() {
-    const sel = document.getElementById('siteSelect');
-    sel.innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('');
-    sel.value = localStorage.getItem('yt_current_site') || sites[0];
-}
-
-function addNewSite() { const n = prompt("新增工地："); if(n){sites.push(n); renderSites(); save();} }
-function deleteSite() { if(confirm("確定刪除此工地？")){sites=sites.filter(s=>s!==document.getElementById('siteSelect').value); renderSites(); save();} }
-
 function renderTabs() {
     let h = '';
-    Object.keys(stepData).sort().forEach(k => { h += `<div class="cat-tab step ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${isAdmin ? `<input class="bg-transparent text-white w-20 text-center font-black" value="${stepData[k].t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">` : stepData[k].t}</div>`; });
-    Object.keys(cats).sort().forEach(k => { h += `<div class="cat-tab ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${isAdmin && k!=='ALL' ? `<input class="bg-transparent text-black w-20 text-center font-black" value="${cats[k]}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()">` : cats[k]}</div>`; });
+    // Step 1-6 優先
+    Object.keys(stepData).sort().forEach(k => { 
+        h += `<div class="cat-tab step ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${isAdmin ? `<input class="bg-transparent text-white w-24 text-center font-black" value="${stepData[k].t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">` : stepData[k].t}</div>`; 
+    });
+    // A-K 類緊接其後
+    Object.keys(cats).sort().forEach(k => { 
+        if(k==='ALL') return;
+        h += `<div class="cat-tab ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${isAdmin ? `<input class="bg-transparent text-black w-24 text-center font-black" value="${cats[k]}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()">` : cats[k]}</div>`; 
+    });
+    // 「全部」放在最後
+    h += `<div class="cat-tab ${currentFilter==='ALL'?'active':''}" onclick="setFilter('ALL')">${cats['ALL']}</div>`;
     document.getElementById('tabContainer').innerHTML = h;
 }
 
@@ -177,7 +160,9 @@ function render() {
             </div>
             <div class="edit-zone">
                 <div>
-                    <div class="text-[9px] font-bold text-gray-400">ID: ${item.id}</div>
+                    <div class="text-[9px] font-bold text-gray-400">
+                        ${isAdmin ? `ID: <input class="id-edit bg-transparent border-none w-10 p-0" value="${item.id}" onchange="updateItemID('${item.id}', this.value)">` : `ID: ${item.id}`}
+                    </div>
                     ${isAdmin ? `<input class="admin-input mb-1" value="${item.n}" oninput="updateDB('${item.id}','n',this.value)">` : `<div class="font-black text-[14px] text-[#095744] truncate">${item.n}</div>`}
                     <div class="flex gap-1">
                         <div class="flex-1 flex items-center min-w-0">
@@ -190,10 +175,7 @@ function render() {
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    ${isAdmin ? `<select class="bg-orange-50 text-[9px] rounded font-black p-0.5 border" onchange="autoRelocateID('${item.id}', this.value)">
-                        ${Object.keys(cats).filter(c=>c!=='ALL').sort().map(k => `<option value="${k}" ${item.cat===k?'selected':''}>分類 ${k}</option>`).join('')}
-                    </select>` : '<div></div>'}
+                <div class="flex items-center justify-end">
                     <input type="number" value="${st.qty}" oninput="updateQty('${item.id}',this.value)" class="qty-input">
                 </div>
             </div>`;
@@ -201,20 +183,33 @@ function render() {
     });
 }
 
-function autoRelocateID(oldID, newCat) {
+// 核心改動：直接修改 ID 自動跳轉分類
+function updateItemID(oldID, newID) {
+    newID = newID.toUpperCase().trim();
+    if (activeDB.some(x => x.id === newID)) return alert("ID 重複了！");
     const item = activeDB.find(x => x.id === oldID);
-    if (!item || item.cat === newCat) return;
-    const brothers = activeDB.filter(x => x.cat === newCat);
-    let nextNum = 1;
-    if (brothers.length > 0) {
-        const nums = brothers.map(b => parseInt(b.id.substring(1))).filter(n => !isNaN(n));
-        nextNum = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+    if (!item) return;
+
+    const newCat = newID.charAt(0);
+    if (!cats[newCat]) return alert("無此分類代碼（請用 A-K）");
+
+    // 1. 更新 ID 與 分類
+    item.id = newID;
+    item.cat = newCat;
+
+    // 2. 同步更新 StepData 內的編號
+    Object.keys(stepData).forEach(k => {
+        stepData[k].items = stepData[k].items.map(id => id === oldID ? newID : id);
+    });
+
+    // 3. 同步更新購物車
+    if (cart[oldID]) {
+        cart[newID] = cart[oldID];
+        delete cart[oldID];
     }
-    const newID = newCat + nextNum.toString().padStart(2, '0');
-    Object.keys(stepData).forEach(k => { stepData[k].items = stepData[k].items.map(id => id === oldID ? newID : id); });
-    if (cart[oldID]) { cart[newID] = cart[oldID]; delete cart[oldID]; }
-    item.cat = newCat; item.id = newID;
-    save(); render();
+
+    save();
+    render();
 }
 
 function updateDB(id, f, v) { const i = activeDB.find(x => x.id === id); if (i) { i[f] = v; save(); } }
@@ -222,8 +217,16 @@ function toggleItem(id) { if (!cart[id]) cart[id] = { sel: false, qty: 1 }; cart
 function updateQty(id, v) { if (!cart[id]) cart[id] = { sel: true, qty: 1 }; cart[id].qty = parseInt(v) || 1; save(); }
 function handleImgErr(i) { if (i.src.includes('.jpg')) { i.src = i.src.replace('.jpg', '.JPG'); } else { i.onerror = null; i.src = 'https://via.placeholder.com/150?text=無照片'; } }
 
+function renderSites() {
+    const sel = document.getElementById('siteSelect');
+    sel.innerHTML = sites.map(s => `<option value="${s}">${s}</option>`).join('');
+    sel.value = localStorage.getItem('yt_current_site') || sites[0];
+}
+function addNewSite() { const n = prompt("新增工地："); if(n){sites.push(n); renderSites(); save();} }
+function deleteSite() { if(confirm("刪除此工地？")){sites=sites.filter(s=>s!==document.getElementById('siteSelect').value); renderSites(); save();} }
+
 function save() {
-    localStorage.setItem('yt_db_v704', JSON.stringify(activeDB));
+    localStorage.setItem('yt_db_v705', JSON.stringify(activeDB));
     localStorage.setItem('yt_cart', JSON.stringify(cart));
     localStorage.setItem('yt_staff', document.getElementById('staff').value);
     localStorage.setItem('yt_current_site', document.getElementById('siteSelect').value);
@@ -246,7 +249,7 @@ function buildReport() {
         <h2 style="text-align:center; color:#095744; margin-bottom:15px; font-weight:900;">${config.title}</h2>
         <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
             <span>工地：${document.getElementById('siteSelect').value}</span>
-            <span>負責：${document.getElementById('staff').value}</span>
+            <span>填單：${document.getElementById('staff').value}</span>
         </div>
         <table style="width:100%; border-collapse:collapse;">`;
     sel.forEach((i, idx) => {
@@ -263,7 +266,7 @@ function buildReport() {
 
 function captureToImage() {
     html2canvas(document.getElementById('captureTarget'), { useCORS: true }).then(canvas => {
-        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">✓ 生成成功！請長按圖片儲存。</p><img src="${canvas.toDataURL("image/png")}" style="width:100%; border:1px solid #ddd;">`;
+        document.getElementById('printArea').innerHTML = `<p style="color:red; font-weight:bold; margin-bottom:10px;">✓ 截圖成功！長按圖片即可存檔。</p><img src="${canvas.toDataURL("image/png")}" style="width:100%; border:1px solid #ddd;">`;
     });
 }
 
