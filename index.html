@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>鈺通營造工安標語系統 (照片路徑修正版)</title>
+    <title>鈺通營造工安標語系統 (分類回歸版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -17,7 +17,6 @@
         .cat-tab-step.active { background-color: var(--yt-light); border-color: var(--yt-light) !important; }
         .cat-tab-item { white-space: nowrap; padding: 8px 18px; border-radius: 10px; background-color: white; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0 !important; flex-shrink: 0; }
         .cat-tab-item.active { background-color: #E6F4F1; color: var(--yt-dark); border-color: var(--yt-dark) !important; font-weight: 900; }
-        .admin-edit-tab { border: 1px dashed #fb923c !important; background: #fff7ed !important; color: #9a3412 !important; }
         .grid-container { display: grid; gap: 15px; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
         .sign-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid #D7CCC8 !important; display: flex; gap: 16px; cursor: pointer; position: relative; }
         .sign-card.selected { border: 3px solid var(--yt-light) !important; background: #f0fdf4; }
@@ -72,7 +71,14 @@
 <script>
 let activeDB, db, cart = {}, sites, isAdmin = false, currentMode = 'CAT', currentKey = 'ALL', guides, catLabels, curEditImgId;
 
-// 維持 V2 資料庫名稱確保手動上傳的照片還在
+// 預設分類 (回歸原本的 A-K 完整分類)
+const DEFAULT_CATS = {
+    'ALL':'全部', 
+    'A':'A類 生活設施', 'B':'B類 安全防護', 'C':'C類 施工告示', 'D':'D類 指引警告', 
+    'E':'E類 電力設備', 'F':'F類 車輛管理', 'G':'G類 環境衛生', 'H':'H類 消防救護', 
+    'I':'I類 吊掛作業', 'J':'J類 其他標語', 'K':'K類 雜項清單'
+};
+
 const request = indexedDB.open("Yutong_SignSystem_V2", 1);
 request.onupgradeneeded = e => e.target.result.createObjectStore("images");
 request.onsuccess = e => { db = e.target.result; init(); };
@@ -84,12 +90,15 @@ function init() {
         {id:'B01', cat:'B', n:'戴安全帽', s:'60x40', m:'中空板'}
     ];
     guides = JSON.parse(localStorage.getItem('yt_guides')) || {
-        'S1': { t: 'Step 1. 工區大門配置', d: '門禁管制、告示牌', items: ['A01','B01'] },
-        'S2': { t: 'Step 2. 生活設施', d: '辦公與生活區域', items: [] }
+        'S1': { t: 'Step 1. 工區大門配置', d: '門禁、警衛室告示', items: ['A01','B01'] },
+        'S2': { t: 'Step 2. 基礎設施', d: '辦公室與生活區', items: [] },
+        'S3': { t: 'Step 3. 施工安全', d: '圍籬與高架作業', items: [] },
+        'S4': { t: 'Step 4. 動線管制', d: '車道與人員出入口', items: [] },
+        'S5': { t: 'Step 5. 機具電力', d: '開關箱與操作守則', items: [] },
+        'S6': { t: 'Step 6. 環境清潔', d: '垃圾分類與洗車台', items: [] }
     };
-    catLabels = JSON.parse(localStorage.getItem('yt_cat_labels')) || {
-        'ALL':'全部', 'A':'A類 生活設施', 'B':'B類 安全防護', 'C':'C類 施工告示', 'D':'D類 指引警告'
-    };
+    // 優先讀取紀錄，若無則用預設值
+    catLabels = JSON.parse(localStorage.getItem('yt_cat_labels')) || DEFAULT_CATS;
     cart = JSON.parse(localStorage.getItem('yt_cart')) || {};
     
     if(localStorage.getItem('yt_lastSite')) document.getElementById('siteSelect').value = localStorage.getItem('yt_lastSite');
@@ -121,8 +130,7 @@ async function render() {
         card.className = `sign-card ${c.sel ? 'selected' : ''}`;
         card.onclick = () => toggleItem(i.id);
         
-        // 【關鍵修正】：嘗試 GitHub 常見的路徑組合
-        // 如果手動上傳過照片(localImg)就用上傳的，否則優先嘗試 IMG/資料夾 + 大寫 ID
+        // 優先找手動上傳的，沒有的話嘗試 GitHub 大寫 IMG/A01.jpg
         const imgSrc = localImg || `IMG/${i.id}.jpg`;
 
         card.innerHTML = `
@@ -142,7 +150,7 @@ async function render() {
                 <div class="flex items-center gap-2 mt-2" onclick="event.stopPropagation()">
                     <span class="text-[10px] font-black text-slate-400">數量</span>
                     <input type="number" value="${c.qty}" oninput="updateQty('${i.id}',this.value)" class="qty-input">
-                    ${isAdmin && currentMode === 'CAT' ? `<select onchange="addIntoStep(this.value, '${i.id}')" class="text-[9px] border px-1 rounded"><option>加入Step...</option><option value="S1">Step 1</option><option value="S2">Step 2</option></select>` : ''}
+                    ${isAdmin && currentMode === 'CAT' ? `<select onchange="addIntoStep(this.value, '${i.id}')" class="text-[9px] border px-1 rounded"><option>加入Step...</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option><option value="S6">S6</option></select>` : ''}
                 </div>
             </div>`;
         grid.appendChild(card);
@@ -151,12 +159,17 @@ async function render() {
 
 function renderTabs() {
     let html = '';
+    // Step 標籤
     Object.keys(guides).sort().forEach(k => {
         html += `<div class="cat-tab-step ${currentMode==='GUIDE'&&currentKey===k?'active':''}" onclick="setFilter('GUIDE','${k}')">Step ${k.replace('S','')}</div>`;
     });
+    // 分類標籤 (回歸 A-K)
     Object.keys(catLabels).forEach(k => {
-        const isAdminStyle = isAdmin && k !== 'ALL' ? 'admin-edit-tab' : '';
-        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdminStyle}" onclick="${isAdmin && k !== 'ALL' ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">${catLabels[k]}</div>`;
+        const isAdminStyle = isAdmin && k !== 'ALL' ? 'border-dashed border-orange-400 bg-orange-50' : '';
+        html += `<div class="cat-tab-item ${currentMode==='CAT'&&currentKey===k?'active':''} ${isAdminStyle}" 
+                     onclick="${isAdmin && k !== 'ALL' ? `renameCat('${k}')` : `setFilter('CAT','${k}')`}">
+                     ${catLabels[k]}
+                 </div>`;
     });
     document.getElementById('tabContainer').innerHTML = html;
 }
@@ -178,9 +191,9 @@ async function dbGet(k) { return new Promise(r => { const t = db.transaction("im
 async function dbSet(k, v) { return new Promise(r => { const t = db.transaction("images","readwrite").objectStore("images").put(v, k); t.onsuccess = () => r(); }); }
 async function handlePhoto(input) { if(input.files[0]) { const reader = new FileReader(); reader.onload = async e => { await dbSet(curEditImgId, e.target.result); render(); }; reader.readAsDataURL(input.files[0]); }}
 function updateI(id, f, v) { const i = activeDB.find(x => x.id === id); if(i) { i[f] = v; saveDB(); }}
-function hardReset() { if(confirm("確定還原？")) { localStorage.clear(); location.reload(); }}
+function hardReset() { if(confirm("確定重設所有資料？")) { localStorage.clear(); location.reload(); }}
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function resetCart() { if(confirm("清空？")) { cart = {}; autoSave(); render(); } }
+function resetCart() { if(confirm("清空目前選擇？")) { cart = {}; autoSave(); render(); } }
 
 async function buildReport() {
     const sel = activeDB.filter(i => cart[i.id]?.sel).sort((a,b) => a.id.localeCompare(b.id));
