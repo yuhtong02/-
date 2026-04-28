@@ -52,10 +52,15 @@ select{flex:1;}
 .btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}.btn-blue:hover{background:#DBEAFE;}
 .btn-purple{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
 
-/* ── TABS ── */
+/* ── TABS (電腦版顯示滑軌) ── */
 .tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
-.tabs-scroll{display:flex;overflow-x:auto;padding:10px 16px;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.tabs-scroll::-webkit-scrollbar{display:none;}
+.tabs-scroll{display:flex;overflow-x:auto;padding:12px 16px;gap:6px;-webkit-overflow-scrolling:touch; scrollbar-width: thin; scrollbar-color: var(--mid) var(--bg);}
+/* 自定義分類列滑軌樣式 (電腦端) */
+.tabs-scroll::-webkit-scrollbar{height:5px; display: block;}
+.tabs-scroll::-webkit-scrollbar-track{background:var(--bg); border-radius: 10px;}
+.tabs-scroll::-webkit-scrollbar-thumb{background:var(--border); border-radius: 10px;}
+.tabs-scroll::-webkit-scrollbar-thumb:hover{background:var(--mid);}
+
 .tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
 .tab:hover{border-color:var(--mid);color:var(--mid);}
 .tab.step-tab{background:var(--pale2);border-color:var(--border2);color:var(--dark);}
@@ -225,8 +230,8 @@ select{flex:1;}
 </div>
 
 <script>
+// 資料庫與初始化
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
-
 const DEF_DB=[
   {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
   {id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
@@ -335,24 +340,16 @@ function renderSites(){
 
 function renderTabs(){
   let h='';
-  // 先放 Step 1~6
   Object.keys(stepData).sort().forEach(k=>{
     const t=stepData[k].t;
     const isActive=currentTab===k;
     h+=`<div class="tab step-tab${isActive?' active':''}" onclick="setTab('${k}')">${isAdmin?`<input style="background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:90px;outline:none;" value="${t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">`:t}</div>`;
   });
-  
-  // 垂直分隔線
   h+=`<span class="tab-sep"></span>`;
-  
-  // 全部標語
   h+=`<div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']}</div>`;
-  
-  // A~K 類
   CAT_KEYS.forEach(k=>{
     h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]||k}</div>`;
   });
-  
   document.getElementById('tabsEl').innerHTML=h;
 }
 
@@ -497,14 +494,35 @@ function buildReport(){
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
+/* ── 核心修復：優化截圖 ── */
 function captureReport(){
   if(typeof html2canvas==='undefined')return alert('截圖功能需要網路連線');
+  
   const target = document.getElementById('modalBox');
-  html2canvas(target,{useCORS:true,scale:2}).then(c=>{
+  
+  // 確保截圖時視窗回到頂部，避免 html2canvas 截取偏移
+  window.scrollTo(0, 0);
+
+  html2canvas(target, {
+    useCORS: true,
+    scale: 2,           // 提高清晰度
+    backgroundColor: "#FFFFFF",
+    scrollY: -window.scrollY, // 強制補償捲動位移
+    windowWidth: target.scrollWidth,
+    windowHeight: target.scrollHeight,
+    onclone: (clonedDoc) => {
+        // 在克隆的 DOM 中確保 modal 是展開狀態且無滾動條
+        const modal = clonedDoc.getElementById('modalBox');
+        modal.style.maxHeight = 'none';
+        modal.style.overflow = 'visible';
+    }
+  }).then(c=>{
     const dataUrl = c.toDataURL('image/png');
     document.getElementById('previewImg').src = dataUrl;
     document.getElementById('captureResult').classList.add('show');
-    closeModal(); // 關閉原本的文字彈窗
+    closeModal(); 
+  }).catch(err => {
+    alert("截圖發生錯誤：" + err);
   });
 }
 
