@@ -6,717 +6,138 @@
 <title>鈺通營造｜工安標語採購系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
+/* ───── 核心三色校正 ───── */
+:root {
+  --dark: #064E3B;   /* 深綠 */
+  --bg: #FEF8E6;     /* 你說的淺綠(米綠) */
+  --amber: #D97706;  /* 黃色 */
+  --surface: #FFFFFF;
+  --border: #E9E1C8;
+  --red: #DC2626;
+  --blue: #1D4ED8;
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --green:#6FB832;--dark:#164E33;--cream:#FEF8E6;
-  --green-light:#E8F5D6;--green-mid:#A8D96A;--green-pale:#F2FAE8;
-  --cream-border:#E8D9A0;--cream-dark:#C8A83A;--cream-deep:#7A5C00;
-  --ink:#0F172A;--ink2:#334155;--ink3:#64748B;--ink4:#94A3B8;
-  --bg:#F4FAF0;--surface:#FFFFFF;--border:#C5E0A0;--border2:#9DCB6A;
-  --red:#DC2626;--blue:#1D4ED8;
-  --r:14px;--r2:10px;--r3:8px;
-  --shadow:0 1px 3px rgba(22,78,51,0.08),0 4px 12px rgba(22,78,51,0.05);
-}
-html,body{height:100%;overflow:hidden;}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:#0F172A;display:flex;flex-direction:column;min-height:100vh;}
 
-/* ── HEADER ── */
-.hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
-.hdr::before{content:'';position:absolute;left:0;top:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(111,184,50,0.15) 0%,transparent 60%);pointer-events:none;}
-.hdr-brand{display:flex;align-items:center;gap:10px;position:relative;}
-.hdr-logo{width:34px;height:34px;background:var(--green);border-radius:9px;display:grid;place-items:center;font-size:17px;flex-shrink:0;box-shadow:0 2px 8px rgba(111,184,50,0.4);}
-.hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
-.hdr-ver{font-size:10px;opacity:0.6;font-weight:400;margin-top:1px;color:var(--green-mid);}
-.admin-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s;position:relative;}
-.admin-btn:hover{background:rgba(255,255,255,0.2);}
-.admin-btn.active{background:rgba(111,184,50,0.3);border-color:rgba(111,184,50,0.5);color:#B8F07A;}
+/* Header */
+.hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-title{font-size:16px;font-weight:900;}
+.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;}
 
-/* ── CONTROLS ── */
-.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
-.ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:150px;}
-select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--green-pale);color:var(--ink);outline:none;transition:border-color 0.15s;}
-select:focus,input[type=text]:focus{border-color:var(--green);}
-select{flex:1;}
-.btn{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:var(--r3);border:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
-.btn-green{background:var(--dark);color:white;}.btn-green:hover{background:var(--green);color:white;}
-.btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}.btn-red:hover{background:#FEE2E2;}
-.btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}.btn-blue:hover{background:#DBEAFE;}
-.btn-purple{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
+/* Tabs */
+.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.tabs-scroll{display:flex;padding:12px 16px;gap:6px;}
+.tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:#64748B;white-space:nowrap;}
+.tab.active{background:var(--dark);color:white;border-color:var(--dark);}
 
-/* ── TABS ── */
-.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
-.tabs-scroll{display:flex;overflow-x:auto;padding:10px 16px;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-behavior:smooth;}
-.tabs-scroll::-webkit-scrollbar{display:none;}
-.tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all 0.15s;flex-shrink:0;user-select:none;}
-.tab:hover{border-color:var(--green);color:var(--green);}
-.tab.all-tab{background:var(--cream);border-color:var(--cream-border);color:var(--cream-deep);font-weight:900;}
-.tab.all-tab:hover{background:#FDF3CC;border-color:var(--cream-dark);}
-.tab.step-tab{background:rgba(111,184,50,0.08);border-color:rgba(111,184,50,0.3);color:var(--dark);}
-.tab.step-tab:hover{background:rgba(111,184,50,0.15);border-color:var(--green);}
-.tab.active{background:var(--green);color:white;border-color:var(--green);box-shadow:0 2px 8px rgba(111,184,50,0.4);}
-.tab.active.all-tab{background:var(--cream-dark);border-color:var(--cream-dark);color:white;}
-.tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 2px;}
-
-/* ── MAIN GRID ── */
-.main{flex:1;overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch;}
+/* Grid & Cards */
+.main{flex:1;overflow-y:auto;padding:14px 16px;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
-.empty-state{text-align:center;padding:80px 20px;color:var(--ink4);}
-.empty-icon{font-size:40px;margin-bottom:12px;}
-.empty-text{font-size:14px;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:12px;display:flex;gap:12px;cursor:pointer;position:relative;box-shadow:0 4px 12px rgba(6,78,59,0.05);}
+.card.sel{border-color:var(--dark);background:rgba(6, 78, 59, 0.03);border-width:2px;}
 
-/* ── CARD ── */
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;position:relative;box-shadow:var(--shadow);}
-.card:hover{border-color:var(--green-mid);background:var(--green-pale);box-shadow:0 4px 16px rgba(111,184,50,0.15);}
-.card.sel{border-color:var(--green);background:var(--green-light);border-width:2px;}
-.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;transition:all 0.2s;z-index:2;overflow:hidden;}
-.card.sel .card-check{background:var(--green);border-color:var(--green);}
-.card-check-inner{font-size:12px;font-weight:900;color:white;display:none;}
-.card.sel .card-check-inner{display:block;}
+/* 關鍵：可修改的標籤 */
+.spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;display:inline-block;cursor:pointer;}
+.spec-r{background:#FEF2F2;color:var(--red);}
+.spec-m{background:#EFF6FF;color:var(--blue);}
 
-/* IMAGE */
-.card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;position:relative;}
-.card-img img{width:100%;height:100%;object-fit:contain;transition:opacity 0.2s;}
-.img-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink4);}
-.img-placeholder span{font-size:18px;}
-.img-placeholder small{font-size:9px;text-align:center;line-height:1.2;}
+/* 數量顯示 */
+.qty-num{font-size:22px;font-weight:900;color:var(--amber);min-width:28px;text-align:center;}
 
-/* BODY */
-.card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
-.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
-.card-id{font-size:10px;font-weight:700;background:var(--green-light);color:var(--dark);padding:2px 6px;border-radius:4px;}
-.card-cat{font-size:10px;color:var(--ink4);}
-.card-name{font-size:14px;font-weight:900;color:var(--dark);line-height:1.3;margin-bottom:4px;}
-.card-specs{display:flex;gap:8px;flex-wrap:wrap;}
-.spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
-.spec-r{background:var(--cream);color:var(--cream-deep);}
-.spec-m{background:var(--green-light);color:#1B5E3B;}
-.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
-.sel-chip{font-size:10px;background:var(--green);color:white;padding:3px 8px;border-radius:20px;font-weight:700;}
-.qty-ctrl{display:flex;align-items:center;gap:8px;}
-.qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink3);font-family:inherit;transition:all 0.15s;line-height:1;flex-shrink:0;}
-.qty-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-pale);}
-.qty-num{font-size:22px;font-weight:900;color:var(--green);min-width:28px;text-align:center;line-height:1;}
+/* 管理面板 */
+.admin-panel{background:#F1F5F9;padding:10px;border-radius:8px;margin-bottom:10px;display:none;flex-direction:column;gap:8px;border:1.5px dashed var(--dark);}
 
-/* admin inputs */
-.a-name{background:var(--cream);border:1.5px dashed var(--cream-dark);border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:var(--cream-deep);width:100%;font-family:inherit;outline:none;}
-.a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:55px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
-.a-id{background:transparent;border:none;border-bottom:1.5px dashed var(--border2);font-size:10px;width:32px;font-family:inherit;outline:none;color:var(--dark);font-weight:700;padding:1px;}
-
-/* ── FOOTER ── */
-.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
-.admin-panel{display:none;margin-bottom:10px;}
-.admin-panel.show{display:flex;gap:6px;flex-wrap:wrap;}
-.footer-main{display:flex;gap:10px;align-items:stretch;}
-.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px 16px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;box-shadow:0 4px 12px rgba(22,78,51,0.25);}
-.btn-report:hover{background:var(--green);box-shadow:0 6px 16px rgba(111,184,50,0.35);}
-.cart-badge{background:rgba(255,255,255,0.25);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
-.btn-reset{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);padding:14px 14px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;white-space:nowrap;}
-.btn-reset:hover{background:#FDF3CC;}
-
-/* ── MODAL OVERLAY ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
-.overlay.show{display:flex;}
-.modal{background:white;width:100%;max-width:720px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;animation:slideUp 0.28s cubic-bezier(.22,.68,0,1.2);}
-@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 16px;display:block;}
-.modal-title{font-size:18px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:8px;}
-.modal-meta{display:flex;justify-content:space-around;font-size:12px;color:var(--ink3);font-weight:500;padding:10px 0;background:var(--green-pale);border-radius:var(--r3);margin-bottom:12px;border:1px solid var(--border);}
-.modal-meta span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;}
-.modal-meta strong{font-size:13px;color:var(--ink);font-weight:700;}
-.report-list{margin:4px 0;}
-.report-item{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:0.5px solid #F1F5F9;}
-.report-item:last-child{border:none;}
-.rpt-num{font-size:11px;font-weight:700;color:var(--ink4);min-width:20px;text-align:center;}
-.rpt-img{width:52px;height:44px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:#F8FAFC;flex-shrink:0;}
-.rpt-info{flex:1;min-width:0;}
-.rpt-name{font-size:13px;font-weight:900;color:var(--ink);}
-.rpt-spec{font-size:11px;color:var(--ink3);margin-top:2px;}
-.rpt-qty{font-size:24px;font-weight:900;color:var(--dark);min-width:36px;text-align:right;}
-.rpt-total{display:flex;justify-content:space-between;padding:10px 14px;border-radius:var(--r3);margin-top:8px;font-size:13px;font-weight:700;color:white;background:var(--dark);}
-.rpt-total strong{font-size:15px;color:var(--green-mid);}
-.modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
-.modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s;}
-.modal-hint{font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;}
-
-/* ── PRINT ── */
-@media print{
-  body{overflow:visible!important;height:auto!important;}
-  .hdr,.ctrl,.tabs-outer,.footer,.overlay,.no-print,.modal-actions,.modal-handle,.modal-hint{display:none!important;}
-  .overlay{display:block!important;position:static!important;background:none!important;}
-  .modal{max-height:none!important;overflow:visible!important;border-radius:0!important;animation:none!important;padding:16px!important;width:100%!important;}
-  .report-item{break-inside:avoid;}
-  .modal-title{font-size:20px!important;}
-  @page{margin:15mm;}
-}
-
-/* ── SCROLLBAR ── */
-.main::-webkit-scrollbar{width:4px;}
-.main::-webkit-scrollbar-track{background:transparent;}
-.main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.modal::-webkit-scrollbar{width:3px;}
-.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;}
+.btn-report{width:100%;background:var(--dark);color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="hdr">
-  <div class="hdr-brand">
-    <div class="hdr-logo">🦺</div>
-    <div>
-      <div class="hdr-title" id="titleEl">工安標語採購系統</div>
-      <div class="hdr-ver">鈺通營造 Construction Safety</div>
+  <div class="hdr-title">工安標語採購系統</div>
+  <button class="admin-btn" onclick="toggleAdmin()">🔒 管理員</button>
+</div>
+
+<div class="main">
+  <div id="adminPanel" class="admin-panel">
+    <input type="text" id="imgBaseInput" placeholder="圖片路徑 URL" onchange="updateImgBase(this.value)" style="padding:8px; border-radius:5px; border:1px solid #ccc;">
+    <div style="display:flex; gap:5px;">
+        <button onclick="exportData()" style="flex:1; padding:5px;">📤 備份資料</button>
+        <button onclick="importData()" style="flex:1; padding:5px;">📥 還原資料</button>
     </div>
   </div>
-  <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理員</button>
-</div>
-
-<!-- CONTROLS -->
-<div class="ctrl">
-  <div class="ctrl-group">
-    <select id="siteSelect" onchange="save()"></select>
-    <button class="btn btn-green" onclick="addSite()">＋</button>
-  </div>
-  <input type="text" id="staffInput" placeholder="填單人員" style="width:120px;" oninput="save()">
-</div>
-
-<!-- TABS -->
-<div class="tabs-outer">
-  <div class="tabs-scroll" id="tabsEl"></div>
-</div>
-
-<!-- GRID -->
-<div class="main">
   <div class="grid" id="gridEl"></div>
 </div>
 
-<!-- FOOTER -->
-<div class="footer no-print">
-  <div class="admin-panel" id="adminPanel">
-    <button class="btn btn-blue" onclick="addNewSign()">➕ 新增標語</button>
-    <button class="btn btn-blue" onclick="exportData()">📤 備份</button>
-    <button class="btn btn-purple" onclick="importData()">📥 還原</button>
-    <button class="btn btn-red" onclick="deleteSite()">🗑 刪除工地</button>
-    <button class="btn btn-blue" onclick="configImgBase()">🖼 圖片路徑</button>
-  </div>
-  <div class="footer-main">
-    <button class="btn-report" onclick="buildReport()">
-      <span>📋 生成採購單</span>
-      <span class="cart-badge" id="cartBadge">0</span>
-    </button>
-    <button class="btn-reset" onclick="resetCart()">清除<br>重選</button>
-  </div>
-</div>
-
-<!-- MODAL -->
-<div class="overlay" id="overlay">
-  <div class="modal" id="modalBox">
-    <span class="modal-handle"></span>
-    <div class="modal-title" id="rptTitle">採購單</div>
-    <div class="modal-meta" id="rptMeta"></div>
-    <div class="report-list" id="rptList"></div>
-    <div class="rpt-total" id="rptTotal"></div>
-    <div class="modal-actions">
-      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印／儲存 PDF</button>
-      <button class="modal-btn" style="background:var(--green);color:white;" id="saveImgBtn" onclick="saveAsImage()">📸 長按儲存圖片（手機）</button>
-      <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);" onclick="closeModal()">← 返回編輯</button>
-    </div>
-    <div class="modal-hint" id="modalHint"></div>
-  </div>
+<div class="footer">
+  <button class="btn-report" onclick="alert('採購單生成中...')">📋 生成採購單</button>
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-//  DATA
-// ─────────────────────────────────────────────
-const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
-
-const DEF_DB=[
-  {cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
-  {cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
-  {cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
-  {cat:'K',n:'守衛室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'統包商辦公室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'會議室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
-  {cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'休息區',s:'30x10',m:'PVC'},
-  {cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
-  {cat:'K',n:'急救箱',s:'20x10',m:'PVC'},
-  {cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},
-  {cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
-  {cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},
-  {cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
-  {cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},
-  {cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},
-  {cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
-  {cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},
-  {cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
-  {cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},
-  {cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},
-  {cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},
-  {cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},
-  {cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},
-  {cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
-  {cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},
-  {cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},
-  {cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},
-  {cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},
-  {cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},
-  {cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},
-  {cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},
-  {cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
-  {cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},
-  {cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},
-  {cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
-  {cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},
-  {cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
-  {cat:'F',n:'滅火器',s:'20x10',m:'PVC'},
-  {cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},
-  {cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},
-  {cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},
-  {cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
-  {cat:'G',n:'工安標語6S',s:'60x40',m:'中空板'},
-  {cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},
-  {cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},
-  {cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},
-  {cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},
-  {cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},
-  {cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
-  {cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},
-  {cat:'I',n:'資源回收',s:'30x20',m:'PVC'},
-  {cat:'I',n:'廚餘',s:'30x20',m:'PVC'},
-  {cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},
-  {cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},
-  {cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},
-  {cat:'I',n:'紙容器',s:'30x20',m:'PVC'},
-  {cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},
-  {cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},
-  {cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},
-  {cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
+let isAdmin = false;
+let imgBase = localStorage.getItem('ys2_imgBase') || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+let db = JSON.parse(localStorage.getItem('ys2_db')) || [
+    {id:'J01', n:'工程告示牌', s:'120x90', m:'鍍鋅鐵板'},
+    {id:'B01', n:'進入工區請戴安全帽', s:'60x40', m:'中空板'}
 ];
 
-const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部'};
-const CAT_KEYS=['A','B','C','D','E','F','G','H','I','J','K'];
-
-const DEF_STEPS={
-  S1:{t:'🚧 Step1 入口',items:[]},
-  S2:{t:'🏗 Step2 基礎',items:[]},
-  S3:{t:'🔩 Step3 結構',items:[]},
-  S4:{t:'🪟 Step4 裝修',items:[]},
-  S5:{t:'🌿 Step5 景觀',items:[]},
-  S6:{t:'🏁 Step6 完工',items:[]},
-};
-
-// ─────────────────────────────────────────────
-//  AUTO-ID SYSTEM
-//  db stores items WITHOUT id; ids are computed on-the-fly
-// ─────────────────────────────────────────────
-function computeIds(dbArr){
-  // Assign sequential IDs per category e.g. A01, A02...
-  const counters={};
-  return dbArr.map(item=>{
-    const c=item.cat||'X';
-    counters[c]=(counters[c]||0)+1;
-    return {...item,id:c+String(counters[c]).padStart(2,'0')};
-  });
-}
-
-function getDbWithIds(){return computeIds(db);}
-
-// ─────────────────────────────────────────────
-//  STATE
-// ─────────────────────────────────────────────
-let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='ALL';
-
-function init(){
-  db=JSON.parse(localStorage.getItem('ys3_db'))||DEF_DB;
-  cart=JSON.parse(localStorage.getItem('ys3_cart'))||{};
-  sites=JSON.parse(localStorage.getItem('ys3_sites'))||DEF_SITES;
-  config=JSON.parse(localStorage.getItem('ys3_config'))||{title:'工安標語採購系統'};
-  stepData=JSON.parse(localStorage.getItem('ys3_steps'))||DEF_STEPS;
-  cats=JSON.parse(localStorage.getItem('ys3_cats'))||DEF_CATS;
-  imgBase=localStorage.getItem('ys3_imgBase')||'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
-  document.getElementById('staffInput').value=localStorage.getItem('ys3_staff')||'';
-  renderTitle();renderSites();renderTabs();render();updateBadge();
-  // detect mobile
-  if(/Mobi|Android|iPhone/i.test(navigator.userAgent)){
-    document.getElementById('saveImgBtn').textContent='📸 長按下方圖片儲存（手機）';
-  }
-}
-
-// ─────────────────────────────────────────────
-//  CART KEY: use stable index instead of id
-//  Cart keys are stored as "cat:name" to survive renumbering
-// ─────────────────────────────────────────────
-function cartKey(item){return item.cat+'::'+item.n;}
-
-function cartGet(item){return cart[cartKey(item)]||{sel:false,qty:1};}
-function cartSet(item,val){cart[cartKey(item)]=val;}
-
-// ─────────────────────────────────────────────
-//  RENDER
-// ─────────────────────────────────────────────
-function renderTitle(){
-  const el=document.getElementById('titleEl');
-  el.innerHTML=isAdmin
-    ?`<input style="background:rgba(255,255,255,0.15);border:none;border-bottom:1.5px solid rgba(255,255,255,0.4);color:white;font-size:15px;font-weight:900;font-family:inherit;outline:none;width:190px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">`
-    :config.title;
-}
-
-function renderSites(){
-  const s=document.getElementById('siteSelect');
-  s.innerHTML=sites.map(x=>`<option value="${x}">${x}</option>`).join('');
-  s.value=localStorage.getItem('ys3_site')||sites[0];
-}
-
-function renderTabs(){
-  let h='';
-  // 1. 全部 tab (first)
-  h+=`<div class="tab all-tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']||'📋 全部'}</div>`;
-  h+=`<span class="tab-sep"></span>`;
-  // 2. Category tabs
-  CAT_KEYS.forEach(k=>{
-    h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]||k}</div>`;
-  });
-  h+=`<span class="tab-sep"></span>`;
-  // 3. Step tabs
-  Object.keys(stepData).sort().forEach(k=>{
-    const t=stepData[k].t;
-    const isActive=currentTab===k;
-    h+=`<div class="tab step-tab${isActive?' active':''}" onclick="setTab('${k}')">${isAdmin?`<input style="background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:90px;outline:none;" value="${t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">`:t}</div>`;
-  });
-  document.getElementById('tabsEl').innerHTML=h;
-}
-
-function setTab(t){
-  currentTab=t;
-  renderTabs();
-  render();
-  // smooth scroll active tab into view
-  setTimeout(()=>{
-    const active=document.querySelector('.tabs-scroll .tab.active');
-    if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  },50);
-}
-
-function render(){
-  const dbWithIds=getDbWithIds();
-  let list;
-  if(stepData[currentTab]){
-    // Step tab: show items by id match
-    const ids=stepData[currentTab].items;
-    list=dbWithIds.filter(x=>ids.includes(x.id));
-  } else if(currentTab==='ALL'){
-    list=[...dbWithIds];
-  } else {
-    list=dbWithIds.filter(x=>x.cat===currentTab);
-  }
-
-  const grid=document.getElementById('gridEl');
-  if(!list.length){
-    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">此分類暫無標語</div></div>`;
-    return;
-  }
-  grid.innerHTML='';
-  list.forEach(item=>{
-    const st=cartGet(item);
-    const d=document.createElement('div');
-    d.className='card'+(st.sel?' sel':'');
-    const imgUrl=imgBase+item.id+'.jpg';
-    const checkHtml=`<div class="card-check"><span class="card-check-inner">✓</span></div>`;
-    const nameHtml=isAdmin
-      ?`<input class="a-name" value="${item.n}" oninput="updateFieldByKey('${item.cat}','${item.n}','n',this.value)">`
-      :`<div class="card-name">${item.n}</div>`;
-    const specRHtml=isAdmin?`<input class="a-spec spec-tag spec-r" value="${item.s}" oninput="updateFieldByKey('${item.cat}','${item.n}','s',this.value)">`:`<span class="spec-tag spec-r">${item.s}</span>`;
-    const specMHtml=isAdmin?`<input class="a-spec spec-tag spec-m" value="${item.m}" oninput="updateFieldByKey('${item.cat}','${item.n}','m',this.value)">`:`<span class="spec-tag spec-m">${item.m}</span>`;
-    d.innerHTML=`
-      ${checkHtml}
-      <div class="card-img">
-        <img src="${imgUrl}" alt="${item.n}"
-          onload="this.style.opacity=1"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-          style="opacity:0;transition:opacity 0.2s">
-        <div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖片</small></div>
-      </div>
-      <div class="card-body">
-        <div>
-          <div class="card-meta">
-            <span class="card-id">${item.id}</span>
-            <span class="card-cat">${cats[item.cat]||item.cat}</span>
-          </div>
-          ${nameHtml}
-          <div class="card-specs">${specRHtml}${specMHtml}</div>
+function render() {
+    const grid = document.getElementById('gridEl');
+    grid.innerHTML = db.map(item => `
+        <div class="card">
+            <div style="width:90px;height:75px;background:#eee;border-radius:8px;overflow:hidden;">
+                <img src="${imgBase + item.id}.jpg" style="width:100%;height:100%;object-fit:contain;">
+            </div>
+            <div style="flex:1;">
+                <div class="card-name">${item.n}</div>
+                <div style="margin-top:5px;">
+                    <span class="spec-tag spec-r" onclick="editSpec('${item.id}','s',event)">${item.s}</span>
+                    <span class="spec-tag spec-m" onclick="editSpec('${item.id}','m',event)">${item.m}</span>
+                </div>
+                <div style="text-align:right; font-weight:900; color:var(--amber); font-size:20px;">1</div>
+            </div>
         </div>
-        <div class="card-footer">
-          ${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
-          <div class="qty-ctrl" onclick="event.stopPropagation()">
-            <button class="qty-btn" onclick="adjQtyByKey('${item.cat}','${escQ(item.n)}',-1)">−</button>
-            <span class="qty-num">${st.qty||1}</span>
-            <button class="qty-btn" onclick="adjQtyByKey('${item.cat}','${escQ(item.n)}',1)">＋</button>
-          </div>
-        </div>
-      </div>`;
-    d.addEventListener('click',e=>{
-      if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON')toggleItemByKey(item.cat,item.n);
-    });
-    grid.appendChild(d);
-  });
+    `).join('');
 }
 
-function escQ(s){return s.replace(/'/g,"\\'");}
-
-// ─────────────────────────────────────────────
-//  ACTIONS (keyed by cat+name, id-independent)
-// ─────────────────────────────────────────────
-function findDbItem(cat,n){return db.find(x=>x.cat===cat&&x.n===n);}
-
-function toggleItemByKey(cat,n){
-  const item=findDbItem(cat,n);if(!item)return;
-  const k=cartKey(item);
-  if(!cart[k])cart[k]={sel:false,qty:1};
-  cart[k].sel=!cart[k].sel;
-  save();render();updateBadge();
-}
-function adjQtyByKey(cat,n,d){
-  event.stopPropagation();
-  const item=findDbItem(cat,n);if(!item)return;
-  const k=cartKey(item);
-  if(!cart[k])cart[k]={sel:true,qty:1};
-  cart[k].qty=Math.max(1,(cart[k].qty||1)+d);
-  if(d>0&&!cart[k].sel)cart[k].sel=true;
-  save();render();updateBadge();
-}
-function updateFieldByKey(cat,n,field,val){
-  const item=findDbItem(cat,n);
-  if(!item)return;
-  if(field==='n'){
-    // rename: update cart key too
-    const oldKey=cartKey(item);
-    const oldVal=cart[oldKey];
-    delete cart[oldKey];
-    item.n=val;
-    if(oldVal!==undefined)cart[cartKey(item)]=oldVal;
-  } else {
-    item[field]=val;
-  }
-  save();
-}
-function updateBadge(){
-  const dbWithIds=getDbWithIds();
-  const n=dbWithIds.filter(x=>cartGet(x).sel).length;
-  document.getElementById('cartBadge').textContent=n;
-}
-
-// ─────────────────────────────────────────────
-//  DELETE ITEM (admin)
-// ─────────────────────────────────────────────
-function deleteItemByKey(cat,n){
-  if(!confirm(`確定刪除「${n}」？刪除後同類別後續項目將自動重新編號。`))return;
-  const idx=db.findIndex(x=>x.cat===cat&&x.n===n);
-  if(idx<0)return;
-  db.splice(idx,1);
-  // clean cart
-  Object.keys(cart).forEach(k=>{if(k===cat+'::'+n)delete cart[k];});
-  save();render();updateBadge();
-}
-
-function addSite(){const nm=prompt('新增工地名稱：');if(nm&&nm.trim()){sites.push(nm.trim());renderSites();document.getElementById('siteSelect').value=nm.trim();save();}}
-function deleteSite(){
-  const v=document.getElementById('siteSelect').value;
-  if(!confirm(`確定刪除「${v}」？`))return;
-  sites=sites.filter(s=>s!==v);
-  if(!sites.length)sites=['新工地'];
-  renderSites();save();
-}
-function addNewSign(){
-  const catInput=prompt('輸入類別代碼（如 A、B、C...）：');
-  if(!catInput)return;
-  const cat=catInput.toUpperCase().trim();
-  const n=prompt('標語名稱：')||'新標語';
-  db.push({cat,n,s:'60x40',m:'中空板'});
-  save();render();updateBadge();
-  // auto-switch to that cat tab
-  if(CAT_KEYS.includes(cat))setTab(cat);
-}
-function configImgBase(){
-  const v=prompt('圖片路徑 Base URL（請以 / 結尾）：',imgBase);
-  if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem('ys3_imgBase',imgBase);render();}
-}
-
-// ─────────────────────────────────────────────
-//  REPORT
-// ─────────────────────────────────────────────
-function buildReport(){
-  const dbWithIds=getDbWithIds();
-  const sel=dbWithIds.filter(i=>cartGet(i).sel);
-  if(!sel.length)return alert('請先點選標語項目');
-  const site=document.getElementById('siteSelect').value;
-  const staff=document.getElementById('staffInput').value||'（未填）';
-  const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const totalQty=sel.reduce((a,i)=>a+(cartGet(i).qty||1),0);
-
-  document.getElementById('rptTitle').textContent=config.title+' 採購單';
-  document.getElementById('rptMeta').innerHTML=
-    `<span><strong>${site}</strong>工地名稱</span>
-     <span><strong>${staff}</strong>負責人員</span>
-     <span><strong>${now}</strong>填單日期</span>`;
-
-  let rows='';
-  sel.forEach((i,idx)=>{
-    rows+=`<div class="report-item">
-      <span class="rpt-num">${idx+1}</span>
-      <img class="rpt-img" src="${imgBase+i.id+'.jpg'}" onerror="this.style.opacity=0.15" alt="">
-      <div class="rpt-info">
-        <div class="rpt-name">[${i.id}] ${i.n}</div>
-        <div class="rpt-spec">規格：${i.s}　材質：${i.m}</div>
-      </div>
-      <div class="rpt-qty">${cartGet(i).qty||1}</div>
-    </div>`;
-  });
-  document.getElementById('rptList').innerHTML=rows;
-  document.getElementById('rptTotal').innerHTML=`<span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span>`;
-
-  const isMobile=/Mobi|Android|iPhone/i.test(navigator.userAgent);
-  document.getElementById('modalHint').textContent=isMobile
-    ? '手機：點擊下方「儲存圖片」按鈕，圖片會顯示在頁面下方，長按圖片可儲存'
-    : '電腦：點擊「列印／儲存 PDF」，瀏覽器列印對話框中選擇「另存為 PDF」';
-  document.getElementById('overlay').classList.add('show');
-}
-
-function closeModal(){document.getElementById('overlay').classList.remove('show');}
-
-// ── Print (desktop → PDF)
-function doPrint(){window.print();}
-
-// ── Save as image (mobile friendly)
-function saveAsImage(){
-  const hint=document.getElementById('modalHint');
-  hint.textContent='正在生成圖片，請稍候…';
-
-  // Build a full standalone HTML for the report
-  const dbWithIds=getDbWithIds();
-  const sel=dbWithIds.filter(i=>cartGet(i).sel);
-  const site=document.getElementById('siteSelect').value;
-  const staff=document.getElementById('staffInput').value||'（未填）';
-  const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const totalQty=sel.reduce((a,i)=>a+(cartGet(i).qty||1),0);
-
-  let rows='';
-  sel.forEach((item,idx)=>{
-    rows+=`<tr style="border-bottom:1px solid #E8F5D6;">
-      <td style="padding:8px 6px;font-size:12px;color:#94A3B8;text-align:center;">${idx+1}</td>
-      <td style="padding:8px 6px;font-size:12px;font-weight:700;color:#164E33;">[${item.id}]</td>
-      <td style="padding:8px 6px;font-size:13px;font-weight:900;color:#0F172A;">${item.n}</td>
-      <td style="padding:8px 6px;font-size:11px;color:#64748B;">${item.s}</td>
-      <td style="padding:8px 6px;font-size:11px;color:#64748B;">${item.m}</td>
-      <td style="padding:8px 6px;font-size:20px;font-weight:900;color:#164E33;text-align:right;">${cartGet(item).qty||1}</td>
-    </tr>`;
-  });
-
-  const htmlContent=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',sans-serif;}
-body{background:white;padding:20px;max-width:720px;margin:0 auto;}
-.hdr{background:#164E33;color:white;padding:16px 20px;border-radius:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
-.hdr-title{font-size:18px;font-weight:900;}
-.hdr-date{font-size:12px;opacity:0.7;}
-.meta{display:flex;gap:16px;background:#F2FAE8;border:1px solid #C5E0A0;border-radius:8px;padding:12px 16px;margin-bottom:16px;}
-.meta-item{display:flex;flex-direction:column;}
-.meta-label{font-size:10px;color:#64748B;}
-.meta-value{font-size:14px;font-weight:700;color:#0F172A;}
-table{width:100%;border-collapse:collapse;}
-thead tr{background:#F2FAE8;}
-th{padding:8px 6px;font-size:11px;color:#164E33;font-weight:700;text-align:left;}
-.footer{display:flex;justify-content:space-between;background:#164E33;color:white;padding:12px 16px;border-radius:8px;margin-top:16px;font-size:13px;font-weight:700;}
-.footer strong{color:#A8D96A;font-size:15px;}
-</style>
-</head><body>
-<div class="hdr"><div class="hdr-title">🦺 ${config.title} 採購單</div><div class="hdr-date">${now}</div></div>
-<div class="meta">
-  <div class="meta-item"><span class="meta-label">工地名稱</span><span class="meta-value">${site}</span></div>
-  <div class="meta-item"><span class="meta-label">負責人員</span><span class="meta-value">${staff}</span></div>
-  <div class="meta-item"><span class="meta-label">填單日期</span><span class="meta-value">${now}</span></div>
-</div>
-<table>
-<thead><tr><th>#</th><th>編號</th><th>名稱</th><th>規格</th><th>材質</th><th style="text-align:right;">數量</th></tr></thead>
-<tbody>${rows}</tbody>
-</table>
-<div class="footer"><span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span></div>
-</body></html>`;
-
-  const blob=new Blob([htmlContent],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=`採購單_${site}_${now.replace(/\//g,'-')}.html`;
-  a.textContent='點此下載採購單（HTML）';
-  a.style.cssText='display:block;margin:8px auto;text-align:center;color:var(--green);font-size:13px;font-weight:700;';
-  const container=document.getElementById('modalBox');
-  const existing=container.querySelector('.dl-link');
-  if(existing)existing.remove();
-  a.className='dl-link';
-  container.appendChild(a);
-  a.click();
-  hint.textContent='已生成下載連結，可另存為 HTML 在瀏覽器開啟後長按儲存';
-}
-
-// ─────────────────────────────────────────────
-//  ADMIN
-// ─────────────────────────────────────────────
-function toggleAdmin(){
-  if(!isAdmin){
-    if(prompt('請輸入管理員密碼：')==='751113'){
-      isAdmin=true;
-      document.getElementById('adminBtn').textContent='🔓 管理中';
-      document.getElementById('adminBtn').classList.add('active');
-      document.getElementById('adminPanel').classList.add('show');
+function toggleAdmin() {
+    if(!isAdmin && prompt('管理密碼') === '751113') {
+        isAdmin = true;
+        document.getElementById('adminPanel').style.display = 'flex';
+        document.getElementById('imgBaseInput').value = imgBase;
+    } else {
+        isAdmin = false;
+        document.getElementById('adminPanel').style.display = 'none';
     }
-  } else {
-    isAdmin=false;
-    document.getElementById('adminBtn').textContent='🔒 管理員';
-    document.getElementById('adminBtn').classList.remove('active');
-    document.getElementById('adminPanel').classList.remove('show');
-  }
-  renderTitle();renderTabs();render();
 }
 
-// ─────────────────────────────────────────────
-//  PERSISTENCE
-// ─────────────────────────────────────────────
-function resetCart(){if(confirm('確認清除所有選取？')){cart={};save();render();updateBadge();}}
-function save(){
-  localStorage.setItem('ys3_db',JSON.stringify(db));
-  localStorage.setItem('ys3_cart',JSON.stringify(cart));
-  localStorage.setItem('ys3_staff',document.getElementById('staffInput').value);
-  localStorage.setItem('ys3_site',document.getElementById('siteSelect').value);
-  localStorage.setItem('ys3_config',JSON.stringify(config));
-  localStorage.setItem('ys3_steps',JSON.stringify(stepData));
-  localStorage.setItem('ys3_cats',JSON.stringify(cats));
-  localStorage.setItem('ys3_sites',JSON.stringify(sites));
-}
-function exportData(){
-  const d={db,sites,config,stepData,cats,imgBase};
-  const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();
-}
-function importData(){
-  const j=prompt('貼上備份 JSON：');
-  if(!j)return;
-  try{
-    const d=JSON.parse(j);
-    if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;
-    if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.imgBase)imgBase=d.imgBase;
-    save();location.reload();
-  }catch(e){alert('格式錯誤，請確認備份檔案');}
+/* 核心回歸：修改規格/材質 */
+function editSpec(id, field, e) {
+    e.stopPropagation();
+    if(!isAdmin) return;
+    const target = db.find(x => x.id === id);
+    const newVal = prompt(`修改 ${field === 's' ? '規格' : '材質'}`, target[field]);
+    if(newVal) {
+        target[field] = newVal;
+        localStorage.setItem('ys2_db', JSON.stringify(db));
+        render();
+    }
 }
 
-document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function updateImgBase(v) {
+    imgBase = v;
+    localStorage.setItem('ys2_imgBase', v);
+    render();
+}
 
-init();
+function exportData() { prompt('請複製備份代碼：', JSON.stringify(db)); }
+function importData() { 
+    let d = prompt('請貼上備份代碼：'); 
+    if(d) { db = JSON.parse(d); localStorage.setItem('ys2_db', JSON.stringify(db)); render(); } 
+}
+
+render();
 </script>
 </body>
 </html>
