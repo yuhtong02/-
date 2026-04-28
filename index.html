@@ -141,6 +141,7 @@ select{flex:1;}
 .footer-main{display:flex;gap:10px;align-items:stretch;}
 .btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px 16px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
 .cart-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:13px;min-width:28px;}
+.btn-reset{padding:0 10px; font-size:12px; font-weight:700; background:#f1f1f1; border:1px solid #ccc; border-radius:8px; cursor:pointer;}
 
 /* ── MODAL ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
@@ -156,11 +157,22 @@ select{flex:1;}
 #captureResult.show{display:flex;}
 #captureResult img{max-width:100%;max-height:80vh;border-radius:8px;}
 
+/* ── PRINT & CAPTURE LOGIC ── */
+/* 預設隱藏動作按鈕 */
+.modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+
+/* 針對【列印】的控制：列印時只顯示帶有 .sel-item 的標語 */
 @media print{
-  .hdr,.ctrl,.tabs-outer,.footer,.overlay,.no-print,#captureResult{display:none!important;}
-  .main{overflow:visible;padding:0;}
-  .card{break-inside:avoid;}
+  .hdr, .ctrl, .tabs-outer, .footer, .overlay, .no-print, #captureResult, .modal-actions { display:none!important; }
+  .overlay { display: block !important; position: static !important; background: none !important; }
+  .modal { max-height: none !important; overflow: visible !important; width: 100% !important; padding: 0 !important; }
+  /* 只在列印模式下隱藏未選中的標語 */
+  .report-item:not(.sel-item) { display: none !important; }
 }
+
+/* 針對【截圖】的控制：截圖時不套用列印的隱藏規則，強制顯示所有項目 */
+.capturing .report-item { display: flex !important; }
+.capturing .modal-actions { display: none !important; }
 </style>
 </head>
 <body>
@@ -214,10 +226,9 @@ select{flex:1;}
     <div class="modal-title" id="rptTitle" style="text-align:center;font-weight:900;font-size:18px;margin-bottom:10px;">採購單</div>
     <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:12px;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px;"></div>
     <div id="rptList"></div>
-    <div id="rptTotal" style="display:flex;justify-content:space-between;padding:10px;font-weight:700;border-top:2px solid #eee;"></div>
-    <div class="modal-actions" style="display:flex;flex-direction:column;gap:8px;margin-top:15px;">
-      <button class="btn btn-green" style="padding:12px" onclick="window.print()">🖨 列印採購單</button>
-      <button class="btn btn-blue" style="padding:12px;background:#F59E0B;color:white;border:none;" onclick="captureReport()">📸 儲存為圖片 (長按儲存)</button>
+    <div class="modal-actions">
+      <button class="btn btn-green" style="padding:12px" onclick="window.print()">🖨 列印【選中項】</button>
+      <button class="btn btn-blue" style="padding:12px;background:#F59E0B;color:white;border:none;" onclick="captureReport()">📸 儲存為圖片 (含完整清單)</button>
       <button class="btn" style="padding:12px;background:#eee;" onclick="closeModal()">返回編輯</button>
     </div>
   </div>
@@ -229,7 +240,7 @@ select{flex:1;}
 </div>
 
 <script>
-// 數據與邏輯 (完全保留原本結構)
+// 數據與邏輯
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
   {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
@@ -314,7 +325,11 @@ let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
 
 function init(){
   db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
-  cart=JSON.parse(localStorage.getItem('ys2_cart'))||{};
+  
+  // 核心修改 1: 重新開啟時清除選擇標語，但不影響資料庫結構
+  cart={}; 
+  localStorage.removeItem('ys2_cart');
+
   sites=JSON.parse(localStorage.getItem('ys2_sites'))||DEF_SITES;
   config=JSON.parse(localStorage.getItem('ys2_config'))||{title:'工安標語採購系統'};
   stepData=JSON.parse(localStorage.getItem('ys2_steps'))||DEF_STEPS;
@@ -372,7 +387,6 @@ function render(){
     d.className='card'+(st.sel?' sel':'');
     const imgUrl=imgBase+item.id+'.jpg';
     
-    // 渲染 Input 時套用修正後的 Class
     const nameHtml=isAdmin
       ?`<input class="a-name" value="${item.n}" oninput="updateField('${item.id}','n',this.value)" onclick="event.stopPropagation()">`
       :`<div class="card-name">${item.n}</div>`;
@@ -388,7 +402,7 @@ function render(){
         <div>
           <div class="card-meta"><span class="card-id">${idHtml}</span><span class="card-cat">${cats[item.cat]||item.cat}</span></div>
           ${nameHtml}
-          <div class="card-specs">${isAdmin?'':''}${specRHtml}${specMHtml}</div>
+          <div class="card-specs">${specRHtml}${specMHtml}</div>
         </div>
         <div class="card-footer">
           <span></span>
@@ -432,7 +446,7 @@ function toggleAdmin(){
   if(!isAdmin){
     if(prompt('請輸入管理員密碼：')==='751113'){
       isAdmin=true;
-      document.getElementById('adminBtn').textContent='🔓 管理中';
+      document.getElementById('adminBtn').textContent='助 管理中';
       document.getElementById('adminPanel').classList.add('show');
     }
   } else {
@@ -455,23 +469,58 @@ function addNewSign(){
   const id=prompt('新 ID：')?.toUpperCase();
   if(id){db.push({id,cat:id[0],n:'新標語',s:'60x40',m:'中空板'});render();save();}
 }
+
+// 核心修改 2: 生成採購單時，將「選中項」加上特定的 Class
 function buildReport(){
-  const sel=db.filter(i=>cart[i.id]?.sel);
-  if(!sel.length)return alert('請選擇項目');
+  const anySel = Object.values(cart).some(c => c.sel);
+  if(!anySel) return alert('請先選擇標語');
+
   const site=document.getElementById('siteSelect').value;
   document.getElementById('rptMeta').innerHTML=`<span>工地：${site}</span><span>人員：${document.getElementById('staffInput').value}</span>`;
+  
   let rows='';
-  sel.forEach(i=>rows+=`<div class="report-item"><img class="rpt-img" src="${imgBase+i.id}.jpg"><div class="rpt-info"><div class="rpt-name">${i.n}</div><div style="font-size:10px">${i.s} / ${i.m}</div></div><div class="rpt-qty">${cart[i.id].qty}</div></div>`);
+  // 核心邏輯：列印清單顯示目前分類下的所有項目（方便手機存整張），但選中的項目標註 sel-item
+  let list;
+  if(stepData[currentTab]) list=db.filter(x=>stepData[currentTab].items.includes(x.id));
+  else if(currentTab==='ALL') list=[...db];
+  else list=db.filter(x=>x.cat===currentTab);
+
+  list.forEach(i=>{
+    const isSel = cart[i.id]?.sel;
+    const qty = cart[i.id]?.qty || 1;
+    // 列印時利用 CSS :not(.sel-item) 隱藏非選中項
+    rows+=`<div class="report-item ${isSel?'sel-item':''}">
+            <img class="rpt-img" src="${imgBase+i.id}.jpg">
+            <div class="rpt-info">
+              <div class="rpt-name">${i.n}</div>
+              <div style="font-size:10px">${i.s} / ${i.m}</div>
+            </div>
+            <div class="rpt-qty">${isSel ? qty : '-'}</div>
+          </div>`;
+  });
   document.getElementById('rptList').innerHTML=rows;
   document.getElementById('overlay').classList.add('show');
 }
+
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
+
+// 核心修改 3: 截圖時強制加上 .capturing Class 以無視列印隱藏規則
 function captureReport(){
-  html2canvas(document.getElementById('modalBox'),{useCORS:true,scale:2}).then(c=>{
+  const box = document.getElementById('modalBox');
+  box.classList.add('capturing'); // 開啟「顯示全部」模式
+  
+  html2canvas(box,{useCORS:true,scale:2}).then(c=>{
     document.getElementById('previewImg').src=c.toDataURL();
     document.getElementById('captureResult').classList.add('show');
+    box.classList.remove('capturing'); // 截圖完恢復
   });
 }
+
+function configImgBase(){
+  const n = prompt('輸入圖片資料夾路徑 (最後需含 /)：', imgBase);
+  if(n){ imgBase = n; localStorage.setItem('ys2_imgBase', n); render(); }
+}
+
 init();
 </script>
 </body>
