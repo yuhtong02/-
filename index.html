@@ -9,7 +9,6 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* 根據需求精確調整色調 */
   --dark:#064E3B;      /* 深綠 */
   --mid:#10B981;       /* 中間綠 */
   --light:#34D399;     /* 淺綠 */
@@ -18,7 +17,6 @@
   
   --ink:#0F172A;--ink2:#334155;--ink3:#64748B;--ink4:#94A3B8;
   
-  /* 您要求的色調 */
   --bg:#FEF8E6;        /* 核心色調底色 */
   --surface:#FFFFFF;   /* 卡片底色 */
   --border:#E9E1C8;    /* 配合背景的邊框色 */
@@ -81,14 +79,12 @@ select{flex:1;}
 .card-check::after{content:'✓';display:none;color:white;font-weight:900;font-size:11px;}
 .card.sel .card-check::after{display:block;}
 
-/* IMAGE */
 .card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;position:relative;}
 .card-img img{width:100%;height:100%;object-fit:contain;}
 .img-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink4);}
 .img-placeholder span{font-size:18px;}
 .img-placeholder small{font-size:9px;text-align:center;line-height:1.2;}
 
-/* BODY */
 .card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
 .card-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
 .card-id{font-size:10px;font-weight:700;background:var(--pale);color:var(--dark);padding:2px 6px;border-radius:4px;}
@@ -145,14 +141,17 @@ select{flex:1;}
 .modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
 .modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s;}
 
-/* ── PRINT ── */
+/* ── LONG PRESS PREVIEW ── */
+#captureResult{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+#captureResult.show{display:flex;}
+#captureResult img{max-width:100%;max-height:80vh;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.preview-tip{color:white;margin-top:15px;font-size:14px;background:rgba(255,255,255,0.2);padding:8px 20px;border-radius:20px;}
+
 @media print{
-  .hdr,.ctrl,.tabs-outer,.footer,.overlay,.no-print{display:none!important;}
+  .hdr,.ctrl,.tabs-outer,.footer,.overlay,.no-print,#captureResult{display:none!important;}
   .main{overflow:visible;padding:0;}
   .card{break-inside:avoid;}
 }
-
-/* ── SCROLLBAR ── */
 .main::-webkit-scrollbar{width:4px;}
 .main::-webkit-scrollbar-track{background:transparent;}
 .main::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
@@ -213,16 +212,19 @@ select{flex:1;}
     <div class="rpt-total" id="rptTotal"></div>
     <div class="modal-actions">
       <button class="modal-btn" style="background:var(--dark);color:white;" onclick="window.print()">🖨 列印採購單</button>
-      <button class="modal-btn" style="background:#F59E0B;color:white;" onclick="captureReport()">📸 儲存為圖片</button>
+      <button class="modal-btn" style="background:#F59E0B;color:white;" onclick="captureReport()">📸 儲存為圖片 (長按儲存)</button>
       <button class="modal-btn" style="background:#F1F5F9;color:#475569;" onclick="closeModal()">← 返回編輯</button>
     </div>
   </div>
 </div>
 
+<div id="captureResult" onclick="this.classList.remove('show')">
+  <img id="previewImg" src="" alt="採購單預覽">
+  <div class="preview-tip">☝️ 長按圖片即可直接儲存或分享</div>
+  <button class="modal-btn" style="margin-top:20px; background:white; color:var(--ink); width:200px;">關閉預覽</button>
+</div>
+
 <script>
-// ─────────────────────────────────────────────
-// 所有數據與邏輯維持原狀，不作更動
-// ─────────────────────────────────────────────
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 
 const DEF_DB=[
@@ -292,7 +294,7 @@ const DEF_DB=[
   {id:'I11',cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
 ];
 
-const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部'};
+const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部標語'};
 const CAT_KEYS=['A','B','C','D','E','F','G','H','I','J','K'];
 
 const DEF_STEPS={
@@ -333,16 +335,24 @@ function renderSites(){
 
 function renderTabs(){
   let h='';
+  // 先放 Step 1~6
   Object.keys(stepData).sort().forEach(k=>{
     const t=stepData[k].t;
     const isActive=currentTab===k;
     h+=`<div class="tab step-tab${isActive?' active':''}" onclick="setTab('${k}')">${isAdmin?`<input style="background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:90px;outline:none;" value="${t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">`:t}</div>`;
   });
+  
+  // 垂直分隔線
   h+=`<span class="tab-sep"></span>`;
+  
+  // 全部標語
+  h+=`<div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']}</div>`;
+  
+  // A~K 類
   CAT_KEYS.forEach(k=>{
     h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]||k}</div>`;
   });
-  h+=`<div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']}</div>`;
+  
   document.getElementById('tabsEl').innerHTML=h;
 }
 
@@ -486,11 +496,15 @@ function buildReport(){
   document.getElementById('overlay').classList.add('show');
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
+
 function captureReport(){
   if(typeof html2canvas==='undefined')return alert('截圖功能需要網路連線');
-  html2canvas(document.getElementById('modalBox'),{useCORS:true,scale:2}).then(c=>{
-    const a=document.createElement('a');a.href=c.toDataURL('image/png');
-    a.download=`採購單_${document.getElementById('siteSelect').value}.png`;a.click();
+  const target = document.getElementById('modalBox');
+  html2canvas(target,{useCORS:true,scale:2}).then(c=>{
+    const dataUrl = c.toDataURL('image/png');
+    document.getElementById('previewImg').src = dataUrl;
+    document.getElementById('captureResult').classList.add('show');
+    closeModal(); // 關閉原本的文字彈窗
   });
 }
 
