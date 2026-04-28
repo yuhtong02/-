@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-/* ───── 核心字體與配色 (100% 原始樣式) ───── */
+/* ───── 基礎樣式 (完全恢復你的原始配色) ───── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --dark:#064E3B;--mid:#10B981;--light:#34D399;--pale:#D1FAE5;--pale2:#ECFDF5;
@@ -20,22 +20,17 @@
 html,body{height:100%;}
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;overflow-x:hidden;}
 
-/* ───── UI 組件 (依照原始版本) ───── */
+/* ───── UI 排版 (100% 原始結構) ───── */
 .hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
 .hdr-brand{display:flex;align-items:center;gap:10px;}
 .hdr-logo{width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0;}
 .hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
-.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
 
 .ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
 .ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:150px;}
 select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--bg);color:var(--ink);outline:none;}
 select{flex:1;}
-.btn{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:var(--r3);border:none;cursor:pointer;white-space:nowrap;}
-.btn-green{background:var(--dark);color:white;}
-.btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}
-.btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}
-.btn-purple{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;}
 
 .tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
 .tabs-scroll{display:flex;overflow-x:auto;padding:12px 16px;gap:6px;-webkit-overflow-scrolling:touch;}
@@ -46,7 +41,7 @@ select{flex:1;}
 .main{flex:1;overflow-y:auto;padding:14px 16px;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
 
-/* ───── 卡片樣式 (原始比例) ───── */
+/* ───── 卡片樣式 ───── */
 .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;position:relative;box-shadow:var(--shadow);}
 .card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;}
 .card-img img{width:100%;height:100%;object-fit:contain;}
@@ -62,27 +57,31 @@ select{flex:1;}
 .card.sel .card-check{background:var(--dark);border-color:var(--dark);}
 .card.sel .card-check::after{content:'✓';color:white;font-weight:900;font-size:11px;}
 
-/* ───── 採購單修正區 (僅針對字體與列印) ───── */
+/* ───── 採購單彈窗修正 (鎖定字體與適中大小) ───── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
-.modal{background:white;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;position:relative;}
+.modal{background:white;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;}
 
-.report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #F1F5F9;}
+.report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;}
 .rpt-img{width:60px;height:50px;border-radius:6px;object-fit:contain;background:#F8FAFC;border:1px solid var(--border);}
 .rpt-info{flex:1;}
-.rpt-name{font-size:14px;font-weight:900;}
-.rpt-qty{font-size:20px;font-weight:900;color:var(--dark);text-align:right;} /* 修正電腦版太大的問題 */
+.rpt-name{font-size:14px;font-weight:900;color:var(--ink);}
+.rpt-qty{font-size:20px;font-weight:900;color:var(--dark);text-align:right;}
 
 @media print{
-  .hdr, .ctrl, .tabs-outer, .footer, .no-print { display:none !important; }
-  .overlay { position:absolute; display:block; background:none; padding:0; top:0; left:0; width:100%; }
-  .modal { position:relative; max-height:none; width:100%; padding:0; box-shadow:none; border:none; }
-  .report-item { page-break-inside: avoid; border-bottom: 1px solid #ddd !important; }
+  .no-print, .hdr, .ctrl, .tabs-outer, .footer { display:none !important; }
+  .overlay { position:absolute; display:block; background:none; top:0; left:0; width:100%; }
+  .modal { max-height:none; width:100%; padding:0; border-radius:0; border:none; box-shadow:none; }
 }
 
 .footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
 .footer-main{display:flex;gap:10px;align-items:stretch;}
-.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px 16px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:var(--r3);border:none;cursor:pointer;}
+.btn-green{background:var(--dark);color:white;}
+.btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}
+.btn-purple{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;}
+.btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}
 </style>
 </head>
 <body>
@@ -115,7 +114,7 @@ select{flex:1;}
 </div>
 
 <div class="footer no-print">
-  <div class="admin-panel" id="adminPanel" style="display:none; margin-bottom:10px; gap:6px; flex-wrap:wrap;">
+  <div id="adminPanel" style="display:none; margin-bottom:10px; gap:6px; flex-wrap:wrap;">
     <button class="btn btn-blue" onclick="addNewSign()">➕ 新增標語</button>
     <button class="btn btn-blue" onclick="exportData()">📤 備份</button>
     <button class="btn btn-purple" onclick="importData()">📥 還原</button>
@@ -131,16 +130,17 @@ select{flex:1;}
 </div>
 
 <div class="overlay" id="overlay">
-  <div class="modal" id="modalBox">
+  <div class="modal">
     <div id="modalPrintArea">
-        <div style="text-align:center;font-weight:900;font-size:20px;margin-bottom:15px;color:var(--dark);">採購清單</div>
-        <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:13px;border-bottom:2px solid var(--dark);padding-bottom:15px;margin-bottom:10px;"></div>
-        <div id="rptList"></div>
+      <div style="text-align:center;font-weight:900;font-size:20px;margin-bottom:15px;color:var(--dark);">工安標語採購單</div>
+      <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:13px;border-bottom:2px solid var(--dark);padding-bottom:15px;margin-bottom:10px;"></div>
+      <div id="rptList"></div>
+      <div id="rptSummary" style="text-align:right;padding-top:15px;font-weight:900;font-size:16px;"></div>
     </div>
-    <div class="no-print" style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
-      <button class="btn-green btn" style="padding:14px; font-size:16px;" onclick="window.print()">🖨 下載 PDF / 列印</button>
-      <button class="btn-blue btn" style="padding:14px; background:#F59E0B; color:white;" onclick="captureReport()">📸 儲存為圖片</button>
-      <button class="btn" style="padding:12px;background:#eee;" onclick="closeModal()">返回修改</button>
+    <div class="no-print" style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
+      <button class="btn btn-green" style="padding:14px; font-size:16px;" onclick="window.print()">🖨 下載 PDF / 列印</button>
+      <button class="btn btn-blue" style="padding:14px; background:#F59E0B; color:white;" onclick="captureReport()">📸 儲存為圖片</button>
+      <button onclick="closeModal()" style="padding:12px; background:#eee; border:none; border-radius:8px; cursor:pointer;">返回修改</button>
     </div>
   </div>
 </div>
@@ -151,85 +151,29 @@ select{flex:1;}
 </div>
 
 <script>
-/* ───── 100% 完整恢復所有原始資料 ───── */
+/* ───── 100% 完整恢復原始資料清單 ───── */
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
-  {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
-  {id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
-  {id:'J03',cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
-  {id:'K01',cat:'K',n:'守衛室',s:'30x10',m:'PVC'},
-  {id:'K02',cat:'K',n:'統包商辦營室',s:'30x10',m:'PVC'},
-  {id:'K03',cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
-  {id:'K04',cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},
-  {id:'K05',cat:'K',n:'會議室',s:'30x10',m:'PVC'},
-  {id:'K06',cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
-  {id:'K07',cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},
-  {id:'K08',cat:'K',n:'休息區',s:'30x10',m:'PVC'},
-  {id:'K09',cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
-  {id:'K10',cat:'K',n:'急救箱',s:'20x10',m:'PVC'},
-  {id:'K11',cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},
-  {id:'K12',cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
-  {id:'K13',cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},
-  {id:'K14',cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
-  {id:'A01',cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},
-  {id:'A02',cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},
-  {id:'A03',cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
-  {id:'B01',cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},
-  {id:'B02',cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
-  {id:'B03',cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},
-  {id:'B04',cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},
-  {id:'B05',cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},
-  {id:'B06',cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},
-  {id:'B07',cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},
-  {id:'B08',cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
-  {id:'C01',cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},
-  {id:'C02',cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},
-  {id:'C03',cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},
-  {id:'C04',cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},
-  {id:'C05',cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},
-  {id:'C06',cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},
-  {id:'C07',cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},
-  {id:'C08',cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
-  {id:'D01',cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},
-  {id:'D02',cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},
-  {id:'D03',cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
-  {id:'E01',cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},
-  {id:'E02',cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
-  {id:'F01',cat:'F',n:'滅火器',s:'20x10',m:'PVC'},
-  {id:'F02',cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},
-  {id:'F03',cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},
-  {id:'F04',cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},
-  {id:'F05',cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
+  {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},{id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},{id:'J03',cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
+  {id:'K01',cat:'K',n:'守衛室',s:'30x10',m:'PVC'},{id:'K02',cat:'K',n:'統包商辦營室',s:'30x10',m:'PVC'},{id:'K03',cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},{id:'K04',cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},{id:'K05',cat:'K',n:'會議室',s:'30x10',m:'PVC'},{id:'K06',cat:'K',n:'倉庫',s:'30x10',m:'PVC'},{id:'K07',cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},{id:'K08',cat:'K',n:'休息區',s:'30x10',m:'PVC'},{id:'K09',cat:'K',n:'飲水機',s:'20x10',m:'PVC'},{id:'K10',cat:'K',n:'急救箱',s:'20x10',m:'PVC'},{id:'K11',cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},{id:'K12',cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},{id:'K13',cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},{id:'K14',cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
+  {id:'A01',cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},{id:'A02',cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},{id:'A03',cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
+  {id:'B01',cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},{id:'B02',cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},{id:'B03',cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},{id:'B04',cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},{id:'B05',cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},{id:'B06',cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},{id:'B07',cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},{id:'B08',cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
+  {id:'C01',cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},{id:'C02',cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},{id:'C03',cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},{id:'C04',cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},{id:'C05',cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},{id:'C06',cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},{id:'C07',cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},{id:'C08',cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
+  {id:'D01',cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},{id:'D02',cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},{id:'D03',cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
+  {id:'E01',cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},{id:'E02',cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
+  {id:'F01',cat:'F',n:'滅火器',s:'20x10',m:'PVC'},{id:'F02',cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},{id:'F03',cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},{id:'F04',cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},{id:'F05',cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
   {id:'G01',cat:'G',n:'工安標語6S',s:'60x40',m:'中空板'},
-  {id:'H01',cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},
-  {id:'H02',cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},
-  {id:'H03',cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},
-  {id:'H04',cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},
-  {id:'H05',cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},
-  {id:'H06',cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
-  {id:'I01',cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},
-  {id:'I02',cat:'I',n:'資源回收',s:'30x20',m:'PVC'},
-  {id:'I03',cat:'I',n:'廚餘',s:'30x20',m:'PVC'},
-  {id:'I04',cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},
-  {id:'I05',cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},
-  {id:'I06',cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},
-  {id:'I07',cat:'I',n:'紙容器',s:'30x20',m:'PVC'},
-  {id:'I08',cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},
-  {id:'I09',cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},
-  {id:'I10',cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},
-  {id:'I11',cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
+  {id:'H01',cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},{id:'H02',cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},{id:'H03',cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},{id:'H04',cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},{id:'H05',cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},{id:'H06',cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
+  {id:'I01',cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},{id:'I02',cat:'I',n:'資源回收',s:'30x20',m:'PVC'},{id:'I03',cat:'I',n:'廚餘',s:'30x20',m:'PVC'},{id:'I04',cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},{id:'I05',cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},{id:'I06',cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},{id:'I07',cat:'I',n:'紙容器',s:'30x20',m:'PVC'},{id:'I08',cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},{id:'I09',cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},{id:'I10',cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},{id:'I11',cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'}
 ];
-
 const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部標語'};
-const CAT_KEYS=['A','B','C','D','E','F','G','H','I','J','K'];
-
 const DEF_STEPS={
   S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01','E01','E02','D02']},
   S2:{t:'🏗 Step2 基礎',items:['B01','B05','C01','D03','B06']},
   S3:{t:'🔩 Step3 結構',items:['B01','B02','B03','C01','C02','C03','C07']},
   S4:{t:'🪟 Step4 裝修',items:['A01','A02','A03','K08','K09','K10','F01']},
   S5:{t:'🌿 Step5 景觀',items:['E01','E02','I01','I02','I03','H04']},
-  S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']},
+  S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']}
 };
 
 let db,cart={},sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
@@ -255,7 +199,7 @@ function renderTabs(){
   let h='';
   Object.keys(stepData).sort().forEach(k=>{ h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${stepData[k].t}</div>`; });
   h+=`<span class="tab-sep"></span><div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']}</div>`;
-  CAT_KEYS.forEach(k=>{ h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]}</div>`; });
+  ['A','B','C','D','E','F','G','H','I','J','K'].forEach(k=>{ h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]}</div>`; });
   document.getElementById('tabsEl').innerHTML=h;
 }
 function setTab(t){currentTab=t;renderTabs();render();}
@@ -286,18 +230,20 @@ function buildReport(){
   const sel=db.filter(x=>cart[x.id]?.sel);
   if(!sel.length)return alert('尚未選擇品項');
   document.getElementById('rptMeta').innerHTML=`<div>工地: <b>${document.getElementById('siteSelect').value}</b></div><div>人員: <b>${document.getElementById('staffInput').value||'--'}</b></div><div>日期: <b>${new Date().toLocaleDateString()}</b></div>`;
-  document.getElementById('rptList').innerHTML=sel.map((i,idx)=>`<div class="report-item"><div style="width:25px;color:#ccc;">${idx+1}</div><img class="rpt-img" src="${imgBase+i.id}.jpg"><div class="rpt-info"><div class="rpt-name">${i.n}</div><div style="font-size:11px;color:#888">${i.s} | ${i.m}</div></div><div class="rpt-qty">${cart[i.id].qty}</div></div>`).join('')+`<div style="text-align:right;padding-top:15px;font-weight:900;">合計: ${sel.reduce((a,b)=>a+cart[b.id].qty,0)} 件</div>`;
+  document.getElementById('rptList').innerHTML=sel.map((i,idx)=>`<div class="report-item"><div style="width:25px;color:#ccc;">${idx+1}</div><img class="rpt-img" src="${imgBase+i.id}.jpg"><div class="rpt-info"><div class="rpt-name">${i.n}</div><div style="font-size:11px;color:#888">${i.s} | ${i.m}</div></div><div class="rpt-qty">${cart[i.id].qty}</div></div>`).join('');
+  document.getElementById('rptSummary').textContent=`合計: ${sel.length} 品項 / ${sel.reduce((a,b)=>a+cart[b.id].qty,0)} 件`;
   document.getElementById('overlay').classList.add('show');
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 function captureReport(){ html2canvas(document.getElementById('modalPrintArea'),{useCORS:true,scale:2}).then(c=>{ document.getElementById('previewImg').src=c.toDataURL(); document.getElementById('captureResult').style.display='flex'; });}
-function toggleAdmin(){ if(!isAdmin && prompt('管理密碼')==='751113'){ isAdmin=true; document.getElementById('adminPanel').style.display='flex'; }else{ isAdmin=false; document.getElementById('adminPanel').style.display='none'; }}
 
-/* 管理功能全數保留 */
+/* ───── 管理員專區與資料維護 ───── */
+function toggleAdmin(){ if(!isAdmin && prompt('管理密碼')==='751113'){ isAdmin=true; document.getElementById('adminPanel').style.display='flex'; }else{ isAdmin=false; document.getElementById('adminPanel').style.display='none'; }}
 function addSite(){ let n=prompt('工地名稱'); if(n){sites.push(n); localStorage.setItem('ys2_sites',JSON.stringify(sites)); renderSites();}}
 function deleteSite(){ if(confirm('刪除工地？')){ let i=sites.indexOf(document.getElementById('siteSelect').value); if(i>-1){sites.splice(i,1); localStorage.setItem('ys2_sites',JSON.stringify(sites)); renderSites();}}}
-function exportData(){ let d=prompt('複製此內容備份', JSON.stringify({db,sites,config,stepData,cats,imgBase})); }
-function importData(){ let d=prompt('貼上備份內容'); if(d){ let p=JSON.parse(d); Object.assign(window,p); localStorage.setItem('ys2_db',JSON.stringify(p.db)); location.reload(); }}
+function exportData(){ prompt('複製此備份內容', JSON.stringify({db,sites,config,stepData,cats,imgBase})); }
+function importData(){ let d=prompt('貼上備份內容'); if(d){ let p=JSON.parse(d); localStorage.setItem('ys2_db',JSON.stringify(p.db)); location.reload(); }}
+function addNewSign(){ let n=prompt('名稱'),s=prompt('規格'),m=prompt('材質'),c=prompt('分類(A-K)'),i=prompt('ID(如K99)'); if(n&&s&&m&&c&&i){db.push({id:i,cat:c,n,s,m}); localStorage.setItem('ys2_db',JSON.stringify(db)); render();}}
 
 init();
 </script>
