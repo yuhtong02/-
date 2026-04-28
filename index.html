@@ -209,7 +209,7 @@ const DEF_DB=[
   {id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
   {id:'J03',cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
   {id:'K01',cat:'K',n:'守衛室',s:'30x10',m:'PVC'},
-  {id:'K02',cat:'K',n:'統包商辦公室',s:'30x10',m:'PVC'},
+  {id:'K02',cat:'K',n:'統包商辦營室',s:'30x10',m:'PVC'},
   {id:'K03',cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
   {id:'K04',cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},
   {id:'K05',cat:'K',n:'會議室',s:'30x10',m:'PVC'},
@@ -285,18 +285,21 @@ const DEF_STEPS={
 
 let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
 
+// 核心優化：重新整理網頁時徹底清除選擇項
 function init(){
+  // 1. 先從本地儲存讀取資料庫、工地等靜態配置
   db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
-  
-  // ⚡ 修改處：每次載入網頁時強制清空選擇項，不讀取舊的 cart
-  cart={}; 
-  localStorage.removeItem('ys2_cart'); 
-  
   sites=JSON.parse(localStorage.getItem('ys2_sites'))||DEF_SITES;
   config=JSON.parse(localStorage.getItem('ys2_config'))||{title:'工安標語採購系統'};
   stepData=JSON.parse(localStorage.getItem('ys2_steps'))||DEF_STEPS;
   cats=JSON.parse(localStorage.getItem('ys2_cats'))||DEF_CATS;
   imgBase=localStorage.getItem('ys2_imgBase')||'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  
+  // 2. ⚡【關鍵優化】⚡：每次重新打開或刷新網頁，強制將 cart 設為空物件並從本地清除
+  cart={}; 
+  localStorage.removeItem('ys2_cart'); 
+  
+  // 3. 恢復填單人與工地選擇
   document.getElementById('staffInput').value=localStorage.getItem('ys2_staff')||'';
   renderTitle();renderSites();renderTabs();render();updateBadge();
 }
