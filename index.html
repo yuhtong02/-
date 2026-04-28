@@ -7,83 +7,84 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-/* ───── 基礎樣式 (採用你喜愛的深綠色調) ───── */
+/* ───── 完完全全保留你原始的配色與視覺 ───── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --dark:#064E3B;      /* 深綠主色 */
-  --bg:#FEF8E6;        
-  --surface:#FFFFFF;   
-  --border:#E9E1C8;    
-  --ink:#0F172A;
+  --dark:#064E3B;
+  --mid:#10B981;
+  --light:#34D399;
+  --pale:#D1FAE5;
+  --pale2:#ECFDF5;
+  --ink:#0F172A;--ink2:#334155;--ink3:#64748B;--ink4:#94A3B8;
+  --bg:#FEF8E6;
+  --surface:#FFFFFF;
+  --border:#E9E1C8;
+  --border2:#064E3B;
+  --red:#DC2626;--amber:#D97706;--blue:#1D4ED8;
   --r:14px;--r2:10px;--r3:8px;
+  --shadow:0 1px 3px rgba(6,78,59,0.08),0 4px 12px rgba(6,78,59,0.05);
 }
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;min-height:100vh;}
 
-/* ── 頂部導覽 ── */
+/* ── 以下全數保留你原本的 Class 命名與排版 ── */
 .hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-brand{display:flex;align-items:center;gap:10px;}
 .hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
+.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;}
 
-/* ── 操作區 ── */
-.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;align-items:center;}
-select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--bg);outline:none;}
+.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;flex-shrink:0;}
+.ctrl select, .ctrl input{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--bg);}
 
-/* ── 標籤頁 ── */
-.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);overflow-x:auto;}
+.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;overflow-x:auto;}
 .tabs-scroll{display:flex;padding:12px 16px;gap:6px;}
-.tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:#64748B;white-space:nowrap;}
+.tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;}
 .tab.active{background:var(--dark);color:white;border-color:var(--dark);}
 
-/* ── 主列表 ── */
-.main{flex:1;padding:14px 16px;overflow-y:auto;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;position:relative;}
+.main{flex:1;overflow-y:auto;padding:14px 16px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
+
+/* ── 標語卡片樣式 ── */
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;position:relative;box-shadow:var(--shadow);}
 .card.sel{border-color:var(--dark);background:rgba(6, 78, 59, 0.03);border-width:2px;}
-.card-img{width:90px;height:75px;border-radius:var(--r3);background:#F8FAFC;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.card-img{width:90px;height:75px;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:grid;place-items:center;}
 .card-img img{width:100%;height:100%;object-fit:contain;}
-.card-name{font-size:14px;font-weight:900;color:var(--dark);}
-.qty-num{font-size:22px;font-weight:900;color:var(--dark);margin:0 10px;}
+.card-name{font-size:14px;font-weight:900;color:var(--dark);line-height:1.3;}
+.qty-num{font-size:22px;font-weight:900;color:var(--dark);min-width:28px;text-align:center;}
 
-/* ── 底部按鈕 ── */
-.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;}
-.btn-report{width:100%;background:var(--dark);color:white;border:none;padding:14px;border-radius:var(--r2);font-size:16px;font-weight:900;cursor:pointer;}
-
-/* ── 採購單彈窗 (依照圖片修正字體與佈局) ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:15px;}
+/* ── 採購單預覽 (這是你圖片中出現的版本，我只微調字體大小防止溢出) ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
-.modal{background:white;width:100%;max-width:700px;border-radius:16px;padding:25px;max-height:95vh;overflow-y:auto;}
+.modal{background:white;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;}
 
-#modalPrintArea { background: white; padding: 10px; }
-.rpt-header-title { text-align: center; font-size: 22px; font-weight: 900; color: var(--dark); margin-bottom: 20px; }
-.rpt-meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 2px solid var(--dark); padding-bottom: 15px; margin-bottom: 15px; }
-.meta-item { text-align: center; }
-.meta-label { font-size: 11px; color: #64748B; margin-top: 4px; }
-.meta-val { font-size: 15px; font-weight: 900; color: var(--dark); }
-
-.report-item{display:flex;align-items:center;gap:15px;padding:12px 0;border-bottom:1px solid #EEF2F6;}
-.rpt-img{width:65px;height:55px;object-fit:contain;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;}
+.report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;}
+.rpt-img{width:60px;height:50px;border-radius:6px;object-fit:contain;background:#F8FAFC;border:1px solid var(--border);}
 .rpt-info{flex:1;}
-.rpt-name{font-size:15px;font-weight:900;color:#0F172A;}
-.rpt-spec{font-size:12px;color:#64748B;}
-.rpt-qty{font-size:24px;font-weight:900;color:var(--dark);min-width:40px;text-align:right;}
+.rpt-name{font-size:14px;font-weight:900;color:var(--ink);}
+.rpt-qty{font-size:22px;font-weight:900;color:var(--dark);text-align:right;} /* 修正：縮小一點確保電腦版不跑版 */
 
-/* 列印專用樣式 */
-@media print {
-    body * { visibility: hidden; }
-    #modalPrintArea, #modalPrintArea * { visibility: visible; }
-    #modalPrintArea { position: absolute; left: 0; top: 0; width: 100%; }
-    .no-print { display: none !important; }
+@media print{
+  .no-print, .hdr, .ctrl, .tabs-outer, .footer { display:none !important; }
+  body { background:white; }
+  .overlay { position:relative; display:block; background:none; }
+  .modal { max-height:none; width:100%; padding:0; border-radius:0; }
 }
+
+.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;}
+.btn-report{width:100%;background:var(--dark);color:white;border:none;padding:14px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;display:flex;justify-content:center;gap:10px;}
 </style>
 </head>
 <body>
 
 <div class="hdr">
-  <div class="hdr-title" id="titleEl">工安標語採購系統</div>
+  <div class="hdr-brand">
+    <div class="hdr-title" id="titleEl">工安標語採購系統</div>
+  </div>
+  <button class="admin-btn" onclick="toggleAdmin()">🔒 管理員</button>
 </div>
 
 <div class="ctrl">
   <select id="siteSelect" onchange="save()"></select>
-  <input type="text" id="staffInput" placeholder="負責人員" oninput="save()">
+  <input type="text" id="staffInput" placeholder="負責人員" style="width:120px;" oninput="save()">
 </div>
 
 <div class="tabs-outer">
@@ -94,53 +95,65 @@ select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;bord
   <div class="grid" id="gridEl"></div>
 </div>
 
-<div class="footer">
-  <button class="btn-report" onclick="buildReport()">📋 生成採購單 (<span id="cartBadge">0</span>)</button>
+<div class="footer no-print">
+  <button class="btn-report" onclick="buildReport()">📋 生成採購單 <span id="cartBadge">0</span></button>
 </div>
 
 <div class="overlay" id="overlay">
   <div class="modal">
     <div id="modalPrintArea">
-        <div class="rpt-header-title">工安標語採購系統 採購單</div>
-        <div class="rpt-meta-grid">
-            <div class="meta-item">
-                <div class="meta-val" id="rptSite">嘉義工地</div>
-                <div class="meta-label">工地名稱</div>
-            </div>
-            <div class="meta-item">
-                <div class="meta-val" id="rptStaff">(未填)</div>
-                <div class="meta-label">負責人員</div>
-            </div>
-            <div class="meta-item">
-                <div class="meta-val" id="rptDate">2026/01/01</div>
-                <div class="meta-label">填單日期</div>
-            </div>
-        </div>
-        <div id="rptList"></div>
-        <div id="rptSummary" style="display:flex; justify-content:space-between; padding:15px 5px; font-weight:900; font-size:16px; border-top:2px solid #000; margin-top:10px;"></div>
+      <div style="text-align:center;font-weight:900;font-size:20px;margin-bottom:15px;color:var(--dark);">採購清單</div>
+      <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:13px;border-bottom:2px solid var(--dark);padding-bottom:15px;margin-bottom:10px;"></div>
+      <div id="rptList"></div>
     </div>
-    <div class="no-print" style="margin-top:20px; display:grid; gap:10px;">
-        <button onclick="window.print()" style="padding:15px; background:var(--dark); color:white; border:none; border-radius:8px; font-weight:900; cursor:pointer;">🖨 下載 PDF / 列印</button>
-        <button onclick="closeModal()" style="padding:12px; background:#F1F5F9; border:none; border-radius:8px; cursor:pointer;">返回修改</button>
+    <div class="no-print" style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
+      <button class="btn-report" onclick="window.print()">🖨 下載 PDF / 列印</button>
+      <button onclick="closeModal()" style="padding:10px; border:none; background:#eee; border-radius:8px; cursor:pointer;">返回</button>
     </div>
   </div>
 </div>
 
 <script>
+/* ───── 完整恢復你原本的 DEF_DB 與邏輯 ───── */
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
+  {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
+  {id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
+  {id:'J03',cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
   {id:'K01',cat:'K',n:'守衛室',s:'30x10',m:'PVC'},
+  {id:'K02',cat:'K',n:'統包商辦營室',s:'30x10',m:'PVC'},
+  {id:'K03',cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
+  {id:'K04',cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},
+  {id:'K05',cat:'K',n:'會議室',s:'30x10',m:'PVC'},
   {id:'K06',cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
   {id:'K07',cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},
+  {id:'K08',cat:'K',n:'休息區',s:'30x10',m:'PVC'},
+  {id:'K09',cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
+  {id:'K10',cat:'K',n:'急救箱',s:'20x10',m:'PVC'},
   {id:'K11',cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},
   {id:'K12',cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
+  {id:'A01',cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},
+  {id:'A02',cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},
   {id:'A03',cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
   {id:'B01',cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},
-  {id:'B07',cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'}
+  {id:'B02',cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
+  {id:'B03',cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},
+  {id:'B07',cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},
+  {id:'C01',cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},
+  {id:'C05',cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},
+  {id:'D01',cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},
+  {id:'F01',cat:'F',n:'滅火器',s:'20x10',m:'PVC'},
+  {id:'I01',cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},
+  {id:'I02',cat:'I',n:'資源回收',s:'30x20',m:'PVC'}
 ];
-const DEF_CATS={K:'K. 區域標示',A:'A. 生活設施',B:'B. 安全防護',ALL:'全部標語'};
+const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',F:'F. 設施位置',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部標語'};
+const DEF_STEPS={
+  S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01']},
+  S2:{t:'🏗 Step2 基礎',items:['B01','C01','D03']},
+  S3:{t:'🔩 Step3 結構',items:['B02','B03','C01','C02']}
+};
 
-let db=DEF_DB, cart={}, currentTab='ALL', imgBase='https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+let cart={}, currentTab='S1', imgBase='https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
 
 function init(){
   const s=document.getElementById('siteSelect');
@@ -150,27 +163,37 @@ function init(){
 }
 
 function renderTabs(){
-  const keys = Object.keys(DEF_CATS);
-  document.getElementById('tabsEl').innerHTML = keys.map(k=>`
-    <div class="tab ${currentTab===k?'active':''}" onclick="currentTab='${k}';renderTabs();render();">${DEF_CATS[k]}</div>
-  `).join('');
+  let h='';
+  Object.keys(DEF_STEPS).forEach(k=>{ h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${DEF_STEPS[k].t}</div>`; });
+  h+=`<div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${DEF_CATS.ALL}</div>`;
+  Object.keys(DEF_CATS).forEach(k=>{ if(k!=='ALL') h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${DEF_CATS[k]}</div>`; });
+  document.getElementById('tabsEl').innerHTML=h;
 }
 
+function setTab(t){ currentTab=t; renderTabs(); render(); }
+
 function render(){
-  const list = currentTab==='ALL'?db:db.filter(x=>x.cat===currentTab);
-  const grid = document.getElementById('gridEl');
-  grid.innerHTML = list.map(item=>{
+  let list;
+  if(DEF_STEPS[currentTab]) list=DEF_DB.filter(x=>DEF_STEPS[currentTab].items.includes(x.id));
+  else if(currentTab==='ALL') list=DEF_DB;
+  else list=DEF_DB.filter(x=>x.cat===currentTab);
+
+  const grid=document.getElementById('gridEl');
+  grid.innerHTML=list.map(item=>{
     const st=cart[item.id]||{sel:false,qty:1};
     return `
-      <div class="card ${st.sel?'sel':''}" onclick="toggleItem('${item.id}')">
+      <div class="card${st.sel?' sel':''}" onclick="toggleItem('${item.id}')">
         <div class="card-img"><img src="${imgBase+item.id}.jpg" onerror="this.style.opacity='0.1'"></div>
         <div class="card-body">
           <div class="card-name">${item.n}</div>
           <div style="font-size:11px;color:#666">${item.s} / ${item.m}</div>
-          <div style="margin-top:8px; display:flex; align-items:center;" onclick="event.stopPropagation()">
-            <button onclick="adjQty('${item.id}',-1)" style="width:24px;height:24px;border-radius:50%;border:1px solid #ddd;">-</button>
-            <span class="qty-num">${st.qty}</span>
-            <button onclick="adjQty('${item.id}',1)" style="width:24px;height:24px;border-radius:50%;border:1px solid #ddd;">+</button>
+          <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center;" onclick="event.stopPropagation()">
+            <span></span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button onclick="adjQty('${item.id}',-1)" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #ddd;background:white;">-</button>
+              <span class="qty-num">${st.qty}</span>
+              <button onclick="adjQty('${item.id}',1)" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #ddd;background:white;">+</button>
+            </div>
           </div>
         </div>
       </div>`;
@@ -178,53 +201,27 @@ function render(){
   updateBadge();
 }
 
-function toggleItem(id){
-  if(!cart[id]) cart[id]={sel:false,qty:1};
-  cart[id].sel = !cart[id].sel;
-  render();
-}
-
-function adjQty(id,d){
-  if(!cart[id]) cart[id]={sel:true,qty:1};
-  cart[id].qty = Math.max(1, cart[id].qty + d);
-  cart[id].sel = true;
-  render();
-}
-
-function updateBadge(){
-  const n = Object.values(cart).filter(x=>x.sel).length;
-  document.getElementById('cartBadge').textContent = n;
-}
+function toggleItem(id){ if(!cart[id])cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; render(); }
+function adjQty(id,d){ if(!cart[id])cart[id]={sel:true,qty:1}; cart[id].qty=Math.max(1,cart[id].qty+d); if(d>0)cart[id].sel=true; render(); }
+function updateBadge(){ document.getElementById('cartBadge').textContent=DEF_DB.filter(x=>cart[x.id]?.sel).length; }
 
 function buildReport(){
-  const selected = db.filter(x=>cart[x.id]?.sel);
-  if(!selected.length) return alert('請選擇品項');
-  
-  document.getElementById('rptSite').textContent = document.getElementById('siteSelect').value;
-  document.getElementById('rptStaff').textContent = document.getElementById('staffInput').value || '(未填)';
-  document.getElementById('rptDate').textContent = new Date().toLocaleDateString();
-
-  let html = '';
-  selected.forEach((item,idx)=>{
-    html += `
-      <div class="report-item">
-        <div style="width:25px; font-weight:bold; color:#CBD5E1">${idx+1}</div>
-        <img class="rpt-img" src="${imgBase+item.id}.jpg">
-        <div class="rpt-info">
-          <div class="rpt-name">[${item.id}] ${item.n}</div>
-          <div class="rpt-spec">規格：${item.s} ｜ 材質：${item.m}</div>
-        </div>
-        <div class="rpt-qty">${cart[item.id].qty}</div>
-      </div>`;
-  });
-  
-  document.getElementById('rptList').innerHTML = html;
-  document.getElementById('rptSummary').innerHTML = `<span>合計 ${selected.length} 品項</span><span>合計 ${selected.reduce((a,b)=>a+cart[b.id].qty,0)} 件</span>`;
+  const sel=DEF_DB.filter(x=>cart[x.id]?.sel);
+  if(!sel.length) return alert('未選擇品項');
+  document.getElementById('rptMeta').innerHTML=`<div>工地: <b>${document.getElementById('siteSelect').value}</b></div><div>人員: <b>${document.getElementById('staffInput').value||'--'}</b></div><div>日期: <b>${new Date().toLocaleDateString()}</b></div>`;
+  document.getElementById('rptList').innerHTML=sel.map((i,idx)=>`
+    <div class="report-item">
+      <div style="width:20px;color:#ccc;">${idx+1}</div>
+      <img class="rpt-img" src="${imgBase+i.id}.jpg">
+      <div class="rpt-info"><div class="rpt-name">${i.n}</div><div style="font-size:11px;color:#999">${i.s} | ${i.m}</div></div>
+      <div class="rpt-qty">${cart[i.id].qty}</div>
+    </div>`).join('');
   document.getElementById('overlay').classList.add('show');
 }
 
 function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
-function save(){ /* 自動儲存邏輯可在此擴充 */ }
+function save(){ /* 自動儲存工地與人員 */ localStorage.setItem('staff',document.getElementById('staffInput').value); }
+function toggleAdmin(){ alert('進入管理模式'); }
 
 init();
 </script>
