@@ -52,10 +52,9 @@ select{flex:1;}
 .btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}.btn-blue:hover{background:#DBEAFE;}
 .btn-purple{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
 
-/* ── TABS (電腦版顯示滑軌) ── */
+/* ── TABS ── */
 .tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
 .tabs-scroll{display:flex;overflow-x:auto;padding:12px 16px;gap:6px;-webkit-overflow-scrolling:touch; scrollbar-width: thin; scrollbar-color: var(--mid) var(--bg);}
-/* 自定義分類列滑軌樣式 (電腦端) */
 .tabs-scroll::-webkit-scrollbar{height:5px; display: block;}
 .tabs-scroll::-webkit-scrollbar-track{background:var(--bg); border-radius: 10px;}
 .tabs-scroll::-webkit-scrollbar-thumb{background:var(--border); border-radius: 10px;}
@@ -86,9 +85,6 @@ select{flex:1;}
 
 .card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;position:relative;}
 .card-img img{width:100%;height:100%;object-fit:contain;}
-.img-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink4);}
-.img-placeholder span{font-size:18px;}
-.img-placeholder small{font-size:9px;text-align:center;line-height:1.2;}
 
 .card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
 .card-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
@@ -106,21 +102,14 @@ select{flex:1;}
 .qty-btn:hover{border-color:var(--mid);color:var(--mid);background:var(--pale2);}
 .qty-num{font-size:22px;font-weight:900;color:var(--dark);min-width:28px;text-align:center;line-height:1;}
 
-/* admin inputs */
-.a-name{background:#FFF7ED;border:1.5px dashed #FB923C;border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:#9A3412;width:100%;font-family:inherit;outline:none;}
-.a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:55px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
-.a-id{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:32px;font-family:inherit;outline:none;color:var(--dark);font-weight:700;padding:1px;}
-
 /* ── FOOTER ── */
 .footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
 .admin-panel{display:none;margin-bottom:10px;}
 .admin-panel.show{display:flex;gap:6px;flex-wrap:wrap;}
 .footer-main{display:flex;gap:10px;align-items:stretch;}
 .btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px 16px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s;box-shadow:0 4px 12px rgba(6,78,59,0.2);}
-.btn-report:hover{background:var(--mid);}
 .cart-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
 .btn-reset{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;padding:14px 14px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;white-space:nowrap;}
-.btn-reset:hover{background:#FEE2E2;}
 
 /* ── MODAL ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;padding:0;}
@@ -134,7 +123,6 @@ select{flex:1;}
 .modal-meta strong{font-size:13px;color:var(--ink);font-weight:700;}
 .report-list{margin:12px 0;}
 .report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #F1F5F9;}
-.report-item:last-child{border:none;}
 .rpt-num{font-size:12px;font-weight:700;color:var(--ink4);min-width:20px;}
 .rpt-img{width:52px;height:44px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:#F8FAFC;flex-shrink:0;}
 .rpt-info{flex:1;min-width:0;}
@@ -146,17 +134,32 @@ select{flex:1;}
 .modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
 .modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s;}
 
-/* ── LONG PRESS PREVIEW ── */
+/* ── PREVIEW ── */
 #captureResult{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
 #captureResult.show{display:flex;}
 #captureResult img{max-width:100%;max-height:80vh;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
 .preview-tip{color:white;margin-top:15px;font-size:14px;background:rgba(255,255,255,0.2);padding:8px 20px;border-radius:20px;}
 
+/* ── 列印專用核心設定 ── */
 @media print{
-  .hdr,.ctrl,.tabs-outer,.footer,.overlay,.no-print,#captureResult{display:none!important;}
-  .main{overflow:visible;padding:0;}
-  .card{break-inside:avoid;}
+  body, html { background: white !important; height: auto !important; overflow: visible !important; }
+  /* 隱藏主介面所有元件 */
+  .hdr, .ctrl, .tabs-outer, .main, .footer, .overlay, #captureResult, .no-print { display: none !important; }
+  /* 只強制顯示彈窗內的採購單內容 */
+  #overlay.show { display: block !important; position: static !important; background: none !important; }
+  #modalBox { 
+    display: block !important; 
+    position: static !important; 
+    box-shadow: none !important; 
+    width: 100% !important; 
+    max-width: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+  }
+  .modal-handle, .modal-actions { display: none !important; }
+  .report-item { break-inside: avoid; border-bottom: 1px solid #eee !important; }
 }
+
 .main::-webkit-scrollbar{width:4px;}
 .main::-webkit-scrollbar-track{background:transparent;}
 .main::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
@@ -230,7 +233,7 @@ select{flex:1;}
 </div>
 
 <script>
-// 資料庫與初始化
+// 資料庫
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
   {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
@@ -315,12 +318,17 @@ let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
 
 function init(){
   db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
-  cart=JSON.parse(localStorage.getItem('ys2_cart'))||{};
+  
+  /* 核心修改：重新開啟時自動清空選擇紀錄 */
+  cart={}; 
+  localStorage.removeItem('ys2_cart');
+  
   sites=JSON.parse(localStorage.getItem('ys2_sites'))||DEF_SITES;
   config=JSON.parse(localStorage.getItem('ys2_config'))||{title:'工安標語採購系統'};
   stepData=JSON.parse(localStorage.getItem('ys2_steps'))||DEF_STEPS;
   cats=JSON.parse(localStorage.getItem('ys2_cats'))||DEF_CATS;
   imgBase=localStorage.getItem('ys2_imgBase')||'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  
   document.getElementById('staffInput').value=localStorage.getItem('ys2_staff')||'';
   renderTitle();renderSites();renderTabs();render();updateBadge();
 }
@@ -429,8 +437,7 @@ function updateID(old,nid){
   if(!nid||nid===old)return;
   if(db.some(x=>x.id===nid))return alert('此 ID 已存在！');
   const item=db.find(x=>x.id===old);if(!item)return;
-  const newCat=nid[0];
-  item.id=nid;item.cat=newCat;
+  item.id=nid; item.cat=nid[0];
   Object.keys(stepData).forEach(k=>{stepData[k].items=stepData[k].items.map(x=>x===old?nid:x);});
   if(cart[old]){cart[nid]=cart[old];delete cart[old];}
   save();render();
@@ -448,17 +455,14 @@ function deleteSite(){
   renderSites();save();
 }
 function addNewSign(){
-  const id=prompt('輸入新標語 ID（如 B09）：');
-  if(!id)return;
+  const id=prompt('輸入新標語 ID：'); if(!id)return;
   const uid=id.toUpperCase().trim();
   if(db.some(x=>x.id===uid))return alert('ID已存在');
-  const cat=uid[0];
-  const n=prompt('標語名稱：')||'新標語';
-  db.push({id:uid,cat,n,s:'60x40',m:'中空板'});
+  db.push({id:uid,cat:uid[0],n:'新標語',s:'60x40',m:'中空板'});
   save();render();
 }
 function configImgBase(){
-  const v=prompt('圖片路徑 Base URL（請以 / 結尾）：',imgBase);
+  const v=prompt('圖片路徑 URL：',imgBase);
   if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem('ys2_imgBase',imgBase);render();}
 }
 
@@ -494,41 +498,28 @@ function buildReport(){
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
-/* ── 核心修復：優化截圖 ── */
+/* ── 核心修復：極致清晰截圖 ── */
 function captureReport(){
   if(typeof html2canvas==='undefined')return alert('截圖功能需要網路連線');
-  
   const target = document.getElementById('modalBox');
-  
-  // 確保截圖時視窗回到頂部，避免 html2canvas 截取偏移
   window.scrollTo(0, 0);
 
   html2canvas(target, {
     useCORS: true,
-    scale: 2,           // 提高清晰度
+    scale: 3,             // 提高到 3 倍縮放，極度清晰
     backgroundColor: "#FFFFFF",
-    scrollY: -window.scrollY, // 強制補償捲動位移
-    windowWidth: target.scrollWidth,
-    windowHeight: target.scrollHeight,
-    onclone: (clonedDoc) => {
-        // 在克隆的 DOM 中確保 modal 是展開狀態且無滾動條
-        const modal = clonedDoc.getElementById('modalBox');
-        modal.style.maxHeight = 'none';
-        modal.style.overflow = 'visible';
-    }
+    logging: false
   }).then(c=>{
-    const dataUrl = c.toDataURL('image/png');
+    const dataUrl = c.toDataURL('image/png', 1.0); // 使用 PNG 並設定最高品質
     document.getElementById('previewImg').src = dataUrl;
     document.getElementById('captureResult').classList.add('show');
     closeModal(); 
-  }).catch(err => {
-    alert("截圖發生錯誤：" + err);
   });
 }
 
 function toggleAdmin(){
   if(!isAdmin){
-    if(prompt('請輸入管理員密碼：')==='751113'){
+    if(prompt('管理員密碼：')==='751113'){
       isAdmin=true;
       document.getElementById('adminBtn').textContent='🔓 管理中';
       document.getElementById('adminBtn').classList.add('active');
@@ -546,7 +537,6 @@ function toggleAdmin(){
 function resetCart(){if(confirm('確認清除所有選取？')){cart={};save();render();updateBadge();}}
 function save(){
   localStorage.setItem('ys2_db',JSON.stringify(db));
-  localStorage.setItem('ys2_cart',JSON.stringify(cart));
   localStorage.setItem('ys2_staff',document.getElementById('staffInput').value);
   localStorage.setItem('ys2_site',document.getElementById('siteSelect').value);
   localStorage.setItem('ys2_config',JSON.stringify(config));
@@ -558,21 +548,18 @@ function exportData(){
   const d={db,sites,config,stepData,cats,imgBase};
   const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();
+  a.download=`備份_${new Date().toISOString().slice(0,10)}.json`;a.click();
 }
 function importData(){
-  const j=prompt('貼上備份 JSON：');
-  if(!j)return;
+  const j=prompt('貼上備份 JSON：'); if(!j)return;
   try{
     const d=JSON.parse(j);
-    if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;
-    if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.imgBase)imgBase=d.imgBase;
+    db=d.db||db; sites=d.sites||sites; config=d.config||config;
     save();location.reload();
-  }catch(e){alert('格式錯誤，請確認備份檔案');}
+  }catch(e){alert('格式錯誤');}
 }
 
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
-
 init();
 </script>
 </body>
