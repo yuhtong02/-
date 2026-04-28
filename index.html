@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-/* ───── 核心視覺樣式 ───── */
+/* ───── 基礎樣式 ───── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --dark:#064E3B;--mid:#10B981;--light:#34D399;--pale:#D1FAE5;--pale2:#ECFDF5;
@@ -17,60 +17,86 @@
   --r:14px;--r2:10px;--r3:8px;
   --shadow:0 1px 3px rgba(6,78,59,0.08),0 4px 12px rgba(6,78,59,0.05);
 }
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;min-height:100vh;}
+html,body{height:100%;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;overflow-x:hidden;}
 
-.hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+/* ───── UI 排版 ───── */
+.hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
 .hdr-brand{display:flex;align-items:center;gap:10px;}
+.hdr-logo{width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0;}
 .hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
-.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;}
+.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
 
-.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;flex-shrink:0;align-items:center;}
-select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--bg);outline:none;}
+.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
+.ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:150px;}
+select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--bg);color:var(--ink);outline:none;}
+select{flex:1;}
 
-.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;overflow-x:auto;}
-.tabs-scroll{display:flex;padding:12px 16px;gap:6px;}
-.tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;}
+.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
+.tabs-scroll{display:flex;overflow-x:auto;padding:12px 16px;gap:6px;-webkit-overflow-scrolling:touch;}
+.tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
 .tab.active{background:var(--dark);color:white;border-color:var(--dark);}
+.tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 4px;}
 
 .main{flex:1;overflow-y:auto;padding:14px 16px;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
 
-/* ───── 卡片與規格修正 ───── */
+/* ───── 卡片與規格修改樣式 ───── */
 .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;position:relative;box-shadow:var(--shadow);}
-.card.sel{border-color:var(--dark);background:rgba(6, 78, 59, 0.03);border-width:2px;}
-.card-img{width:90px;height:75px;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;}
+.card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;}
 .card-img img{width:100%;height:100%;object-fit:contain;}
-.card-name{font-size:14px;font-weight:900;color:var(--dark);}
-.spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;display:inline-block;margin-top:4px;cursor:help;}
+.card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
+.card-name{font-size:14px;font-weight:900;color:var(--dark);line-height:1.3;}
+.spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;display:inline-block;cursor:pointer;}
+.spec-tag:hover{opacity:0.8;text-decoration:underline;}
 .spec-r{background:#FEF2F2;color:var(--red);}
 .spec-m{background:#EFF6FF;color:var(--blue);}
 .qty-num{font-size:22px;font-weight:900;color:var(--dark);min-width:28px;text-align:center;}
 
-.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;}
-.btn-report{width:100%;background:var(--dark);color:white;border:none;padding:14px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;}
-.admin-panel{background:#F8FAFC;padding:10px;border-radius:8px;margin-bottom:10px;display:none;flex-direction:column;gap:8px;border:1px dashed var(--dark);}
+.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;z-index:2;}
+.card.sel{border-color:var(--dark);background:rgba(6, 78, 59, 0.03);border-width:2px;}
+.card.sel .card-check{background:var(--dark);border-color:var(--dark);}
+.card.sel .card-check::after{content:'✓';color:white;font-weight:900;font-size:11px;}
 
-/* ───── 採購單樣式 ───── */
+.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
+.footer-main{display:flex;gap:10px;align-items:stretch;}
+.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
+.admin-panel{background:#F1F5F9;border:1.5px dashed var(--dark);padding:10px;border-radius:10px;margin-bottom:10px;display:none;flex-direction:column;gap:8px;}
+
+/* ───── 採購單預覽 ───── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
 .modal{background:white;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;}
 .report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;}
-.rpt-img{width:60px;height:50px;object-fit:contain;}
+.rpt-img{width:60px;height:50px;border-radius:6px;object-fit:contain;background:#F8FAFC;border:1px solid var(--border);}
 .rpt-qty{font-size:20px;font-weight:900;color:var(--dark);}
+
+@media print{
+  .no-print, .hdr, .ctrl, .tabs-outer, .footer { display:none !important; }
+  .overlay { position:absolute; display:block; background:none; }
+  .modal { max-height:none; width:100%; padding:0; border:none; }
+}
 </style>
 </head>
 <body>
 
 <div class="hdr">
   <div class="hdr-brand">
-    <div class="hdr-title" id="titleEl">工安標語採購系統</div>
+    <div class="hdr-logo">🦺</div>
+    <div>
+      <div class="hdr-title" id="titleEl">工安標語採購系統</div>
+      <div class="hdr-ver">鈺通營造 Construction Safety</div>
+    </div>
   </div>
   <button class="admin-btn" onclick="toggleAdmin()">🔒 管理員</button>
 </div>
 
 <div class="ctrl">
-  <select id="siteSelect" onchange="save()"></select>
-  <input type="text" id="staffInput" placeholder="負責人員" oninput="save()">
+  <div class="ctrl-group">
+    <select id="siteSelect" onchange="save()"></select>
+    <button onclick="addSite()" style="padding:8px 12px;border-radius:8px;border:none;background:var(--pale);color:var(--dark);font-weight:900;">＋</button>
+  </div>
+  <input type="text" id="staffInput" placeholder="負責人員" style="width:120px;" oninput="save()">
 </div>
 
 <div class="tabs-outer">
@@ -81,52 +107,65 @@ select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;bord
   <div class="grid" id="gridEl"></div>
 </div>
 
-<div class="footer">
+<div class="footer no-print">
   <div class="admin-panel" id="adminPanel">
-    <div style="display:flex; gap:5px;">
-        <input type="text" id="imgBaseInput" placeholder="圖片路徑 URL" style="flex:1;" onchange="updateImgBase(this.value)">
-        <button onclick="addNewSign()" style="padding:5px 10px;">➕ 新增標語</button>
+    <div style="display:flex;gap:6px;">
+        <input type="text" id="imgBaseInput" placeholder="圖片路徑 (URL)" style="flex:1;" onchange="updateImgBase(this.value)">
+        <button onclick="addNewSign()" style="padding:8px 12px;border-radius:6px;border:none;background:var(--dark);color:white;font-weight:bold;">➕ 新增標語</button>
     </div>
-    <div style="display:flex; gap:5px;">
-        <button onclick="exportData()" style="flex:1;">📤 備份</button>
-        <button onclick="importData()" style="flex:1;">📥 還原</button>
-        <button onclick="deleteSite()" style="color:red;">🗑 刪除工地</button>
+    <div style="display:flex;gap:6px;">
+        <button onclick="exportData()" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;background:white;">📤 備份</button>
+        <button onclick="importData()" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;background:white;">📥 還原</button>
+        <button onclick="deleteSite()" style="color:var(--red);padding:8px;">🗑 刪除工地</button>
     </div>
   </div>
-  <button class="btn-report" onclick="buildReport()">📋 生成採購單 (<span id="cartBadge">0</span>)</button>
+  <div class="footer-main">
+    <button class="btn-report" onclick="buildReport()">
+      <span>📋 生成採購單</span>
+      <span id="cartBadge" style="background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;">0</span>
+    </button>
+    <button onclick="resetCart()" style="padding:0 10px;font-size:12px;background:none;border:none;color:var(--ink3);">重置</button>
+  </div>
 </div>
 
 <div class="overlay" id="overlay">
   <div class="modal">
     <div id="modalPrintArea">
-      <div style="text-align:center;font-weight:900;font-size:20px;margin-bottom:15px;color:var(--dark);">工安標語採購單</div>
-      <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:13px;border-bottom:2px solid var(--dark);padding-bottom:15px;margin-bottom:10px;"></div>
-      <div id="rptList"></div>
-      <div id="rptSummary" style="text-align:right;padding-top:15px;font-weight:900;"></div>
+        <div style="text-align:center;font-weight:900;font-size:20px;margin-bottom:15px;color:var(--dark);">工安標語採購單</div>
+        <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:13px;border-bottom:2px solid var(--dark);padding-bottom:15px;margin-bottom:10px;"></div>
+        <div id="rptList"></div>
+        <div id="rptSummary" style="text-align:right;padding-top:15px;font-weight:900;"></div>
     </div>
-    <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
-      <button class="btn-report" onclick="window.print()">🖨 列印 / PDF</button>
-      <button onclick="closeModal()" style="padding:10px; border:none; background:#eee; border-radius:8px;">返回</button>
+    <div class="no-print" style="margin-top:15px;display:flex;flex-direction:column;gap:8px;">
+      <button class="btn-report" onclick="window.print()">🖨 列印 / 下載 PDF</button>
+      <button onclick="closeModal()" style="padding:10px;border:none;background:#eee;border-radius:8px;">返回</button>
     </div>
   </div>
 </div>
 
 <script>
-/* 100% 原始資料回歸 */
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
-  {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},{id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
-  {id:'K01',cat:'K',n:'守衛室',s:'30x10',m:'PVC'},{id:'K02',cat:'K',n:'統包商辦營室',s:'30x10',m:'PVC'},
-  {id:'A01',cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},{id:'A02',cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},
-  {id:'B01',cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},{id:'C01',cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},
-  {id:'D01',cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},{id:'F01',cat:'F',n:'滅火器',s:'20x10',m:'PVC'},
-  {id:'I01',cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},{id:'I02',cat:'I',n:'資源回收',s:'30x20',m:'PVC'}
-  /* ...其餘 60 幾項略，代碼中已完整包含 */
+  {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},{id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},{id:'J03',cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
+  {id:'K01',cat:'K',n:'守衛室',s:'30x10',m:'PVC'},{id:'K02',cat:'K',n:'統包商辦營室',s:'30x10',m:'PVC'},{id:'K03',cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},{id:'K04',cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},{id:'K05',cat:'K',n:'會議室',s:'30x10',m:'PVC'},{id:'K06',cat:'K',n:'倉庫',s:'30x10',m:'PVC'},{id:'K07',cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},{id:'K08',cat:'K',n:'休息區',s:'30x10',m:'PVC'},{id:'K09',cat:'K',n:'飲水機',s:'20x10',m:'PVC'},{id:'K10',cat:'K',n:'急救箱',s:'20x10',m:'PVC'},{id:'K11',cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},{id:'K12',cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},{id:'K13',cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},{id:'K14',cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
+  {id:'A01',cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},{id:'A02',cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},{id:'A03',cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
+  {id:'B01',cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},{id:'B02',cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},{id:'B03',cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},{id:'B04',cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},{id:'B05',cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},{id:'B06',cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},{id:'B07',cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},{id:'B08',cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
+  {id:'C01',cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},{id:'C02',cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},{id:'C03',cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},{id:'C04',cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},{id:'C05',cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},{id:'C06',cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},{id:'C07',cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},{id:'C08',cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
+  {id:'D01',cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},{id:'D02',cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},{id:'D03',cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
+  {id:'E01',cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},{id:'E02',cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
+  {id:'F01',cat:'F',n:'滅火器',s:'20x10',m:'PVC'},{id:'F02',cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},{id:'F03',cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},{id:'F04',cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},{id:'F05',cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
+  {id:'G01',cat:'G',n:'工安標語6S',s:'60x40',m:'中空板'},
+  {id:'H01',cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},{id:'H02',cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},{id:'H03',cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},{id:'H04',cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},{id:'H05',cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},{id:'H06',cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
+  {id:'I01',cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},{id:'I02',cat:'I',n:'資源回收',s:'30x20',m:'PVC'},{id:'I03',cat:'I',n:'廚餘',s:'30x20',m:'PVC'},{id:'I04',cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},{id:'I05',cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},{id:'I06',cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},{id:'I07',cat:'I',n:'紙容器',s:'30x20',m:'PVC'},{id:'I08',cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},{id:'I09',cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},{id:'I10',cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},{id:'I11',cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'}
 ];
-const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',F:'F. 設施位置',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部'};
+const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部標語'};
 const DEF_STEPS={
-  S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01']},
-  S2:{t:'🏗 Step2 基礎',items:['B01','C01']}
+  S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01','E01','E02','D02']},
+  S2:{t:'🏗 Step2 基礎',items:['B01','B05','C01','D03','B06']},
+  S3:{t:'🔩 Step3 結構',items:['B01','B02','B03','C01','C02','C03','C07']},
+  S4:{t:'🪟 Step4 裝修',items:['A01','A02','A03','K08','K09','K10','F01']},
+  S5:{t:'🌿 Step5 景觀',items:['E01','E02','I01','I02','I03','H04']},
+  S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']}
 };
 
 let db,cart={},sites,imgBase,isAdmin=false,currentTab='S1';
@@ -135,49 +174,58 @@ function init(){
   db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
   sites=JSON.parse(localStorage.getItem('ys2_sites'))||DEF_SITES;
   imgBase=localStorage.getItem('ys2_imgBase')||'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  document.getElementById('staffInput').value=localStorage.getItem('ys2_staff')||'';
   document.getElementById('imgBaseInput').value=imgBase;
-  renderSites();renderTabs();render();
+  renderSites();renderTabs();render();updateBadge();
 }
 
 function renderSites(){
   const s=document.getElementById('siteSelect');
   s.innerHTML=sites.map(x=>`<option value="${x}">${x}</option>`).join('');
+  s.value=localStorage.getItem('ys2_site')||sites[0];
 }
-
 function renderTabs(){
   let h='';
-  Object.keys(DEF_STEPS).forEach(k=>h+=`<div class="tab ${currentTab===k?'active':''}" onclick="setTab('${k}')">${DEF_STEPS[k].t}</div>`);
-  h+=`<div class="tab ${currentTab==='ALL'?'active':''}" onclick="setTab('ALL')">全部</div>`;
+  Object.keys(DEF_STEPS).sort().forEach(k=>h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${DEF_STEPS[k].t}</div>`);
+  h+=`<span class="tab-sep"></span><div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">全部</div>`;
+  ['A','B','C','D','E','F','G','H','I','J','K'].forEach(k=>h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${DEF_CATS[k]}</div>`);
   document.getElementById('tabsEl').innerHTML=h;
 }
 function setTab(t){currentTab=t;renderTabs();render();}
-
 function render(){
-  let list = currentTab==='ALL'?db:db.filter(x=>DEF_STEPS[currentTab]?.items.includes(x.id));
+  let list;
+  if(DEF_STEPS[currentTab]) list=db.filter(x=>DEF_STEPS[currentTab].items.includes(x.id));
+  else if(currentTab==='ALL') list=[...db];
+  else list=db.filter(x=>x.cat===currentTab);
   const grid=document.getElementById('gridEl');
   grid.innerHTML=list.map(item=>{
     const st=cart[item.id]||{sel:false,qty:1};
-    return `
-      <div class="card ${st.sel?'sel':''}" onclick="toggleItem('${item.id}')">
-        <div class="card-img"><img src="${imgBase+item.id}.jpg" onerror="this.style.opacity='0.1'"></div>
-        <div class="card-body">
-          <div class="card-name">${item.n}</div>
-          <div>
-            <span class="spec-tag spec-r" onclick="editSpec('${item.id}','s',event)">${item.s}</span>
-            <span class="spec-tag spec-m" onclick="editSpec('${item.id}','m',event)">${item.m}</span>
-          </div>
-          <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:8px;" onclick="event.stopPropagation()">
-            <button onclick="adjQty('${item.id}',-1)">-</button>
-            <span class="qty-num">${st.qty}</span>
-            <button onclick="adjQty('${item.id}',1)">+</button>
-          </div>
+    return `<div class="card${st.sel?' sel':''}" onclick="toggleItem('${item.id}')">
+      <div class="card-check"></div>
+      <div class="card-img"><img src="${imgBase+item.id}.jpg" onerror="this.style.opacity='0.1'"></div>
+      <div class="card-body">
+        <div class="card-name">${item.n}</div>
+        <div>
+          <span class="spec-tag spec-r" onclick="editSpec('${item.id}','s',event)">${item.s}</span>
+          <span class="spec-tag spec-m" onclick="editSpec('${item.id}','m',event)">${item.m}</span>
         </div>
-      </div>`;
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;" onclick="event.stopPropagation()">
+          <button onclick="adjQty('${item.id}',-1)" style="width:26px;height:26px;border-radius:50%;border:1px solid #ddd;background:white;">-</button>
+          <span class="qty-num">${st.qty}</span>
+          <button onclick="adjQty('${item.id}',1)" style="width:26px;height:26px;border-radius:50%;border:1px solid #ddd;background:white;">+</button>
+        </div>
+      </div>
+    </div>`;
   }).join('');
-  updateBadge();
 }
 
-/* 修改規格/材質功能 */
+function toggleItem(id){ if(!cart[id])cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; updateBadge(); render(); }
+function adjQty(id,d){ if(!cart[id])cart[id]={sel:true,qty:1}; cart[id].qty=Math.max(1,cart[id].qty+d); if(d>0)cart[id].sel=true; updateBadge(); render(); }
+function updateBadge(){ document.getElementById('cartBadge').textContent=db.filter(x=>cart[x.id]?.sel).length; }
+function save(){ localStorage.setItem('ys2_staff',document.getElementById('staffInput').value); localStorage.setItem('ys2_site',document.getElementById('siteSelect').value); }
+function resetCart(){ if(confirm('重設？')){cart={};updateBadge();render();}}
+
+/* ───── 關鍵回歸功能 ───── */
 function editSpec(id, field, e){
   e.stopPropagation();
   if(!isAdmin) return;
@@ -189,41 +237,29 @@ function editSpec(id, field, e){
     render();
   }
 }
-
-function updateImgBase(v){
-    imgBase=v;
-    localStorage.setItem('ys2_imgBase', v);
-    render();
-}
-
+function updateImgBase(v){ imgBase=v; localStorage.setItem('ys2_imgBase', v); render(); }
 function toggleAdmin(){
-  if(!isAdmin && prompt('管理密碼')==='751113'){
-    isAdmin=true;
-    document.getElementById('adminPanel').style.display='flex';
-  }else{
-    isAdmin=false;
-    document.getElementById('adminPanel').style.display='none';
-  }
+  if(!isAdmin && prompt('密碼')==='751113'){ isAdmin=true; document.getElementById('adminPanel').style.display='flex'; }
+  else{ isAdmin=false; document.getElementById('adminPanel').style.display='none'; }
 }
-
-function toggleItem(id){ if(!cart[id])cart[id]={sel:false,qty:1}; cart[id].sel=!cart[id].sel; render(); }
-function adjQty(id,d){ if(!cart[id])cart[id]={sel:true,qty:1}; cart[id].qty=Math.max(1,cart[id].qty+d); render(); }
-function updateBadge(){ document.getElementById('cartBadge').textContent=db.filter(x=>cart[x.id]?.sel).length; }
-function save(){ localStorage.setItem('ys2_site', document.getElementById('siteSelect').value); }
-function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+function addNewSign(){
+  let n=prompt('名稱'),s=prompt('規格'),m=prompt('材質'),c=prompt('分類(A-K)'),i=prompt('ID');
+  if(n&&s&&m&&c&&i){ db.push({id:i,cat:c,n,s,m}); localStorage.setItem('ys2_db',JSON.stringify(db)); render(); }
+}
+function exportData(){ prompt('複製此內容', JSON.stringify({db,sites,imgBase})); }
+function importData(){ let d=prompt('貼上內容'); if(d){ let p=JSON.parse(d); localStorage.setItem('ys2_db',JSON.stringify(p.db)); location.reload(); }}
+function addSite(){ let n=prompt('工地名稱'); if(n){sites.push(n); localStorage.setItem('ys2_sites',JSON.stringify(sites)); renderSites();}}
+function deleteSite(){ if(confirm('刪除？')){ let i=sites.indexOf(document.getElementById('siteSelect').value); if(i>-1){sites.splice(i,1); localStorage.setItem('ys2_sites',JSON.stringify(sites)); renderSites();}}}
 
 function buildReport(){
   const sel=db.filter(x=>cart[x.id]?.sel);
-  if(!sel.length)return alert('未選擇');
-  document.getElementById('rptMeta').innerHTML=`<div>工地: ${document.getElementById('siteSelect').value}</div><div>人員: ${document.getElementById('staffInput').value}</div>`;
-  document.getElementById('rptList').innerHTML=sel.map(i=>`
-    <div class="report-item">
-      <img class="rpt-img" src="${imgBase+i.id}.jpg">
-      <div style="flex:1;"><b>${i.n}</b><br><small>${i.s} | ${i.m}</small></div>
-      <div class="rpt-qty">${cart[i.id].qty}</div>
-    </div>`).join('');
+  if(!sel.length)return alert('未選');
+  document.getElementById('rptMeta').innerHTML=`<div>工地: <b>${document.getElementById('siteSelect').value}</b></div><div>人員: <b>${document.getElementById('staffInput').value}</b></div>`;
+  document.getElementById('rptList').innerHTML=sel.map(i=>`<div class="report-item"><img class="rpt-img" src="${imgBase+i.id}.jpg"><div style="flex:1;"><b>${i.n}</b><br><small>${i.s} | ${i.m}</small></div><div class="rpt-qty">${cart[i.id].qty}</div></div>`).join('');
+  document.getElementById('rptSummary').textContent=`合計: ${sel.reduce((a,b)=>a+cart[b.id].qty,0)} 件`;
   document.getElementById('overlay').classList.add('show');
 }
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
 init();
 </script>
