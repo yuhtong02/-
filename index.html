@@ -287,7 +287,11 @@ let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
 
 function init(){
   db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
-  cart=JSON.parse(localStorage.getItem('ys2_cart'))||{}; 
+  
+  // ⚡ 修改處：每次載入網頁時強制清空選擇項，不讀取舊的 cart
+  cart={}; 
+  localStorage.removeItem('ys2_cart'); 
+  
   sites=JSON.parse(localStorage.getItem('ys2_sites'))||DEF_SITES;
   config=JSON.parse(localStorage.getItem('ys2_config'))||{title:'工安標語採購系統'};
   stepData=JSON.parse(localStorage.getItem('ys2_steps'))||DEF_STEPS;
