@@ -97,42 +97,10 @@ select{flex:1;}
 .qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;}
 .qty-num{font-size:22px;font-weight:900;color:var(--dark);min-width:28px;text-align:center;}
 
-/* ── ADMIN INPUTS 修復區 ── */
-.a-name{
-  background:#FFF7ED;
-  border:1.5px dashed #FB923C;
-  border-radius:4px;
-  padding:2px 4px;
-  font-size:14px;
-  font-weight:900;
-  color:#9A3412;
-  width:100%;
-  font-family:inherit;
-  outline:none;
-  margin-bottom:4px;
-  display:block;
-}
-.a-spec{
-  background:white;
-  border:1px dashed #CBD5E1;
-  font-size:10px;
-  width:65px;
-  font-family:inherit;
-  outline:none;
-  padding:1px 4px;
-  border-radius:3px;
-}
-.a-id{
-  background:transparent;
-  border:none;
-  border-bottom:1px dashed var(--dark);
-  font-size:10px;
-  width:35px;
-  font-family:inherit;
-  outline:none;
-  color:var(--dark);
-  font-weight:700;
-}
+/* ── ADMIN INPUTS ── */
+.a-name{background:#FFF7ED;border:1.5px dashed #FB923C;border-radius:4px;padding:2px 4px;font-size:14px;font-weight:900;color:#9A3412;width:100%;font-family:inherit;outline:none;margin-bottom:4px;display:block;}
+.a-spec{background:white;border:1px dashed #CBD5E1;font-size:10px;width:65px;font-family:inherit;outline:none;padding:1px 4px;border-radius:3px;}
+.a-id{background:transparent;border:none;border-bottom:1px dashed var(--dark);font-size:10px;width:35px;font-family:inherit;outline:none;color:var(--dark);font-weight:700;}
 
 /* ── FOOTER ── */
 .footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
@@ -157,21 +125,14 @@ select{flex:1;}
 #captureResult.show{display:flex;}
 #captureResult img{max-width:100%;max-height:80vh;border-radius:8px;}
 
-/* ── PRINT & CAPTURE LOGIC ── */
-/* 預設隱藏動作按鈕 */
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
 
-/* 針對【列印】的控制：列印時只顯示帶有 .sel-item 的標語 */
 @media print{
   .hdr, .ctrl, .tabs-outer, .footer, .overlay, .no-print, #captureResult, .modal-actions { display:none!important; }
   .overlay { display: block !important; position: static !important; background: none !important; }
   .modal { max-height: none !important; overflow: visible !important; width: 100% !important; padding: 0 !important; }
-  /* 只在列印模式下隱藏未選中的標語 */
-  .report-item:not(.sel-item) { display: none !important; }
 }
 
-/* 針對【截圖】的控制：截圖時不套用列印的隱藏規則，強制顯示所有項目 */
-.capturing .report-item { display: flex !important; }
 .capturing .modal-actions { display: none !important; }
 </style>
 </head>
@@ -227,8 +188,8 @@ select{flex:1;}
     <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:12px;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px;"></div>
     <div id="rptList"></div>
     <div class="modal-actions">
-      <button class="btn btn-green" style="padding:12px" onclick="window.print()">🖨 列印【選中項】</button>
-      <button class="btn btn-blue" style="padding:12px;background:#F59E0B;color:white;border:none;" onclick="captureReport()">📸 儲存為圖片 (含完整清單)</button>
+      <button class="btn btn-green" style="padding:12px" onclick="window.print()">🖨 列印清單</button>
+      <button class="btn btn-blue" style="padding:12px;background:#F59E0B;color:white;border:none;" onclick="captureReport()">📸 儲存為圖片</button>
       <button class="btn" style="padding:12px;background:#eee;" onclick="closeModal()">返回編輯</button>
     </div>
   </div>
@@ -240,7 +201,6 @@ select{flex:1;}
 </div>
 
 <script>
-// 數據與邏輯
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
   {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
@@ -325,11 +285,8 @@ let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
 
 function init(){
   db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
-  
-  // 核心修改 1: 重新開啟時清除選擇標語，但不影響資料庫結構
   cart={}; 
   localStorage.removeItem('ys2_cart');
-
   sites=JSON.parse(localStorage.getItem('ys2_sites'))||DEF_SITES;
   config=JSON.parse(localStorage.getItem('ys2_config'))||{title:'工安標語採購系統'};
   stepData=JSON.parse(localStorage.getItem('ys2_steps'))||DEF_STEPS;
@@ -341,9 +298,7 @@ function init(){
 
 function renderTitle(){
   const el=document.getElementById('titleEl');
-  el.innerHTML=isAdmin
-    ?`<input style="background:rgba(255,255,255,0.15);border:none;border-bottom:1.5px solid rgba(255,255,255,0.4);color:white;font-size:16px;font-weight:900;font-family:inherit;outline:none;width:200px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">`
-    :config.title;
+  el.innerHTML=isAdmin ? `<input style="background:rgba(255,255,255,0.15);border:none;border-bottom:1.5px solid rgba(255,255,255,0.4);color:white;font-size:16px;font-weight:900;font-family:inherit;outline:none;width:200px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">` : config.title;
 }
 
 function renderSites(){
@@ -361,9 +316,7 @@ function renderTabs(){
   });
   h+=`<span class="tab-sep"></span>`;
   h+=`<div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']}</div>`;
-  CAT_KEYS.forEach(k=>{
-    h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]||k}</div>`;
-  });
+  CAT_KEYS.forEach(k=>{ h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]||k}</div>`; });
   document.getElementById('tabsEl').innerHTML=h;
 }
 
@@ -387,10 +340,7 @@ function render(){
     d.className='card'+(st.sel?' sel':'');
     const imgUrl=imgBase+item.id+'.jpg';
     
-    const nameHtml=isAdmin
-      ?`<input class="a-name" value="${item.n}" oninput="updateField('${item.id}','n',this.value)" onclick="event.stopPropagation()">`
-      :`<div class="card-name">${item.n}</div>`;
-    
+    const nameHtml=isAdmin ? `<input class="a-name" value="${item.n}" oninput="updateField('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="card-name">${item.n}</div>`;
     const specRHtml=isAdmin?`<input class="a-spec" value="${item.s}" oninput="updateField('${item.id}','s',this.value)" onclick="event.stopPropagation()">`:`<span class="spec-tag spec-r">${item.s}</span>`;
     const specMHtml=isAdmin?`<input class="a-spec" value="${item.m}" oninput="updateField('${item.id}','m',this.value)" onclick="event.stopPropagation()">`:`<span class="spec-tag spec-m">${item.m}</span>`;
     const idHtml=isAdmin?`<input class="a-id" value="${item.id}" onchange="updateID('${item.id}',this.value)" onclick="event.stopPropagation()">`:`${item.id}`;
@@ -470,49 +420,37 @@ function addNewSign(){
   if(id){db.push({id,cat:id[0],n:'新標語',s:'60x40',m:'中空板'});render();save();}
 }
 
-// 核心修改 2: 生成採購單時，將「選中項」加上特定的 Class
 function buildReport(){
-  const anySel = Object.values(cart).some(c => c.sel);
-  if(!anySel) return alert('請先選擇標語');
+  const selectedItems = db.filter(x => cart[x.id]?.sel);
+  if(selectedItems.length === 0) return alert('請先選擇標語');
 
-  const site=document.getElementById('siteSelect').value;
-  document.getElementById('rptMeta').innerHTML=`<span>工地：${site}</span><span>人員：${document.getElementById('staffInput').value}</span>`;
+  const site = document.getElementById('siteSelect').value;
+  document.getElementById('rptMeta').innerHTML = `<span>工地：${site}</span><span>人員：${document.getElementById('staffInput').value}</span>`;
   
-  let rows='';
-  // 核心邏輯：列印清單顯示目前分類下的所有項目（方便手機存整張），但選中的項目標註 sel-item
-  let list;
-  if(stepData[currentTab]) list=db.filter(x=>stepData[currentTab].items.includes(x.id));
-  else if(currentTab==='ALL') list=[...db];
-  else list=db.filter(x=>x.cat===currentTab);
-
-  list.forEach(i=>{
-    const isSel = cart[i.id]?.sel;
-    const qty = cart[i.id]?.qty || 1;
-    // 列印時利用 CSS :not(.sel-item) 隱藏非選中項
-    rows+=`<div class="report-item ${isSel?'sel-item':''}">
-            <img class="rpt-img" src="${imgBase+i.id}.jpg">
+  let rows = '';
+  selectedItems.forEach(i => {
+    const qty = cart[i.id].qty || 1;
+    rows += `<div class="report-item sel-item">
+            <img class="rpt-img" src="${imgBase + i.id}.jpg">
             <div class="rpt-info">
               <div class="rpt-name">${i.n}</div>
               <div style="font-size:10px">${i.s} / ${i.m}</div>
             </div>
-            <div class="rpt-qty">${isSel ? qty : '-'}</div>
+            <div class="rpt-qty">${qty}</div>
           </div>`;
   });
-  document.getElementById('rptList').innerHTML=rows;
+
+  document.getElementById('rptList').innerHTML = rows;
   document.getElementById('overlay').classList.add('show');
 }
 
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
-// 核心修改 3: 截圖時強制加上 .capturing Class 以無視列印隱藏規則
 function captureReport(){
   const box = document.getElementById('modalBox');
-  box.classList.add('capturing'); // 開啟「顯示全部」模式
-  
   html2canvas(box,{useCORS:true,scale:2}).then(c=>{
     document.getElementById('previewImg').src=c.toDataURL();
     document.getElementById('captureResult').classList.add('show');
-    box.classList.remove('capturing'); // 截圖完恢復
   });
 }
 
