@@ -31,13 +31,11 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink)
 
 /* ── HEADER ── */
 .hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
-.hdr::after{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;}
 .hdr-brand{display:flex;align-items:center;gap:10px;}
 .hdr-logo{width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0;}
 .hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
 .hdr-ver{font-size:10px;opacity:0.5;font-weight:400;margin-top:1px;}
 .admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background 0.15s;}
-.admin-btn:hover{background:rgba(255,255,255,0.22);}
 .admin-btn.active{background:rgba(255,183,0,0.25);border-color:rgba(255,183,0,0.4);color:#FCD34D;}
 
 /* ── CONTROLS ── */
@@ -84,6 +82,16 @@ select{flex:1;}
 .spec-m{background:#EFF6FF;color:var(--blue);}
 .qty-num{font-size:22px;font-weight:900;color:var(--dark);min-width:28px;text-align:center;}
 
+/* 電腦版特化：切換為清單模式 */
+@media (min-width: 768px) {
+  .grid { grid-template-columns: 1fr; gap: 8px; max-width: 1000px; margin: 0 auto; }
+  .card { padding: 8px 20px; align-items: center; gap: 20px; border-radius: 8px; }
+  .card-img { width: 60px; height: 50px; }
+  .card-body { flex-direction: row; align-items: center; justify-content: space-between; }
+  .card-footer { margin-top: 0; }
+  .card-name { margin-bottom: 0; min-width: 250px; font-size: 16px; }
+}
+
 /* ── FOOTER ── */
 .footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
 .footer-main{display:flex;gap:10px;align-items:stretch;}
@@ -92,16 +100,15 @@ select{flex:1;}
 /* ── MODAL & PRINTING ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
-/* 修改：移除 Modal 高度限制以便分頁 */
 .modal{background:white;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;position:relative;}
 
+/* PDF 列印優化：清乾淨雜物 & 分頁支援 */
 @media print{
-  /* 隱藏所有不需要的雜物 */
-  .hdr, .ctrl, .tabs-outer, .footer, .no-print, #captureResult, .modal-actions, .admin-btn, .admin-panel, .qty-ctrl, .card-check, .btn-reset { display:none !important; }
+  @page { margin: 1cm; }
+  .hdr, .ctrl, .tabs-outer, .footer, .no-print, #captureResult, .modal-actions, .admin-btn, .admin-panel, .qty-ctrl, .card-check, .btn-reset, .qty-btn { display:none !important; }
   
-  /* 解除 Modal 限制，讓 PDF 自動分頁 */
   html, body { height: auto !important; overflow: visible !important; background: white !important; }
-  .overlay { position: static !important; display: block !important; background: none !important; }
+  .overlay { position: static !important; display: block !important; background: none !important; padding: 0 !important; }
   .modal { 
     position: static !important; 
     max-height: none !important; 
@@ -112,7 +119,12 @@ select{flex:1;}
     box-shadow: none !important;
   }
   #modalPrintArea { width: 100% !important; }
-  .report-item { page-break-inside: avoid; border-bottom: 1px solid #eee !important; }
+  .report-item { 
+    page-break-inside: avoid; /* 防止品項被跨頁裁斷 */
+    border-bottom: 1px solid #eee !important; 
+    padding: 12px 0 !important;
+  }
+  .rpt-qty { color: #000 !important; font-size: 20px !important; }
 }
 
 .report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #F1F5F9;}
@@ -122,7 +134,6 @@ select{flex:1;}
 .rpt-qty{font-size:26px;font-weight:900;color:var(--dark);text-align:right;}
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
 
-/* 其他原本的樣式保持不變... */
 .card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;font-size:12px;z-index:2;}
 .card.sel .card-check{background:var(--dark);border-color:var(--dark);color:white;}
 .card.sel .card-check::after{content:'✓';display:block;color:white;font-weight:900;font-size:11px;}
@@ -212,7 +223,7 @@ select{flex:1;}
 </div>
 
 <script>
-// 腳本邏輯部分完全保持原樣，僅確保 save/init 等功能運作正常
+// 邏輯部分完全保留
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
   {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
@@ -359,15 +370,14 @@ function render(){
 
     d.innerHTML=`
       <div class="card-check"></div>
-      <div class="card-img"><img src="${imgUrl}" onerror="this.style.display='none'"></div>
+      <div class="card-img"><img src="${imgUrl}" onerror="this.style.opacity='0.2'"></div>
       <div class="card-body">
-        <div>
+        <div style="flex:1">
           <div class="card-meta"><span class="card-id">${idHtml}</span><span class="card-cat">${cats[item.cat]||item.cat}</span></div>
           ${nameHtml}
           <div class="card-specs">${specRHtml}${specMHtml}</div>
         </div>
         <div class="card-footer">
-          <span></span>
           <div class="qty-ctrl" onclick="event.stopPropagation()">
             <button class="qty-btn" onclick="adjQty('${item.id}',-1)">−</button>
             <span class="qty-num">${st.qty||1}</span>
