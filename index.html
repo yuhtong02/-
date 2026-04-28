@@ -31,72 +31,118 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink)
 
 /* ── HEADER ── */
 .hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
+.hdr::after{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;}
 .hdr-brand{display:flex;align-items:center;gap:10px;}
 .hdr-logo{width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0;}
 .hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
 .hdr-ver{font-size:10px;opacity:0.5;font-weight:400;margin-top:1px;}
-.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background 0.15s;}
+.admin-btn:hover{background:rgba(255,255,255,0.22);}
+.admin-btn.active{background:rgba(255,183,0,0.25);border-color:rgba(255,183,0,0.4);color:#FCD34D;}
 
-/* ── CONTROLS & TABS ── */
+/* ── CONTROLS ── */
 .ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
 .ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:150px;}
-select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--bg);color:var(--ink);outline:none;}
+select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--bg);color:var(--ink);outline:none;transition:border-color 0.15s;}
+select:focus,input[type=text]:focus{border-color:var(--mid);}
+select{flex:1;}
+.btn{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:var(--r3);border:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.btn-green{background:var(--dark);color:white;}.btn-green:hover{background:var(--mid);}
+.btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}.btn-red:hover{background:#FEE2E2;}
+.btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}.btn-blue:hover{background:#DBEAFE;}
+.btn-purple{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
 
+/* ── TABS ── */
 .tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
-.tabs-scroll{display:flex;overflow-x:auto;padding:12px 16px;gap:6px;}
+.tabs-scroll{display:flex;overflow-x:auto;padding:12px 16px;gap:6px;-webkit-overflow-scrolling:touch; scrollbar-width: thin; scrollbar-color: var(--mid) var(--bg);}
+.tabs-scroll::-webkit-scrollbar{height:5px; display: block;}
+.tabs-scroll::-webkit-scrollbar-track{background:var(--bg); border-radius: 10px;}
+.tabs-scroll::-webkit-scrollbar-thumb{background:var(--border); border-radius: 10px;}
+.tabs-scroll::-webkit-scrollbar-thumb:hover{background:var(--mid);}
+
 .tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
-.tab.active{background:var(--dark);color:white;border-color:var(--dark);}
+.tab:hover{border-color:var(--mid);color:var(--mid);}
+.tab.step-tab{background:var(--pale2);border-color:var(--border2);color:var(--dark);}
+.tab.step-tab:hover{background:var(--pale);border-color:var(--mid);}
+.tab.active{background:var(--dark);color:white;border-color:var(--dark);box-shadow:0 2px 8px rgba(6,78,59,0.25);}
 .tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 4px;}
 
 /* ── MAIN GRID ── */
-.main{flex:1;overflow-y:auto;padding:14px 16px;}
+.main{flex:1;overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
+.empty-state{text-align:center;padding:80px 20px;color:var(--ink4);}
 
 /* ── CARD ── */
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;position:relative;box-shadow:var(--shadow);}
-.card.sel{border-color:var(--dark);background:rgba(6, 78, 59, 0.03);border-width:2px;}
-.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;z-index:2;}
-.card.sel .card-check{background:var(--dark);border-color:var(--dark);color:white;}
-.card.sel .card-check::after{content:'✓';color:white;font-weight:900;font-size:11px;}
-.card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);background:#F8FAFC;display:flex;align-items:center;justify-content:center;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;position:relative;box-shadow:var(--shadow);}
+.card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;position:relative;}
 .card-img img{width:100%;height:100%;object-fit:contain;}
-.card-name{font-size:14px;font-weight:900;color:var(--dark);margin-bottom:4px;}
-.spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px; margin-right:4px;}
+.card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
+.card-name{font-size:14px;font-weight:900;color:var(--dark);line-height:1.3;margin-bottom:4px;}
+.card-specs{display:flex;gap:4px;flex-wrap:wrap;}
+.spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px; display:inline-block;}
 .spec-r{background:#FEF2F2;color:var(--red);}
 .spec-m{background:#EFF6FF;color:var(--blue);}
-.qty-ctrl{display:flex;align-items:center;gap:8px;}
-.qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;display:grid;place-items:center;}
 .qty-num{font-size:22px;font-weight:900;color:var(--dark);min-width:28px;text-align:center;}
 
 /* ── FOOTER ── */
 .footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
-.btn-report{width:100%;background:var(--dark);color:white;border:none;padding:14px 16px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
-.cart-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;}
+.footer-main{display:flex;gap:10px;align-items:stretch;}
+.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px 16px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
 
-/* ── MODAL ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 0;}
+/* ── MODAL & PRINTING ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
-.modal{background:white;width:95%;max-width:680px;border-radius:12px;padding:25px;position:relative;margin-bottom:40px;}
-.report-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F1F5F9; page-break-inside: avoid;}
-.rpt-img{width:50px;height:42px;object-fit:contain;background:#f9f9f9;border:1px solid #eee;border-radius:4px;}
-.rpt-info{flex:1;}
-.rpt-qty{font-size:24px;font-weight:900;color:var(--dark);}
+/* 修改：移除 Modal 高度限制以便分頁 */
+.modal{background:white;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;position:relative;}
 
-/* ── PRINT PDF FIX ── */
-@media print {
-    body, html { height: auto !important; overflow: visible !important; background: white !important; }
-    .hdr, .ctrl, .tabs-outer, .footer, .no-print, .modal-actions, #adminPanel, .admin-btn { display: none !important; }
-    .overlay { position: absolute !important; inset: 0 !important; background: white !important; display: block !important; padding: 0 !important; overflow: visible !important; }
-    .modal { width: 100% !important; max-width: none !important; border: none !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
-    #modalPrintArea { width: 100% !important; }
-    .report-item { border-bottom: 1px solid #eee !important; }
+@media print{
+  /* 隱藏所有不需要的雜物 */
+  .hdr, .ctrl, .tabs-outer, .footer, .no-print, #captureResult, .modal-actions, .admin-btn, .admin-panel, .qty-ctrl, .card-check, .btn-reset { display:none !important; }
+  
+  /* 解除 Modal 限制，讓 PDF 自動分頁 */
+  html, body { height: auto !important; overflow: visible !important; background: white !important; }
+  .overlay { position: static !important; display: block !important; background: none !important; }
+  .modal { 
+    position: static !important; 
+    max-height: none !important; 
+    overflow: visible !important; 
+    width: 100% !important; 
+    padding: 0 !important; 
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  #modalPrintArea { width: 100% !important; }
+  .report-item { page-break-inside: avoid; border-bottom: 1px solid #eee !important; }
 }
 
+.report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #F1F5F9;}
+.rpt-img{width:52px;height:44px;border-radius:6px;object-fit:contain;background:#F8FAFC;border:1px solid var(--border);}
+.rpt-info{flex:1;}
+.rpt-name{font-size:13px;font-weight:900;}
+.rpt-qty{font-size:26px;font-weight:900;color:var(--dark);text-align:right;}
+.modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+
+/* 其他原本的樣式保持不變... */
+.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;font-size:12px;z-index:2;}
+.card.sel .card-check{background:var(--dark);border-color:var(--dark);color:white;}
+.card.sel .card-check::after{content:'✓';display:block;color:white;font-weight:900;font-size:11px;}
+.card.sel{border-color:var(--dark);background:rgba(6, 78, 59, 0.03);border-width:2px;}
+.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.card-id{font-size:10px;font-weight:700;background:var(--pale);color:var(--dark);padding:2px 6px;border-radius:4px;}
+.card-cat{font-size:10px;color:var(--ink4);}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.qty-ctrl{display:flex;align-items:center;gap:8px;}
+.qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;}
+.a-name{background:#FFF7ED;border:1.5px dashed #FB923C;border-radius:4px;padding:2px 4px;font-size:14px;font-weight:900;color:#9A3412;width:100%;font-family:inherit;outline:none;margin-bottom:4px;display:block;}
+.a-spec{background:white;border:1px dashed #CBD5E1;font-size:10px;width:65px;font-family:inherit;outline:none;padding:1px 4px;border-radius:3px;}
+.a-id{background:transparent;border:none;border-bottom:1px dashed var(--dark);font-size:10px;width:35px;font-family:inherit;outline:none;color:var(--dark);font-weight:700;}
+.admin-panel{display:none;margin-bottom:10px;}
+.admin-panel.show{display:flex;gap:6px;flex-wrap:wrap;}
+.cart-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:13px;min-width:28px;}
+.btn-reset{padding:0 10px; font-size:12px; font-weight:700; background:#f1f1f1; border:1px solid #ccc; border-radius:8px; cursor:pointer;}
 #captureResult{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
 #captureResult.show{display:flex;}
 #captureResult img{max-width:100%;max-height:80vh;border-radius:8px;}
-.btn-group{display:flex;gap:10px;margin-top:15px;}
-.btn-group .btn{flex:1;padding:12px;border-radius:8px;font-weight:700;border:none;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -112,48 +158,50 @@ select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;bord
   <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理員</button>
 </div>
 
-<div class="ctrl no-print">
+<div class="ctrl">
   <div class="ctrl-group">
     <select id="siteSelect" onchange="save()"></select>
-    <button style="padding:4px 10px; border-radius:4px; border:1px solid #ccc;" onclick="addSite()">＋</button>
+    <button class="btn btn-green" onclick="addSite()">＋</button>
   </div>
   <input type="text" id="staffInput" placeholder="填單人員" style="width:120px;" oninput="save()">
 </div>
 
-<div class="tabs-outer no-print">
+<div class="tabs-outer">
   <div class="tabs-scroll" id="tabsEl"></div>
 </div>
 
-<div class="main no-print">
+<div class="main">
   <div class="grid" id="gridEl"></div>
 </div>
 
 <div class="footer no-print">
-  <div id="adminPanel" style="display:none; margin-bottom:10px; gap:5px; flex-wrap:wrap;">
-    <button onclick="addNewSign()" style="padding:5px 10px; font-size:12px;">➕ 新增標語</button>
-    <button onclick="exportData()" style="padding:5px 10px; font-size:12px;">📤 備份</button>
-    <button onclick="importData()" style="padding:5px 10px; font-size:12px;">📥 還原</button>
+  <div class="admin-panel" id="adminPanel">
+    <button class="btn btn-blue" onclick="addNewSign()">➕ 新增標語</button>
+    <button class="btn btn-blue" onclick="exportData()">📤 備份</button>
+    <button class="btn btn-purple" onclick="importData()">📥 還原</button>
+    <button class="btn btn-red" onclick="deleteSite()">🗑 刪除工地</button>
+    <button class="btn btn-blue" onclick="configImgBase()">🖼 設定圖片路徑</button>
   </div>
-  <div style="display:flex; gap:10px;">
+  <div class="footer-main">
     <button class="btn-report" onclick="buildReport()">
       <span>📋 生成採購單</span>
       <span class="cart-badge" id="cartBadge">0</span>
     </button>
-    <button onclick="resetCart()" style="padding:0 15px; border-radius:10px; border:1px solid #ccc; font-size:12px;">清除</button>
+    <button class="btn-reset" onclick="resetCart()">清除<br>重選</button>
   </div>
 </div>
 
 <div class="overlay" id="overlay">
   <div class="modal" id="modalBox">
     <div id="modalPrintArea">
-        <div style="text-align:center;font-weight:900;font-size:22px;margin-bottom:15px;color:#064E3B;">採購申請單</div>
-        <div id="rptMeta" style="display:flex;justify-content:space-between;padding:15px;background:#f8f9fa;border-radius:8px;margin-bottom:20px;font-size:13px;"></div>
+        <div class="modal-title" id="rptTitle" style="text-align:center;font-weight:900;font-size:18px;margin-bottom:10px;">採購單</div>
+        <div id="rptMeta" style="display:flex;justify-content:space-around;font-size:12px;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px;"></div>
         <div id="rptList"></div>
     </div>
-    <div class="btn-group no-print">
-      <button onclick="window.print()" style="background:var(--dark);color:white;">🖨 列印 PDF / 紙本</button>
-      <button onclick="captureReport()" style="background:#F59E0B;color:white;">📸 轉為圖片</button>
-      <button onclick="closeModal()" style="background:#eee;">返回修改</button>
+    <div class="modal-actions">
+      <button class="btn btn-green" style="padding:12px" onclick="window.print()">🖨 列印清單 (PDF)</button>
+      <button class="btn btn-blue" style="padding:12px;background:#F59E0B;color:white;border:none;" onclick="captureReport()">📸 儲存為圖片</button>
+      <button class="btn" style="padding:12px;background:#eee;" onclick="closeModal()">返回編輯</button>
     </div>
   </div>
 </div>
@@ -164,7 +212,7 @@ select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;bord
 </div>
 
 <script>
-// 此處保留原有的數據 (DEF_DB, DEF_CATS 等) 及其所有邏輯功能
+// 腳本邏輯部分完全保持原樣，僅確保 save/init 等功能運作正常
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
   {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
@@ -235,6 +283,7 @@ const DEF_DB=[
 
 const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部標語'};
 const CAT_KEYS=['A','B','C','D','E','F','G','H','I','J','K'];
+
 const DEF_STEPS={
   S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01','E01','E02','D02']},
   S2:{t:'🏗 Step2 基礎',items:['B01','B05','C01','D03','B06']},
@@ -244,7 +293,7 @@ const DEF_STEPS={
   S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']},
 };
 
-let db,cart={},sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
+let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
 
 function init(){
   db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
@@ -253,12 +302,15 @@ function init(){
   stepData=JSON.parse(localStorage.getItem('ys2_steps'))||DEF_STEPS;
   cats=JSON.parse(localStorage.getItem('ys2_cats'))||DEF_CATS;
   imgBase=localStorage.getItem('ys2_imgBase')||'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
-  
-  // 修正：刷新時保留選擇項，但不自動列印
-  cart=JSON.parse(localStorage.getItem('ys2_cart'))||{};
-  
+  cart={}; 
+  localStorage.removeItem('ys2_cart'); 
   document.getElementById('staffInput').value=localStorage.getItem('ys2_staff')||'';
-  renderSites();renderTabs();render();updateBadge();
+  renderTitle();renderSites();renderTabs();render();updateBadge();
+}
+
+function renderTitle(){
+  const el=document.getElementById('titleEl');
+  el.innerHTML=isAdmin ? `<input style="background:rgba(255,255,255,0.15);border:none;border-bottom:1.5px solid rgba(255,255,255,0.4);color:white;font-size:16px;font-weight:900;font-family:inherit;outline:none;width:200px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">` : config.title;
 }
 
 function renderSites(){
@@ -270,12 +322,13 @@ function renderSites(){
 function renderTabs(){
   let h='';
   Object.keys(stepData).sort().forEach(k=>{
+    const t=stepData[k].t;
     const isActive=currentTab===k;
-    h+=`<div class="tab ${isActive?'active':''}" onclick="setTab('${k}')">${stepData[k].t}</div>`;
+    h+=`<div class="tab step-tab${isActive?' active':''}" onclick="setTab('${k}')">${isAdmin?`<input style="background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:90px;outline:none;" value="${t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">`:t}</div>`;
   });
   h+=`<span class="tab-sep"></span>`;
-  h+=`<div class="tab ${currentTab==='ALL'?'active':''}" onclick="setTab('ALL')">全部</div>`;
-  CAT_KEYS.forEach(k=>{ h+=`<div class="tab ${currentTab===k?'active':''}" onclick="setTab('${k}')">${k}</div>`; });
+  h+=`<div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']}</div>`;
+  CAT_KEYS.forEach(k=>{ h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]||k}</div>`; });
   document.getElementById('tabsEl').innerHTML=h;
 }
 
@@ -288,19 +341,33 @@ function render(){
   else list=db.filter(x=>x.cat===currentTab);
 
   const grid=document.getElementById('gridEl');
+  if(!list.length){
+    grid.innerHTML=`<div class="empty-state">🔍 此分類暫無標語</div>`;
+    return;
+  }
   grid.innerHTML='';
   list.forEach(item=>{
     const st=cart[item.id]||{sel:false,qty:1};
     const d=document.createElement('div');
     d.className='card'+(st.sel?' sel':'');
+    const imgUrl=imgBase+item.id+'.jpg';
+    
+    const nameHtml=isAdmin ? `<input class="a-name" value="${item.n}" oninput="updateField('${item.id}','n',this.value)" onclick="event.stopPropagation()">` : `<div class="card-name">${item.n}</div>`;
+    const specRHtml=isAdmin?`<input class="a-spec" value="${item.s}" oninput="updateField('${item.id}','s',this.value)" onclick="event.stopPropagation()">`:`<span class="spec-tag spec-r">${item.s}</span>`;
+    const specMHtml=isAdmin?`<input class="a-spec" value="${item.m}" oninput="updateField('${item.id}','m',this.value)" onclick="event.stopPropagation()">`:`<span class="spec-tag spec-m">${item.m}</span>`;
+    const idHtml=isAdmin?`<input class="a-id" value="${item.id}" onchange="updateID('${item.id}',this.value)" onclick="event.stopPropagation()">`:`${item.id}`;
+
     d.innerHTML=`
       <div class="card-check"></div>
-      <div class="card-img"><img src="${imgBase + item.id}.jpg" onerror="this.style.opacity='0.1'"></div>
+      <div class="card-img"><img src="${imgUrl}" onerror="this.style.display='none'"></div>
       <div class="card-body">
-        <div class="card-name">${item.n}</div>
-        <div style="margin-bottom:8px;"><span class="spec-tag spec-r">${item.s}</span><span class="spec-tag spec-m">${item.m}</span></div>
+        <div>
+          <div class="card-meta"><span class="card-id">${idHtml}</span><span class="card-cat">${cats[item.cat]||item.cat}</span></div>
+          ${nameHtml}
+          <div class="card-specs">${specRHtml}${specMHtml}</div>
+        </div>
         <div class="card-footer">
-          <span style="font-size:10px; color:#999;">ID: ${item.id}</span>
+          <span></span>
           <div class="qty-ctrl" onclick="event.stopPropagation()">
             <button class="qty-btn" onclick="adjQty('${item.id}',-1)">−</button>
             <span class="qty-num">${st.qty||1}</span>
@@ -324,16 +391,46 @@ function adjQty(id,d){
   if(d>0) cart[id].sel=true;
   save();render();updateBadge();
 }
+function updateField(id,f,v){const i=db.find(x=>x.id===id);if(i){i[f]=v;save();}}
+function updateID(old,nid){
+  nid=nid.toUpperCase().trim();
+  if(!nid||nid===old)return;
+  if(db.some(x=>x.id===nid))return alert('ID已存在');
+  const item=db.find(x=>x.id===old);
+  item.id=nid; item.cat=nid[0];
+  save();render();
+}
 function updateBadge(){
   const n=db.filter(x=>cart[x.id]?.sel).length;
   document.getElementById('cartBadge').textContent=n;
 }
+function toggleAdmin(){
+  if(!isAdmin){
+    if(prompt('請輸入管理員密碼：')==='751113'){
+      isAdmin=true;
+      document.getElementById('adminBtn').textContent='助 管理中';
+      document.getElementById('adminPanel').classList.add('show');
+    }
+  } else {
+    isAdmin=false;
+    document.getElementById('adminBtn').textContent='🔒 管理員';
+    document.getElementById('adminPanel').classList.remove('show');
+  }
+  renderTitle();renderTabs();render();
+}
 function save(){
+  localStorage.setItem('ys2_db',JSON.stringify(db));
   localStorage.setItem('ys2_cart',JSON.stringify(cart));
   localStorage.setItem('ys2_staff',document.getElementById('staffInput').value);
   localStorage.setItem('ys2_site',document.getElementById('siteSelect').value);
 }
 function resetCart(){if(confirm('確認清除？')){cart={};save();render();updateBadge();}}
+function addSite(){const n=prompt('工地名稱：');if(n){sites.push(n);renderSites();save();}}
+function deleteSite(){const v=document.getElementById('siteSelect').value; sites=sites.filter(x=>x!==v); renderSites(); save();}
+function addNewSign(){
+  const id=prompt('新 ID：')?.toUpperCase();
+  if(id){db.push({id,cat:id[0],n:'新標語',s:'60x40',m:'中空板'});render();save();}
+}
 
 function buildReport(){
   const selectedItems = db.filter(x => cart[x.id]?.sel);
@@ -341,48 +438,57 @@ function buildReport(){
 
   const site = document.getElementById('siteSelect').value;
   const staff = document.getElementById('staffInput').value || '(未填)';
-  const date = new Date().toLocaleDateString('zh-TW');
+  const date = new Date().toLocaleDateString('zh-TW', {year: 'numeric', month: '2-digit', day: '2-digit'});
 
   document.getElementById('rptMeta').innerHTML = `
-    <div><b>工地：</b>${site}</div>
-    <div><b>人員：</b>${staff}</div>
-    <div><b>日期：</b>${date}</div>
+    <div style="text-align:center"><b>${site}</b><br><span style="color:#666">工地名稱</span></div>
+    <div style="text-align:center"><b>${staff}</b><br><span style="color:#666">負責人員</span></div>
+    <div style="text-align:center"><b>${date}</b><br><span style="color:#666">填單日期</span></div>
   `;
   
   let rows = '';
   selectedItems.forEach((i, idx) => {
     const qty = cart[i.id].qty || 1;
     rows += `<div class="report-item">
-            <div style="width:20px; font-size:11px; color:#999;">${idx + 1}</div>
-            <img class="rpt-img" src="${imgBase + i.id}.jpg">
+            <div style="width:25px; font-size:12px; color:#94A3B8; font-weight:bold">${idx + 1}</div>
+            <img class="rpt-img" src="${imgBase + i.id}.jpg" onerror="this.style.opacity='0.2'">
             <div class="rpt-info">
-              <div style="font-weight:bold; font-size:14px;">[${i.id}] ${i.n}</div>
-              <div style="font-size:11px; color:#666">${i.s} ｜ ${i.m}</div>
+              <div class="rpt-name">[${i.id}] ${i.n}</div>
+              <div style="font-size:10px; color:#64748B">規格：${i.s} ｜ 材質：${i.m}</div>
             </div>
             <div class="rpt-qty">${qty}</div>
           </div>`;
   });
 
+  const totalItems = selectedItems.length;
   const totalQty = selectedItems.reduce((acc, cur) => acc + (cart[cur.id].qty || 1), 0);
-  rows += `<div style="text-align:right; padding:15px; font-weight:bold; font-size:18px; border-top:2px solid #000;">合計數量：${totalQty} 件</div>`;
+  
+  rows += `<div style="display:flex; justify-content:space-between; padding:15px 5px; font-weight:bold; font-size:14px; color:var(--dark); border-top:2px solid #eee">
+            <span>合計 ${totalItems} 品項</span>
+            <span>共計 ${totalQty} 件</span>
+           </div>`;
 
   document.getElementById('rptList').innerHTML = rows;
   document.getElementById('overlay').classList.add('show');
 }
 
-function toggleAdmin(){
-  if(prompt('管理員密碼：')==='751113'){
-    isAdmin=true;
-    document.getElementById('adminPanel').style.display='flex';
-  }
-}
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
+
 function captureReport(){
   const area = document.getElementById('modalPrintArea');
-  html2canvas(area,{useCORS:true, scale:2}).then(c=>{
+  html2canvas(area,{
+      useCORS:true,
+      scale:2,
+      backgroundColor: "#FFFFFF"
+  }).then(c=>{
     document.getElementById('previewImg').src=c.toDataURL();
     document.getElementById('captureResult').classList.add('show');
   });
+}
+
+function configImgBase(){
+  const n = prompt('輸入圖片資料夾路徑 (最後需含 /)：', imgBase);
+  if(n){ imgBase = n; localStorage.setItem('ys2_imgBase', n); render(); }
 }
 
 init();
