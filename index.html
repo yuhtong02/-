@@ -11,133 +11,164 @@
   --dark:#164E33;
   --green:#6EB831;
   --cream:#FEF8E6;
-  --green-pale:#F0FAE6;
-  --green-light:#DCF0B8;
-  --green-mid:#8DD448;
-  --cream-border:#E8D9A0;
-  --cream-dark:#C8A83A;
-  --cream-deep:#7A5200;
-  --ink:#0F172A;--ink2:#334155;--ink3:#64748B;--ink4:#94A3B8;
-  --bg:#F3FAE8;--surface:#FFFFFF;--border:#C5DF98;--border2:#9DCB5A;
+  --cream2:#FFFBF0;
+  --cream-border:#E2C96A;
+  --cream-dark:#B8942A;
+  --cream-deep:#6B4700;
+  --ink:#0F172A;--ink3:#64748B;--ink4:#94A3B8;
+  --bg:#FFFDF5;
+  --surface:#FFFFFF;
+  --border:#D8EAB8;
+  --card-bg:#FFFEF8;
   --red:#DC2626;--blue:#1D4ED8;--purple:#6D28D9;
   --r:14px;--r2:10px;--r3:8px;
-  --shadow:0 1px 3px rgba(22,78,51,0.08),0 4px 12px rgba(22,78,51,0.05);
+  --shadow:0 1px 3px rgba(22,78,51,0.06),0 3px 10px rgba(22,78,51,0.04);
 }
 html,body{height:100%;overflow:hidden;}
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;}
 
-/* ── HEADER ── */
-.hdr{background:var(--dark);color:white;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
-.hdr::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(110,184,49,0.18) 0%,transparent 55%);pointer-events:none;}
-.hdr-brand{display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
-.hdr-logo{width:36px;height:36px;display:grid;place-items:center;font-size:24px;flex-shrink:0;cursor:default;line-height:1;overflow:hidden;position:relative;}
-.hdr-logo img{width:100%;height:100%;object-fit:contain;}
-.hdr-logo.admin-editable{cursor:pointer;}
-.hdr-logo.admin-editable::after{content:'✏️';position:absolute;bottom:-1px;right:-2px;font-size:10px;background:var(--green);border-radius:50%;width:14px;height:14px;display:grid;place-items:center;}
-.hdr-text{}
-.hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
-.hdr-ver{font-size:10px;opacity:0.6;font-weight:400;margin-top:1px;color:var(--green-mid);}
-.admin-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);color:white;padding:7px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s;position:relative;z-index:1;}
-.admin-btn:hover{background:rgba(255,255,255,0.2);}
-.admin-btn.active{background:rgba(110,184,49,0.3);border-color:rgba(110,184,49,0.55);color:#C8F07A;}
+/* ─── HEADER ─── */
+.hdr{background:var(--dark);color:white;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-brand{display:flex;align-items:center;gap:10px;}
+/* LOGO — fixed size 40×40, no background, no border */
+.hdr-logo{
+  width:40px;height:40px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;line-height:1;
+  cursor:default;overflow:hidden;position:relative;
+}
+.hdr-logo img{width:100%;height:100%;object-fit:contain;display:block;}
+.hdr-logo.editable{cursor:pointer;}
+.hdr-logo.editable::after{
+  content:'✏';position:absolute;bottom:0;right:0;
+  font-size:9px;background:var(--green);color:white;
+  border-radius:50%;width:13px;height:13px;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.hdr-title{font-size:15px;font-weight:900;letter-spacing:.3px;}
+.hdr-ver{font-size:10px;opacity:.55;margin-top:1px;color:#A8D96A;}
+.admin-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;}
+.admin-btn:hover{background:rgba(255,255,255,.2);}
+.admin-btn.active{background:rgba(110,184,49,.28);border-color:rgba(110,184,49,.5);color:#C8F07A;}
 
-/* ── CONTROLS ── */
+/* ─── CONTROLS ─── */
 .ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 14px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
 .ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:140px;}
-select,input[type=text]{font-family:inherit;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--green-pale);color:var(--ink);outline:none;transition:border-color 0.15s;}
+select,input[type=text]{font-family:inherit;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--cream2);color:var(--ink);outline:none;transition:border-color .15s;}
 select:focus,input[type=text]:focus{border-color:var(--green);}
 select{flex:1;}
-.btn{font-family:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:var(--r3);border:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
-.btn-green{background:var(--dark);color:white;}.btn-green:hover{background:var(--green);}
+.btn{font-family:inherit;font-size:12px;font-weight:700;padding:7px 11px;border-radius:var(--r3);border:none;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-dark{background:var(--dark);color:white;}.btn-dark:hover{background:#1E6840;}
 .btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}.btn-red:hover{background:#FEE2E2;}
 .btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}.btn-blue:hover{background:#DBEAFE;}
 .btn-purple{background:#F5F3FF;color:var(--purple);border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
-.btn-amber{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);}.btn-amber:hover{background:#FDF3CC;}
+.btn-cream{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);}.btn-cream:hover{background:#FEF0C0;}
 
-/* ── TABS ── */
-.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
-.tabs-scroll{display:flex;overflow-x:auto;padding:9px 14px;gap:5px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-behavior:smooth;}
+/* ─── TABS ─── */
+.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;position:relative;}
+.tabs-scroll{
+  display:flex;overflow-x:auto;padding:9px 14px;gap:5px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  /* smooth native scroll — no JS needed */
+  scroll-behavior:smooth;
+}
 .tabs-scroll::-webkit-scrollbar{display:none;}
-.tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all 0.15s;flex-shrink:0;user-select:none;display:flex;align-items:center;gap:4px;}
-.tab:hover{border-color:var(--green);color:var(--green);}
-.tab.step-tab{background:rgba(110,184,49,0.07);border-color:rgba(110,184,49,0.25);color:var(--dark);}
-.tab.step-tab:hover{background:rgba(110,184,49,0.14);border-color:var(--green);}
-.tab.all-tab{background:var(--cream);border-color:var(--cream-border);color:var(--cream-deep);}
-.tab.all-tab:hover{background:#FDF3CC;border-color:var(--cream-dark);}
-.tab.cat-tab{background:var(--green-pale);border-color:var(--border);}
-.tab.active{background:var(--dark)!important;color:white!important;border-color:var(--dark)!important;box-shadow:0 2px 8px rgba(22,78,51,0.28);}
-.tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 3px;border-radius:1px;}
-.tab-edit-input{background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:80px;outline:none;cursor:text;}
+/* scroll arrows */
+.tabs-arrow{position:absolute;top:0;bottom:0;width:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:opacity .2s;}
+.tabs-arrow.left{left:0;background:linear-gradient(to right,var(--surface) 60%,transparent);}
+.tabs-arrow.right{right:0;background:linear-gradient(to left,var(--surface) 60%,transparent);}
+.tabs-arrow svg{width:16px;height:16px;stroke:var(--ink3);stroke-width:2.5;fill:none;}
+.tab{
+  padding:6px 13px;border-radius:20px;font-size:12px;font-weight:700;
+  cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);
+  white-space:nowrap;transition:all .15s;flex-shrink:0;user-select:none;
+  display:flex;align-items:center;gap:4px;
+}
+.tab:hover{border-color:var(--green);color:var(--dark);}
+/* step tabs — cream tint */
+.tab.step-tab{background:var(--cream);border-color:var(--cream-border);color:var(--cream-deep);}
+.tab.step-tab:hover{background:#FEF0C0;border-color:var(--cream-dark);}
+/* all tab — slightly stronger cream */
+.tab.all-tab{background:var(--cream);border-color:var(--cream-dark);color:var(--cream-deep);font-weight:900;}
+/* category tabs — very light */
+.tab.cat-tab{background:var(--surface);border-color:var(--border);color:var(--ink3);}
+/* active — always dark green */
+.tab.active{background:var(--dark)!important;color:white!important;border-color:var(--dark)!important;box-shadow:0 2px 8px rgba(22,78,51,.25);}
+.tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 4px;border-radius:1px;}
+.tab-edit-input{background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:78px;outline:none;cursor:text;}
 
-/* ── MAIN GRID ── */
+/* ─── MAIN GRID ─── */
 .main{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px;}
 .empty-state{text-align:center;padding:80px 20px;color:var(--ink4);}
 .empty-icon{font-size:40px;margin-bottom:12px;}
 .empty-text{font-size:14px;}
 
-/* ── CARD ── */
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:11px;display:flex;gap:11px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;position:relative;box-shadow:var(--shadow);}
-.card:hover{border-color:var(--green-mid);background:var(--green-pale);box-shadow:0 4px 16px rgba(110,184,49,0.14);}
-.card.sel{border-color:var(--green);background:var(--green-light);border-width:2px;}
-.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;transition:all 0.18s;z-index:2;}
-.card.sel .card-check{background:var(--green);border-color:var(--green);color:white;}
+/* ─── CARD ─── */
+.card{
+  background:var(--card-bg);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:11px;display:flex;gap:11px;
+  cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s;
+  position:relative;box-shadow:var(--shadow);
+}
+.card:hover{border-color:var(--cream-border);background:var(--cream2);box-shadow:0 4px 14px rgba(22,78,51,.08);}
+.card.sel{border-color:var(--green);background:#F4FCE8;border-width:2px;}
+.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;transition:all .18s;z-index:2;}
+.card.sel .card-check{background:var(--green);border-color:var(--green);}
 .check-icon{font-size:11px;font-weight:900;color:white;display:none;}
 .card.sel .check-icon{display:block;}
 
-/* IMAGE */
-.card-img{width:86px;height:72px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;position:relative;}
-.card-img img{width:100%;height:100%;object-fit:contain;transition:opacity 0.2s;}
+.card-img{width:86px;height:72px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;}
+.card-img img{width:100%;height:100%;object-fit:contain;transition:opacity .2s;}
 .img-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink4);}
 .img-placeholder span{font-size:18px;}
 .img-placeholder small{font-size:9px;text-align:center;line-height:1.2;}
 
-/* BODY */
 .card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
 .card-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
-.card-id{font-size:10px;font-weight:700;background:var(--green-light);color:var(--dark);padding:2px 6px;border-radius:4px;}
+.card-id{font-size:10px;font-weight:700;background:var(--cream);color:var(--cream-deep);padding:2px 6px;border-radius:4px;border:1px solid var(--cream-border);}
 .card-cat{font-size:10px;color:var(--ink4);}
 .card-name{font-size:13px;font-weight:900;color:var(--dark);line-height:1.35;margin-bottom:4px;}
 .card-specs{display:flex;gap:6px;flex-wrap:wrap;}
 .spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
-.spec-r{background:var(--cream);color:var(--cream-deep);}
-.spec-m{background:var(--green-pale);color:#1A5C20;}
+.spec-r{background:var(--cream);color:var(--cream-deep);border:1px solid var(--cream-border);}
+.spec-m{background:#F0F7E6;color:#2A5A1A;border:1px solid #C5DF98;}
 .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
-.sel-chip{font-size:10px;background:var(--green);color:white;padding:3px 8px;border-radius:20px;font-weight:700;}
+.sel-chip{font-size:10px;background:var(--dark);color:white;padding:3px 8px;border-radius:20px;font-weight:700;}
 .qty-ctrl{display:flex;align-items:center;gap:7px;}
-.qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink3);font-family:inherit;transition:all 0.15s;line-height:1;flex-shrink:0;}
-.qty-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-pale);}
-.qty-num{font-size:21px;font-weight:900;color:var(--green);min-width:26px;text-align:center;line-height:1;}
+.qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink3);font-family:inherit;transition:all .15s;line-height:1;flex-shrink:0;}
+.qty-btn:hover{border-color:var(--green);color:var(--green);background:#F4FCE8;}
+.qty-num{font-size:21px;font-weight:900;color:var(--dark);min-width:26px;text-align:center;line-height:1;}
 
-/* admin card inputs */
+/* admin inputs in cards */
 .a-name{background:var(--cream);border:1.5px dashed var(--cream-dark);border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:var(--cream-deep);width:100%;font-family:inherit;outline:none;}
 .a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:52px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
 .admin-del-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--red);border:none;color:white;font-size:11px;cursor:pointer;display:none;place-items:center;z-index:3;font-family:inherit;}
 .isAdmin .card:hover .admin-del-btn{display:grid;}
 
-/* ── FOOTER ── */
+/* ─── FOOTER ─── */
 .footer{background:var(--surface);border-top:1.5px solid var(--border);padding:11px 14px;flex-shrink:0;}
 .admin-panel{display:none;margin-bottom:9px;flex-wrap:wrap;gap:6px;}
 .admin-panel.show{display:flex;}
 .footer-main{display:flex;gap:9px;align-items:stretch;}
-.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:13px 14px;border-radius:var(--r2);font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;box-shadow:0 4px 14px rgba(22,78,51,0.22);}
-.btn-report:hover{background:var(--green);box-shadow:0 6px 18px rgba(110,184,49,0.32);}
-.cart-badge{background:rgba(255,255,255,0.22);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
-.btn-reset{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);padding:13px 13px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;white-space:nowrap;}
-.btn-reset:hover{background:#FDF3CC;}
+.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:13px 14px;border-radius:var(--r2);font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 4px 14px rgba(22,78,51,.2);}
+.btn-report:hover{background:#1E6840;box-shadow:0 6px 18px rgba(22,78,51,.28);}
+.cart-badge{background:rgba(255,255,255,.22);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
+.btn-reset{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);padding:13px 13px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;}
+.btn-reset:hover{background:#FEF0C0;}
 
-/* ── PRINT MODAL ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
+/* ─── MODAL ─── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
-.modal{background:white;width:100%;max-width:700px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp 0.26s cubic-bezier(.2,.7,0,1.1);}
+.modal{background:white;width:100%;max-width:700px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp .26s cubic-bezier(.2,.7,0,1.1);}
 @keyframes slideUp{from{transform:translateY(56px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 14px;display:block;}
 .modal-title{font-size:17px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:8px;}
-.modal-meta{display:flex;justify-content:space-around;font-size:12px;color:var(--ink3);padding:9px 0;background:var(--green-pale);border-radius:var(--r3);margin-bottom:12px;border:1px solid var(--border);}
+.modal-meta{display:flex;justify-content:space-around;font-size:12px;color:var(--ink3);padding:9px 0;background:var(--cream2);border-radius:var(--r3);margin-bottom:12px;border:1px solid var(--cream-border);}
 .modal-meta span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;}
 .modal-meta strong{font-size:13px;color:var(--ink);font-weight:700;}
 .report-list{margin:2px 0;}
-.report-item{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:0.5px solid #F1F5F9;}
+.report-item{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:.5px solid #F1F5F9;}
 .report-item:last-child{border:none;}
 .rpt-num{font-size:11px;font-weight:700;color:var(--ink4);min-width:18px;text-align:center;}
 .rpt-img{width:50px;height:42px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:#F8FAFC;flex-shrink:0;}
@@ -146,37 +177,37 @@ select{flex:1;}
 .rpt-spec{font-size:11px;color:var(--ink3);margin-top:1px;}
 .rpt-qty{font-size:22px;font-weight:900;color:var(--dark);min-width:32px;text-align:right;}
 .rpt-total{display:flex;justify-content:space-between;padding:10px 14px;background:var(--dark);color:white;border-radius:var(--r3);margin-top:10px;font-size:13px;font-weight:700;}
-.rpt-total strong{color:var(--green-mid);font-size:15px;}
+.rpt-total strong{color:#A8D96A;font-size:15px;}
 .modal-actions{display:flex;flex-direction:column;gap:7px;margin-top:13px;}
-.modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s;}
-.modal-hint{font-size:11px;color:var(--ink4);text-align:center;margin-top:5px;line-height:1.5;}
+.modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.modal-hint{font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;line-height:1.6;padding:0 8px;}
 
-/* ── PRINT STYLES ── */
+/* ─── PRINT ─── */
 @media print{
   html,body{height:auto!important;overflow:visible!important;}
-  .hdr,.ctrl,.tabs-outer,.footer,.overlay .modal-actions,.overlay .modal-handle,.overlay .modal-hint,.no-print{display:none!important;}
-  .overlay{position:static!important;display:block!important;background:none!important;padding:0!important;}
-  .modal{max-height:none!important;overflow:visible!important;border-radius:0!important;animation:none!important;padding:0!important;max-width:100%!important;}
-  .report-item{break-inside:avoid;page-break-inside:avoid;}
-  .rpt-total{background:var(--dark)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .modal-meta{background:var(--green-pale)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  @page{margin:12mm 14mm;}
+  /* Hide everything except the print container */
+  body>*:not(#printContainer){display:none!important;}
+  #printContainer{display:block!important;}
 }
+#printContainer{display:none;}
 
-/* ── SCROLLBAR ── */
+/* scrollbars */
 .main::-webkit-scrollbar{width:3px;}
-.main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.main::-webkit-scrollbar-thumb{background:#C5DF98;border-radius:2px;}
 .modal::-webkit-scrollbar{width:3px;}
 .modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 </style>
 </head>
 <body>
 
+<!-- ── PRINT CONTAINER (hidden; only shown on print) ── -->
+<div id="printContainer"></div>
+
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-brand">
     <div class="hdr-logo" id="logoEl">🦺</div>
-    <div class="hdr-text">
+    <div>
       <div class="hdr-title" id="titleEl">工安標語採購系統</div>
       <div class="hdr-ver">鈺通營造 Construction Safety</div>
     </div>
@@ -188,14 +219,20 @@ select{flex:1;}
 <div class="ctrl">
   <div class="ctrl-group">
     <select id="siteSelect" onchange="save()"></select>
-    <button class="btn btn-green" onclick="addSite()">＋</button>
+    <button class="btn btn-dark" onclick="addSite()">＋</button>
   </div>
-  <input type="text" id="staffInput" placeholder="填單人員" style="width:110px;" oninput="save()">
+  <input type="text" id="staffInput" placeholder="填單人員" style="width:108px;" oninput="save()">
 </div>
 
 <!-- TABS -->
 <div class="tabs-outer">
+  <div class="tabs-arrow left" id="tabLeft" onclick="scrollTabs(-120)">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </div>
   <div class="tabs-scroll" id="tabsEl"></div>
+  <div class="tabs-arrow right" id="tabRight" onclick="scrollTabs(120)">
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  </div>
 </div>
 
 <!-- GRID -->
@@ -204,16 +241,16 @@ select{flex:1;}
 </div>
 
 <!-- FOOTER -->
-<div class="footer no-print">
+<div class="footer">
   <div class="admin-panel" id="adminPanel">
-    <button class="btn btn-blue" onclick="addNewSign()">➕ 新增標語</button>
-    <button class="btn btn-blue" onclick="addStep()">➕ 新增工序</button>
-    <button class="btn btn-blue" onclick="addCat()">➕ 新增類別</button>
+    <button class="btn btn-dark" onclick="addNewSign()">➕ 新增標語</button>
+    <button class="btn btn-dark" onclick="addStep()">➕ 新增工序</button>
+    <button class="btn btn-dark" onclick="addCat()">➕ 新增類別</button>
     <button class="btn btn-blue" onclick="exportData()">📤 備份</button>
     <button class="btn btn-purple" onclick="importData()">📥 還原</button>
     <button class="btn btn-red" onclick="deleteSite()">🗑 刪除工地</button>
-    <button class="btn btn-amber" onclick="configImgBase()">🖼 圖片路徑</button>
-    <button class="btn btn-amber" onclick="changeLogo()">🏷 更換圖示</button>
+    <button class="btn btn-cream" onclick="configImgBase()">🖼 圖片路徑</button>
+    <button class="btn btn-cream" onclick="changeLogo()">🏷 更換圖示</button>
   </div>
   <div class="footer-main">
     <button class="btn-report" onclick="buildReport()">
@@ -224,7 +261,7 @@ select{flex:1;}
   </div>
 </div>
 
-<!-- REPORT MODAL -->
+<!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal" id="modalBox">
     <span class="modal-handle"></span>
@@ -232,25 +269,18 @@ select{flex:1;}
     <div class="modal-meta" id="rptMeta"></div>
     <div class="report-list" id="rptList"></div>
     <div class="rpt-total" id="rptTotal"></div>
-    <div class="modal-actions no-print">
-      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="printReport()">🖨 列印 ／ 儲存 PDF</button>
-      <button class="modal-btn" style="background:var(--green);color:white;" onclick="saveImg()">📸 儲存為圖片（手機長按）</button>
-      <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);" onclick="closeModal()">← 返回編輯</button>
+    <div class="modal-actions">
+      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印 ／ 儲存 PDF（電腦）</button>
+      <button class="modal-btn" style="background:var(--green);color:white;" onclick="openPrintPage()">📱 開啟列印頁（手機截圖儲存）</button>
+      <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);" onclick="closeModal()">← 返回編輯</button>
     </div>
-    <div class="modal-hint no-print" id="modalHint"></div>
+    <div class="modal-hint" id="modalHint"></div>
   </div>
 </div>
 
-<!-- hidden canvas for image export -->
-<canvas id="imgCanvas" style="display:none;"></canvas>
-
 <script>
-/* ═══════════════════════════════════════════
-   DEFAULTS
-═══════════════════════════════════════════ */
+/* ═══════ DEFAULTS ═══════ */
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
-
-// DB: no hardcoded id — auto-computed from cat + position
 const DEF_DB=[
   {cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
   {cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
@@ -317,9 +347,7 @@ const DEF_DB=[
   {cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},
   {cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
 ];
-
 const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示'};
-
 const DEF_STEPS={
   S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01','E01','E02','D02']},
   S2:{t:'🏗 Step2 基礎',items:['B01','B05','C01','D03','B06']},
@@ -329,142 +357,127 @@ const DEF_STEPS={
   S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']},
 };
 
-/* ═══════════════════════════════════════════
-   AUTO-ID
-   IDs are computed on the fly; never stored.
-   Cart uses "cat::name" as stable key.
-═══════════════════════════════════════════ */
+/* ═══════ AUTO-ID ═══════
+   IDs computed on-the-fly per category.
+   Cart stable key = "cat::name"
+*/
 function computeIds(arr){
   const cnt={};
   return arr.map(item=>{
     const c=item.cat||'X';
     cnt[c]=(cnt[c]||0)+1;
-    return {...item, id:c+String(cnt[c]).padStart(2,'0')};
+    return {...item,id:c+String(cnt[c]).padStart(2,'0')};
   });
 }
 function getDbWithIds(){return computeIds(db);}
 function cartKey(item){return item.cat+'::'+item.n;}
 function cartGet(item){return cart[cartKey(item)]||{sel:false,qty:1};}
 
-/* ═══════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════ */
-let db,cart,sites,config,stepData,cats,catOrder,imgBase,logoSrc,isAdmin=false,currentTab='S1';
+/* ═══════ STATE ═══════ */
+let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,isAdmin=false,currentTab='S1';
 
 function init(){
-  db      = JSON.parse(localStorage.getItem('ys4_db'))   || DEF_DB;
-  // ★ cart is always cleared on page load
-  cart    = {};
-  sites   = JSON.parse(localStorage.getItem('ys4_sites')) || DEF_SITES;
-  config  = JSON.parse(localStorage.getItem('ys4_cfg'))   || {title:'工安標語採購系統'};
-  stepData= JSON.parse(localStorage.getItem('ys4_steps')) || DEF_STEPS;
-  cats    = JSON.parse(localStorage.getItem('ys4_cats'))  || DEF_CATS;
-  catOrder= JSON.parse(localStorage.getItem('ys4_catOrd'))|| Object.keys(DEF_CATS);
-  imgBase = localStorage.getItem('ys4_imgBase')           || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
-  logoSrc = localStorage.getItem('ys4_logo')              || '';
-  document.getElementById('staffInput').value = localStorage.getItem('ys4_staff')||'';
-  renderLogo();
-  renderTitle();
-  renderSites();
-  renderTabs();
-  render();
-  updateBadge();
+  db       = JSON.parse(localStorage.getItem('ys5_db'))    || DEF_DB;
+  cart     = {};   // ← always clear on load
+  sites    = JSON.parse(localStorage.getItem('ys5_sites')) || DEF_SITES;
+  config   = JSON.parse(localStorage.getItem('ys5_cfg'))   || {title:'工安標語採購系統'};
+  stepData = JSON.parse(localStorage.getItem('ys5_steps')) || DEF_STEPS;
+  cats     = JSON.parse(localStorage.getItem('ys5_cats'))  || DEF_CATS;
+  catOrder = JSON.parse(localStorage.getItem('ys5_catOrd'))|| Object.keys(DEF_CATS);
+  imgBase  = localStorage.getItem('ys5_imgBase')           || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  logoSrc  = localStorage.getItem('ys5_logo')              || '';
+  document.getElementById('staffInput').value = localStorage.getItem('ys5_staff')||'';
+  renderLogo(); renderTitle(); renderSites(); renderTabs(); render(); updateBadge();
 }
 
-/* ═══════════════════════════════════════════
-   LOGO
-═══════════════════════════════════════════ */
+/* ═══════ TAB SCROLLING ═══════ */
+function scrollTabs(delta){
+  const el=document.getElementById('tabsEl');
+  el.scrollBy({left:delta,behavior:'smooth'});
+}
+
+/* ═══════ LOGO ═══════ */
 function renderLogo(){
   const el=document.getElementById('logoEl');
-  el.className='hdr-logo'+(isAdmin?' admin-editable':'');
-  if(logoSrc){
-    el.innerHTML=`<img src="${logoSrc}" alt="logo">`;
-  } else {
-    el.innerHTML='🦺';
-  }
-  if(isAdmin){
-    el.onclick=changeLogo;
-  } else {
-    el.onclick=null;
-  }
+  el.className='hdr-logo'+(isAdmin?' editable':'');
+  el.innerHTML=logoSrc?`<img src="${logoSrc}" alt="logo">`:'🦺';
+  el.onclick=isAdmin?changeLogo:null;
 }
 function changeLogo(){
-  const input=document.createElement('input');
-  input.type='file';input.accept='image/*';
-  input.onchange=e=>{
+  // compress large images before storing
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='image/*';
+  inp.onchange=e=>{
     const file=e.target.files[0];if(!file)return;
     const reader=new FileReader();
     reader.onload=ev=>{
-      logoSrc=ev.target.result;
-      localStorage.setItem('ys4_logo',logoSrc);
-      renderLogo();
+      // draw onto canvas to resize to max 120px
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=120;
+        const canvas=document.createElement('canvas');
+        const scale=Math.min(1,MAX/Math.max(img.width,img.height));
+        canvas.width=img.width*scale;
+        canvas.height=img.height*scale;
+        canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+        logoSrc=canvas.toDataURL('image/png',0.85);
+        localStorage.setItem('ys5_logo',logoSrc);
+        renderLogo();
+      };
+      img.src=ev.target.result;
     };
     reader.readAsDataURL(file);
   };
-  input.click();
+  inp.click();
 }
 
-/* ═══════════════════════════════════════════
-   RENDER TITLE
-═══════════════════════════════════════════ */
+/* ═══════ TITLE ═══════ */
 function renderTitle(){
   const el=document.getElementById('titleEl');
   el.innerHTML=isAdmin
-    ?`<input style="background:rgba(255,255,255,0.15);border:none;border-bottom:1.5px solid rgba(255,255,255,0.4);color:white;font-size:15px;font-weight:900;font-family:inherit;outline:none;width:190px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">`
+    ?`<input style="background:rgba(255,255,255,.15);border:none;border-bottom:1.5px solid rgba(255,255,255,.4);color:white;font-size:15px;font-weight:900;font-family:inherit;outline:none;width:185px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">`
     :config.title;
 }
 
-/* ═══════════════════════════════════════════
-   RENDER SITES
-═══════════════════════════════════════════ */
+/* ═══════ SITES ═══════ */
 function renderSites(){
   const s=document.getElementById('siteSelect');
   s.innerHTML=sites.map(x=>`<option value="${x}">${x}</option>`).join('');
-  s.value=localStorage.getItem('ys4_site')||sites[0];
+  s.value=localStorage.getItem('ys5_site')||sites[0];
 }
 
-/* ═══════════════════════════════════════════
-   RENDER TABS
+/* ═══════ TABS ═══════
    Order: Step tabs | sep | 全部 | sep | A~K cats
-═══════════════════════════════════════════ */
+*/
 function renderTabs(){
   let h='';
-
-  // Step tabs
   Object.keys(stepData).sort().forEach(k=>{
     const t=stepData[k].t;
-    const active=currentTab===k?' active':'';
+    const act=currentTab===k?' active':'';
     if(isAdmin){
-      h+=`<div class="tab step-tab${active}" onclick="setTab('${k}')">
-        <input class="tab-edit-input" value="${t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()" title="點此編輯工序名稱">
-        <span style="font-size:10px;color:rgba(255,255,255,0.5);cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();deleteStep('${k}')">✕</span>
+      h+=`<div class="tab step-tab${act}" onclick="setTab('${k}')">
+        <input class="tab-edit-input" value="${esc(t)}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()" title="編輯工序名稱">
+        <span style="margin-left:2px;opacity:.5;font-size:10px;cursor:pointer;" onclick="event.stopPropagation();deleteStep('${k}')">✕</span>
       </div>`;
     } else {
-      h+=`<div class="tab step-tab${active}" onclick="setTab('${k}')">${t}</div>`;
+      h+=`<div class="tab step-tab${act}" onclick="setTab('${k}')">${t}</div>`;
     }
   });
-
   h+=`<span class="tab-sep"></span>`;
-
-  // 全部
   h+=`<div class="tab all-tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">📋 全部</div>`;
-
   h+=`<span class="tab-sep"></span>`;
-
-  // Category tabs
   catOrder.forEach(k=>{
     if(!cats[k])return;
-    const active=currentTab===k?' active':'';
+    const act=currentTab===k?' active':'';
     if(isAdmin){
-      h+=`<div class="tab cat-tab${active}" onclick="setTab('${k}')">
-        <input class="tab-edit-input" style="width:70px;" value="${cats[k]}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()" title="點此編輯分類名稱">
-        <span style="font-size:10px;color:rgba(0,0,0,0.35);cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();deleteCat('${k}')">✕</span>
+      h+=`<div class="tab cat-tab${act}" onclick="setTab('${k}')">
+        <input class="tab-edit-input" style="width:66px;" value="${esc(cats[k])}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()" title="編輯類別名稱">
+        <span style="margin-left:2px;opacity:.45;font-size:10px;cursor:pointer;" onclick="event.stopPropagation();deleteCat('${k}')">✕</span>
       </div>`;
     } else {
-      h+=`<div class="tab cat-tab${active}" onclick="setTab('${k}')">${cats[k]}</div>`;
+      h+=`<div class="tab cat-tab${act}" onclick="setTab('${k}')">${cats[k]}</div>`;
     }
   });
-
   document.getElementById('tabsEl').innerHTML=h;
 }
 
@@ -472,15 +485,14 @@ function setTab(t){
   currentTab=t;
   renderTabs();
   render();
-  setTimeout(()=>{
-    const active=document.querySelector('.tabs-scroll .tab.active');
-    if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  },60);
+  // smooth-scroll active tab into view
+  requestAnimationFrame(()=>{
+    const el=document.querySelector('.tabs-scroll .tab.active');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  });
 }
 
-/* ═══════════════════════════════════════════
-   RENDER CARDS
-═══════════════════════════════════════════ */
+/* ═══════ RENDER CARDS ═══════ */
 function render(){
   const dbIds=getDbWithIds();
   let list;
@@ -496,6 +508,7 @@ function render(){
   const grid=document.getElementById('gridEl');
   if(!list.length){
     grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">此分類暫無標語</div></div>`;
+    document.getElementById('mainArea').classList.remove('isAdmin');
     return;
   }
   grid.innerHTML='';
@@ -506,25 +519,23 @@ function render(){
     const imgUrl=imgBase+item.id+'.jpg';
 
     const nameHtml=isAdmin
-      ?`<input class="a-name" value="${esc(item.n)}" oninput="updateNameInDb('${item.cat}','${escQ(item.n)}',this.value)">`
+      ?`<input class="a-name" value="${esc(item.n)}" oninput="updateName('${item.cat}','${escQ(item.n)}',this.value)">`
       :`<div class="card-name">${item.n}</div>`;
-    const specRHtml=isAdmin
-      ?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateFieldInDb('${item.cat}','${escQ(item.n)}','s',this.value)">`
+    const specR=isAdmin
+      ?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateField('${item.cat}','${escQ(item.n)}','s',this.value)">`
       :`<span class="spec-tag spec-r">${item.s}</span>`;
-    const specMHtml=isAdmin
-      ?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateFieldInDb('${item.cat}','${escQ(item.n)}','m',this.value)">`
+    const specM=isAdmin
+      ?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateField('${item.cat}','${escQ(item.n)}','m',this.value)">`
       :`<span class="spec-tag spec-m">${item.m}</span>`;
-
     const delBtn=isAdmin
       ?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`
       :'';
 
-    d.innerHTML=`
-      ${delBtn}
+    d.innerHTML=`${delBtn}
       <div class="card-check"><span class="check-icon">✓</span></div>
       <div class="card-img">
-        <img src="${imgUrl}" alt="${item.n}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity 0.2s">
-        <div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖片</small></div>
+        <img src="${imgUrl}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity .2s" alt="${item.n}">
+        <div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖</small></div>
       </div>
       <div class="card-body">
         <div>
@@ -533,7 +544,7 @@ function render(){
             <span class="card-cat">${cats[item.cat]||item.cat}</span>
           </div>
           ${nameHtml}
-          <div class="card-specs">${specRHtml}${specMHtml}</div>
+          <div class="card-specs">${specR}${specM}</div>
         </div>
         <div class="card-footer">
           ${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
@@ -549,21 +560,15 @@ function render(){
     });
     grid.appendChild(d);
   });
-
-  // show del buttons on hover if admin
-  if(isAdmin){
-    document.getElementById('mainArea').classList.add('isAdmin');
-  } else {
-    document.getElementById('mainArea').classList.remove('isAdmin');
-  }
+  if(isAdmin) document.getElementById('mainArea').classList.add('isAdmin');
+  else document.getElementById('mainArea').classList.remove('isAdmin');
 }
 
+/* helpers */
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
 function escQ(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
-/* ═══════════════════════════════════════════
-   CART / TOGGLE
-═══════════════════════════════════════════ */
+/* ═══════ CART ═══════ */
 function toggleItem(cat,n){
   const item=db.find(x=>x.cat===cat&&x.n===n);if(!item)return;
   const k=cartKey(item);
@@ -581,17 +586,13 @@ function adjQty(cat,n,delta){
   render();updateBadge();
 }
 function updateBadge(){
-  const dbIds=getDbWithIds();
-  document.getElementById('cartBadge').textContent=dbIds.filter(x=>cartGet(x).sel).length;
+  document.getElementById('cartBadge').textContent=getDbWithIds().filter(x=>cartGet(x).sel).length;
 }
 function resetCart(){if(confirm('確認清除所有選取？')){cart={};render();updateBadge();}}
 
-/* ═══════════════════════════════════════════
-   DB MUTATIONS (admin)
-═══════════════════════════════════════════ */
-function updateNameInDb(cat,oldN,newN){
-  const item=db.find(x=>x.cat===cat&&x.n===oldN);
-  if(!item)return;
+/* ═══════ DB MUTATIONS ═══════ */
+function updateName(cat,oldN,newN){
+  const item=db.find(x=>x.cat===cat&&x.n===oldN);if(!item)return;
   const oldKey=cartKey(item);
   const saved=cart[oldKey];
   delete cart[oldKey];
@@ -599,22 +600,20 @@ function updateNameInDb(cat,oldN,newN){
   if(saved!==undefined)cart[cartKey(item)]=saved;
   save();
 }
-function updateFieldInDb(cat,n,field,val){
+function updateField(cat,n,field,val){
   const item=db.find(x=>x.cat===cat&&x.n===n);
   if(item){item[field]=val;save();}
 }
 function deleteItem(cat,n){
   if(!confirm(`確定刪除「${n}」？刪除後同類別後續項目將自動重新編號。`))return;
-  const k=db.findIndex(x=>x.cat===cat&&x.n===n);
-  if(k<0)return;
-  db.splice(k,1);
+  const idx=db.findIndex(x=>x.cat===cat&&x.n===n);
+  if(idx<0)return;
+  db.splice(idx,1);
   delete cart[cat+'::'+n];
   save();render();updateBadge();
 }
 
-/* ═══════════════════════════════════════════
-   SITE MANAGEMENT
-═══════════════════════════════════════════ */
+/* ═══════ SITE ═══════ */
 function addSite(){
   const nm=prompt('新增工地名稱：');
   if(nm&&nm.trim()){sites.push(nm.trim());renderSites();document.getElementById('siteSelect').value=nm.trim();save();}
@@ -627,32 +626,38 @@ function deleteSite(){
   renderSites();save();
 }
 
-/* ═══════════════════════════════════════════
-   ADD SIGN / STEP / CAT
-═══════════════════════════════════════════ */
+/* ═══════ ADD SIGN ═══════ */
 function addNewSign(){
-  const catInput=prompt('類別代碼（現有：'+catOrder.join('、')+'）：');
-  if(!catInput)return;
-  const cat=catInput.toUpperCase().trim();
-  if(!cats[cat]&&!confirm(`類別「${cat}」不存在，是否自動建立？`))return;
-  if(!cats[cat]){cats[cat]=cat+'. 新分類';catOrder.push(cat);}
-  const n=prompt('標語名稱：');if(!n||!n.trim())return;
-  db.push({cat,n:n.trim(),s:'60x40',m:'中空板'});
+  // show category selector then name prompt
+  const catList=catOrder.filter(k=>cats[k]);
+  const catStr=catList.map((k,i)=>`${i+1}. ${cats[k]} (${k})`).join('\n');
+  const choice=prompt(`請選擇要新增標語的類別（輸入代碼，如 A）：\n\n${catStr}`);
+  if(!choice)return;
+  const cat=choice.toUpperCase().trim();
+  if(!cats[cat]){
+    if(!confirm(`類別「${cat}」不存在，要自動建立嗎？`))return;
+    cats[cat]=cat+'. 新分類';catOrder.push(cat);
+  }
+  const nm=prompt(`在「${cats[cat]}」中新增標語名稱：`);
+  if(!nm||!nm.trim())return;
+  db.push({cat,n:nm.trim(),s:'60x40',m:'中空板'});
   save();renderTabs();render();setTab(cat);
 }
+
+/* ═══════ STEP / CAT ═══════ */
 function addStep(){
-  const key='S'+(Object.keys(stepData).length+1);
   const t=prompt('工序標籤名稱（含 emoji）：',`🔧 Step${Object.keys(stepData).length+1} 新工序`);
   if(!t)return;
+  let key='S'+(Object.keys(stepData).length+1);
+  while(stepData[key])key='S'+(parseInt(key.slice(1))+1);
   stepData[key]={t,items:[]};
   save();renderTabs();setTab(key);
 }
 function deleteStep(key){
   if(!confirm(`確定刪除工序「${stepData[key].t}」？`))return;
   delete stepData[key];
-  save();
   if(currentTab===key)currentTab='ALL';
-  renderTabs();render();
+  save();renderTabs();render();
 }
 function addCat(){
   const key=prompt('新類別代碼（單一英文字母，如 L）：');
@@ -665,22 +670,78 @@ function addCat(){
   save();renderTabs();setTab(k);
 }
 function deleteCat(k){
-  if(db.some(x=>x.cat===k)){alert('此類別尚有標語，請先移除所有標語後再刪除類別。');return;}
+  if(db.some(x=>x.cat===k)){alert('此類別尚有標語，請先移除所有標語後再刪除。');return;}
   if(!confirm(`確定刪除類別「${cats[k]}」？`))return;
-  delete cats[k];
-  catOrder=catOrder.filter(c=>c!==k);
+  delete cats[k];catOrder=catOrder.filter(c=>c!==k);
   if(currentTab===k)currentTab='ALL';
   save();renderTabs();render();
 }
 
-/* ═══════════════════════════════════════════
-   REPORT
-═══════════════════════════════════════════ */
+/* ═══════ BUILD REPORT HTML ═══════ */
+function buildReportHtml(sel,site,staff,now,totalQty){
+  let rows='';
+  sel.forEach((item,idx)=>{
+    const qty=cartGet(item).qty||1;
+    rows+=`<tr>
+      <td style="text-align:center;color:#94A3B8;font-size:11px;">${idx+1}</td>
+      <td style="font-weight:700;color:#164E33;font-size:12px;">${item.id}</td>
+      <td style="font-weight:900;font-size:13px;">${item.n}</td>
+      <td style="font-size:11px;color:#64748B;">${item.s}</td>
+      <td style="font-size:11px;color:#64748B;">${item.m}</td>
+      <td style="font-weight:900;font-size:18px;color:#164E33;text-align:right;">${qty}</td>
+    </tr>`;
+  });
+  return `<!DOCTYPE html><html lang="zh-TW"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>採購單 ${site}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',sans-serif;}
+body{background:#fff;padding:20px;max-width:700px;margin:0 auto;}
+.hdr{background:#164E33;color:white;padding:14px 18px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.hdr-t{font-size:17px;font-weight:900;}
+.hdr-d{font-size:12px;opacity:.7;}
+.meta{display:flex;background:#FFFBF0;border:1px solid #E2C96A;border-radius:8px;margin-bottom:14px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.mi{flex:1;padding:9px 12px;border-right:1px solid #E2C96A;}
+.mi:last-child{border-right:none;}
+.ml{font-size:10px;color:#64748B;margin-bottom:2px;}
+.mv{font-size:13px;font-weight:700;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{background:#FFFBF0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+th{padding:8px 6px;font-weight:700;color:#164E33;text-align:left;border-bottom:2px solid #E2C96A;}
+td{padding:7px 6px;border-bottom:1px solid #F1F5F9;vertical-align:middle;}
+tr:nth-child(even) td{background:#FEFDF8;}
+tr:last-child td{border-bottom:none;}
+.foot{display:flex;justify-content:space-between;background:#164E33;color:white;padding:11px 16px;border-radius:8px;margin-top:14px;font-size:13px;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.foot strong{color:#A8D96A;font-size:15px;}
+.hint{text-align:center;color:#94A3B8;font-size:11px;margin-top:18px;line-height:1.6;}
+@media print{.hint{display:none!important;} tr{page-break-inside:avoid;} @page{margin:12mm;}}
+</style>
+</head><body>
+<div class="hdr"><div class="hdr-t">🦺 ${config.title} 採購單</div><div class="hdr-d">${now}</div></div>
+<div class="meta">
+  <div class="mi"><div class="ml">工地名稱</div><div class="mv">${site}</div></div>
+  <div class="mi"><div class="ml">負責人員</div><div class="mv">${staff}</div></div>
+  <div class="mi"><div class="ml">填單日期</div><div class="mv">${now}</div></div>
+</div>
+<table><thead><tr>
+  <th>#</th><th>編號</th><th>名稱</th><th>規格</th><th>材質</th>
+  <th style="text-align:right;">數量</th>
+</tr></thead><tbody>${rows}</tbody></table>
+<div class="foot">
+  <span>合計 <strong>${sel.length}</strong> 品項</span>
+  <span>合計 <strong>${totalQty}</strong> 件</span>
+</div>
+<p class="hint">📱 手機：對此頁面截圖或使用瀏覽器「分享→儲存PDF」<br>💻 電腦：Ctrl+P → 另存為PDF</p>
+</body></html>`;
+}
+
+/* ═══════ REPORT MODAL ═══════ */
 function buildReport(){
   const dbIds=getDbWithIds();
   const sel=dbIds.filter(i=>cartGet(i).sel);
   if(!sel.length)return alert('請先點選標語項目');
-
   const site=document.getElementById('siteSelect').value;
   const staff=document.getElementById('staffInput').value||'（未填）';
   const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
@@ -694,110 +755,89 @@ function buildReport(){
 
   let rows='';
   sel.forEach((item,idx)=>{
-    const qty=cartGet(item).qty||1;
     rows+=`<div class="report-item">
       <span class="rpt-num">${idx+1}</span>
-      <img class="rpt-img" src="${imgBase+item.id+'.jpg'}" onerror="this.style.opacity=0.15" alt="" crossorigin="anonymous">
+      <img class="rpt-img" src="${imgBase+item.id+'.jpg'}" onerror="this.style.opacity=.12" alt="">
       <div class="rpt-info">
         <div class="rpt-name">[${item.id}] ${item.n}</div>
         <div class="rpt-spec">規格：${item.s}　材質：${item.m}</div>
       </div>
-      <div class="rpt-qty">${qty}</div>
+      <div class="rpt-qty">${cartGet(item).qty||1}</div>
     </div>`;
   });
-
   document.getElementById('rptList').innerHTML=rows;
   document.getElementById('rptTotal').innerHTML=
     `<span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span>`;
-
-  const isMobile=/Mobi|Android|iPhone/i.test(navigator.userAgent);
-  document.getElementById('modalHint').textContent=isMobile
-    ? '手機：點擊「儲存為圖片」後長按圖片即可儲存至相簿'
-    : '電腦：點擊「列印／儲存 PDF」，在列印視窗選擇「另存為 PDF」';
-
+  document.getElementById('modalHint').innerHTML=
+    '📱 手機：點「開啟列印頁」→ 截圖或分享儲存PDF<br>💻 電腦：點「列印／儲存PDF」→ 在列印視窗選另存PDF';
   document.getElementById('overlay').classList.add('show');
+
+  // store for print/export
+  window._rptSel=sel;window._rptSite=site;window._rptStaff=staff;window._rptNow=now;window._rptTotalQty=totalQty;
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
-/* ── Print (desktop → PDF) ── */
-function printReport(){window.print();}
-
-/* ── Save as image ──
-   Renders the report content onto a canvas without html2canvas:
-   we open a new window with the report HTML, let the user long-press / screenshot.
-   On desktop it auto-triggers print. On mobile opens a full-screen printable page.
-*/
-function saveImg(){
-  const dbIds=getDbWithIds();
-  const sel=dbIds.filter(i=>cartGet(i).sel);
-  const site=document.getElementById('siteSelect').value;
-  const staff=document.getElementById('staffInput').value||'（未填）';
-  const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const totalQty=sel.reduce((a,i)=>a+(cartGet(i).qty||1),0);
-
+/* ── Print (desktop): inject clean HTML into printContainer, then window.print() ── */
+function doPrint(){
+  const {_rptSel:sel,_rptSite:site,_rptStaff:staff,_rptNow:now,_rptTotalQty:totalQty}=window;
+  if(!sel)return;
+  const pc=document.getElementById('printContainer');
+  // Build print-only content inline (avoids new window, no popup blocker)
   let rows='';
   sel.forEach((item,idx)=>{
     const qty=cartGet(item).qty||1;
-    rows+=`<tr>
-      <td>${idx+1}</td>
-      <td style="font-weight:700;color:#164E33;">${item.id}</td>
-      <td style="font-weight:900;">${item.n}</td>
-      <td>${item.s}</td>
-      <td>${item.m}</td>
-      <td style="font-weight:900;font-size:17px;color:#164E33;text-align:right;">${qty}</td>
+    rows+=`<tr style="page-break-inside:avoid;">
+      <td style="text-align:center;color:#94A3B8;font-size:11px;padding:7px 5px;">${idx+1}</td>
+      <td style="font-weight:700;color:#164E33;font-size:12px;padding:7px 5px;">${item.id}</td>
+      <td style="font-weight:900;font-size:13px;padding:7px 5px;">${item.n}</td>
+      <td style="font-size:11px;color:#64748B;padding:7px 5px;">${item.s}</td>
+      <td style="font-size:11px;color:#64748B;padding:7px 5px;">${item.m}</td>
+      <td style="font-weight:900;font-size:18px;color:#164E33;text-align:right;padding:7px 5px;">${qty}</td>
     </tr>`;
   });
+  pc.innerHTML=`
+    <div style="font-family:'Noto Sans TC',sans-serif;max-width:700px;margin:0 auto;padding:10px;">
+      <div style="background:#164E33;color:white;padding:13px 18px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <span style="font-size:17px;font-weight:900;">🦺 ${config.title} 採購單</span>
+        <span style="font-size:12px;opacity:.7;">${now}</span>
+      </div>
+      <div style="display:flex;background:#FFFBF0;border:1px solid #E2C96A;border-radius:8px;margin-bottom:12px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <div style="flex:1;padding:8px 12px;border-right:1px solid #E2C96A;"><div style="font-size:10px;color:#64748B;">工地名稱</div><div style="font-size:13px;font-weight:700;">${site}</div></div>
+        <div style="flex:1;padding:8px 12px;border-right:1px solid #E2C96A;"><div style="font-size:10px;color:#64748B;">負責人員</div><div style="font-size:13px;font-weight:700;">${staff}</div></div>
+        <div style="flex:1;padding:8px 12px;"><div style="font-size:10px;color:#64748B;">填單日期</div><div style="font-size:13px;font-weight:700;">${now}</div></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;font-family:'Noto Sans TC',sans-serif;">
+        <thead><tr style="background:#FFFBF0;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;text-align:center;">#</th>
+          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">編號</th>
+          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">名稱</th>
+          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">規格</th>
+          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">材質</th>
+          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;text-align:right;">數量</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="display:flex;justify-content:space-between;background:#164E33;color:white;padding:11px 16px;border-radius:8px;margin-top:12px;font-size:13px;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <span>合計 <span style="color:#A8D96A;font-size:15px;">${sel.length}</span> 品項</span>
+        <span>合計 <span style="color:#A8D96A;font-size:15px;">${totalQty}</span> 件</span>
+      </div>
+    </div>`;
+  window.print();
+  // clean up after print dialog
+  setTimeout(()=>{pc.innerHTML='';},2000);
+}
 
-  const html=`<!DOCTYPE html><html lang="zh-TW"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>採購單</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',sans-serif;}
-body{background:#fff;padding:20px;max-width:680px;margin:0 auto;}
-.hdr{background:#164E33;color:white;padding:14px 18px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.hdr-t{font-size:17px;font-weight:900;}
-.hdr-d{font-size:12px;opacity:0.7;}
-.meta{display:flex;gap:0;background:#F0FAE6;border:1px solid #C5DF98;border-radius:8px;margin-bottom:14px;overflow:hidden;}
-.meta-item{flex:1;padding:9px 12px;border-right:1px solid #C5DF98;}
-.meta-item:last-child{border-right:none;}
-.meta-label{font-size:10px;color:#64748B;margin-bottom:2px;}
-.meta-value{font-size:13px;font-weight:700;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-thead tr{background:#F0FAE6;}
-th{padding:8px 7px;font-weight:700;color:#164E33;text-align:left;border-bottom:2px solid #C5DF98;}
-td{padding:8px 7px;border-bottom:1px solid #F1F5F9;vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-.foot{display:flex;justify-content:space-between;background:#164E33;color:white;padding:11px 16px;border-radius:8px;margin-top:14px;font-size:13px;font-weight:700;}
-.foot strong{color:#8DD448;font-size:15px;}
-.hint{text-align:center;color:#94A3B8;font-size:12px;margin-top:18px;}
-@media print{.hint{display:none!important;}@page{margin:12mm;}}
-</style>
-</head><body>
-<div class="hdr"><div class="hdr-t">🦺 ${config.title} 採購單</div><div class="hdr-d">${now}</div></div>
-<div class="meta">
-  <div class="meta-item"><div class="meta-label">工地名稱</div><div class="meta-value">${site}</div></div>
-  <div class="meta-item"><div class="meta-label">負責人員</div><div class="meta-value">${staff}</div></div>
-  <div class="meta-item"><div class="meta-label">填單日期</div><div class="meta-value">${now}</div></div>
-</div>
-<table>
-<thead><tr><th>#</th><th>編號</th><th>名稱</th><th>規格</th><th>材質</th><th style="text-align:right;">數量</th></tr></thead>
-<tbody>${rows}</tbody>
-</table>
-<div class="foot"><span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span></div>
-<p class="hint">手機：長按此頁面截圖儲存 ／ 電腦：Ctrl+P 列印或另存 PDF</p>
-</body></html>`;
-
+/* ── Open standalone print page (mobile screenshot) ── */
+function openPrintPage(){
+  const {_rptSel:sel,_rptSite:site,_rptStaff:staff,_rptNow:now,_rptTotalQty:totalQty}=window;
+  if(!sel)return;
+  const html=buildReportHtml(sel,site,staff,now,totalQty);
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
-  // open in new tab — user can long-press screenshot on mobile, or print on desktop
   window.open(url,'_blank');
 }
 
-/* ═══════════════════════════════════════════
-   ADMIN TOGGLE
-═══════════════════════════════════════════ */
+/* ═══════ ADMIN ═══════ */
 function toggleAdmin(){
   if(!isAdmin){
     const pw=prompt('請輸入管理員密碼：');
@@ -806,41 +846,32 @@ function toggleAdmin(){
       document.getElementById('adminBtn').textContent='🔓 管理中';
       document.getElementById('adminBtn').classList.add('active');
       document.getElementById('adminPanel').classList.add('show');
-    } else if(pw!==null){
-      alert('密碼錯誤');
-    }
+    } else if(pw!==null){alert('密碼錯誤');}
   } else {
     isAdmin=false;
     document.getElementById('adminBtn').textContent='🔒 管理員';
     document.getElementById('adminBtn').classList.remove('active');
     document.getElementById('adminPanel').classList.remove('show');
   }
-  renderLogo();
-  renderTitle();
-  renderTabs();
-  render();
+  renderLogo();renderTitle();renderTabs();render();
 }
 
-/* ═══════════════════════════════════════════
-   SETTINGS
-═══════════════════════════════════════════ */
+/* ═══════ SETTINGS ═══════ */
 function configImgBase(){
   const v=prompt('圖片路徑 Base URL（請以 / 結尾）：',imgBase);
-  if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem('ys4_imgBase',imgBase);render();}
+  if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem('ys5_imgBase',imgBase);render();}
 }
 
-/* ═══════════════════════════════════════════
-   PERSISTENCE
-═══════════════════════════════════════════ */
+/* ═══════ PERSISTENCE ═══════ */
 function save(){
-  localStorage.setItem('ys4_db',JSON.stringify(db));
-  localStorage.setItem('ys4_staff',document.getElementById('staffInput').value);
-  localStorage.setItem('ys4_site',document.getElementById('siteSelect').value);
-  localStorage.setItem('ys4_cfg',JSON.stringify(config));
-  localStorage.setItem('ys4_steps',JSON.stringify(stepData));
-  localStorage.setItem('ys4_cats',JSON.stringify(cats));
-  localStorage.setItem('ys4_catOrd',JSON.stringify(catOrder));
-  localStorage.setItem('ys4_sites',JSON.stringify(sites));
+  localStorage.setItem('ys5_db',JSON.stringify(db));
+  localStorage.setItem('ys5_staff',document.getElementById('staffInput').value);
+  localStorage.setItem('ys5_site',document.getElementById('siteSelect').value);
+  localStorage.setItem('ys5_cfg',JSON.stringify(config));
+  localStorage.setItem('ys5_steps',JSON.stringify(stepData));
+  localStorage.setItem('ys5_cats',JSON.stringify(cats));
+  localStorage.setItem('ys5_catOrd',JSON.stringify(catOrder));
+  localStorage.setItem('ys5_sites',JSON.stringify(sites));
 }
 function exportData(){
   const d={db,sites,config,stepData,cats,catOrder,imgBase,logoSrc};
@@ -849,30 +880,18 @@ function exportData(){
   a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();
 }
 function importData(){
-  const j=prompt('貼上備份 JSON：');
-  if(!j)return;
+  const j=prompt('貼上備份 JSON：');if(!j)return;
   try{
     const d=JSON.parse(j);
-    if(d.db)db=d.db;
-    if(d.sites)sites=d.sites;
-    if(d.config)config=d.config;
-    if(d.stepData)stepData=d.stepData;
-    if(d.cats)cats=d.cats;
-    if(d.catOrder)catOrder=d.catOrder;
+    if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;
+    if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.catOrder)catOrder=d.catOrder;
     if(d.imgBase)imgBase=d.imgBase;
-    if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem('ys4_logo',logoSrc);}
+    if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem('ys5_logo',logoSrc);}
     save();location.reload();
   }catch(e){alert('格式錯誤，請確認備份檔案');}
 }
 
-/* ═══════════════════════════════════════════
-   OVERLAY CLOSE
-═══════════════════════════════════════════ */
-document.getElementById('overlay').addEventListener('click',function(e){
-  if(e.target===this)closeModal();
-});
-
-/* START */
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 init();
 </script>
 </body>
