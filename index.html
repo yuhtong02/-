@@ -5,15 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>鈺通營造｜工安標語採購系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --dark:#164E33;--mid:#2E7D52;--light:#4CAF80;--pale:#E8F5E9;--pale2:#F1FAF2;
-  --cream:#FEF8E6;--cream2:#FFF9ED;--cream-border:#F0E4B8;--cream-accent:#D4A843;
+  --dark:#164E33;
+  --green:#6EB831;
+  --cream:#FEF8E6;
+  --green-pale:#F0FAE6;
+  --green-light:#DCF0B8;
+  --green-mid:#8DD448;
+  --cream-border:#E8D9A0;
+  --cream-dark:#C8A83A;
+  --cream-deep:#7A5200;
   --ink:#0F172A;--ink2:#334155;--ink3:#64748B;--ink4:#94A3B8;
-  --bg:#F5FBF6;--surface:#FFFFFF;--border:#C8E6C9;--border2:#A5D6A7;
-  --red:#DC2626;--amber:#D97706;--blue:#1D4ED8;
+  --bg:#F3FAE8;--surface:#FFFFFF;--border:#C5DF98;--border2:#9DCB5A;
+  --red:#DC2626;--blue:#1D4ED8;--purple:#6D28D9;
   --r:14px;--r2:10px;--r3:8px;
   --shadow:0 1px 3px rgba(22,78,51,0.08),0 4px 12px rgba(22,78,51,0.05);
 }
@@ -21,130 +27,147 @@ html,body{height:100%;overflow:hidden;}
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;}
 
 /* ── HEADER ── */
-.hdr{background:var(--dark);color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
-.hdr::after{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;}
-.hdr-brand{display:flex;align-items:center;gap:10px;}
-.hdr-logo{width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0;}
+.hdr{background:var(--dark);color:white;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(110,184,49,0.18) 0%,transparent 55%);pointer-events:none;}
+.hdr-brand{display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
+.hdr-logo{width:36px;height:36px;display:grid;place-items:center;font-size:24px;flex-shrink:0;cursor:default;line-height:1;overflow:hidden;position:relative;}
+.hdr-logo img{width:100%;height:100%;object-fit:contain;}
+.hdr-logo.admin-editable{cursor:pointer;}
+.hdr-logo.admin-editable::after{content:'✏️';position:absolute;bottom:-1px;right:-2px;font-size:10px;background:var(--green);border-radius:50%;width:14px;height:14px;display:grid;place-items:center;}
+.hdr-text{}
 .hdr-title{font-size:16px;font-weight:900;letter-spacing:0.3px;}
-.hdr-ver{font-size:10px;opacity:0.55;font-weight:400;margin-top:1px;color:#A5D6A7;}
-.admin-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:white;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background 0.15s;}
-.admin-btn:hover{background:rgba(255,255,255,0.22);}
-.admin-btn.active{background:rgba(254,248,230,0.2);border-color:rgba(254,248,230,0.4);color:#FEF8E6;}
+.hdr-ver{font-size:10px;opacity:0.6;font-weight:400;margin-top:1px;color:var(--green-mid);}
+.admin-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.22);color:white;padding:7px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s;position:relative;z-index:1;}
+.admin-btn:hover{background:rgba(255,255,255,0.2);}
+.admin-btn.active{background:rgba(110,184,49,0.3);border-color:rgba(110,184,49,0.55);color:#C8F07A;}
 
 /* ── CONTROLS ── */
-.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
-.ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:150px;}
-select,input[type=text]{font-family:inherit;font-size:13px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--pale2);color:var(--ink);outline:none;transition:border-color 0.15s;}
-select:focus,input[type=text]:focus{border-color:var(--mid);}
+.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 14px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
+.ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:140px;}
+select,input[type=text]{font-family:inherit;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--green-pale);color:var(--ink);outline:none;transition:border-color 0.15s;}
+select:focus,input[type=text]:focus{border-color:var(--green);}
 select{flex:1;}
-.btn{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:var(--r3);border:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
-.btn-green{background:var(--dark);color:white;}.btn-green:hover{background:var(--mid);}
+.btn{font-family:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:var(--r3);border:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.btn-green{background:var(--dark);color:white;}.btn-green:hover{background:var(--green);}
 .btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}.btn-red:hover{background:#FEE2E2;}
 .btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}.btn-blue:hover{background:#DBEAFE;}
-.btn-purple{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
+.btn-purple{background:#F5F3FF;color:var(--purple);border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
+.btn-amber{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);}.btn-amber:hover{background:#FDF3CC;}
 
 /* ── TABS ── */
 .tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
-.tabs-scroll{display:flex;overflow-x:auto;padding:10px 16px;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tabs-scroll{display:flex;overflow-x:auto;padding:9px 14px;gap:5px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-behavior:smooth;}
 .tabs-scroll::-webkit-scrollbar{display:none;}
-.tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
-.tab:hover{border-color:var(--mid);color:var(--mid);}
-.tab.step-tab{background:var(--cream);border-color:var(--cream-border);color:#6B4A10;}
-.tab.step-tab:hover{background:#FDF3CC;border-color:var(--cream-accent);}
-.tab.active{background:var(--dark);color:white;border-color:var(--dark);box-shadow:0 2px 8px rgba(22,78,51,0.25);}
-.tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 4px;}
+.tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all 0.15s;flex-shrink:0;user-select:none;display:flex;align-items:center;gap:4px;}
+.tab:hover{border-color:var(--green);color:var(--green);}
+.tab.step-tab{background:rgba(110,184,49,0.07);border-color:rgba(110,184,49,0.25);color:var(--dark);}
+.tab.step-tab:hover{background:rgba(110,184,49,0.14);border-color:var(--green);}
+.tab.all-tab{background:var(--cream);border-color:var(--cream-border);color:var(--cream-deep);}
+.tab.all-tab:hover{background:#FDF3CC;border-color:var(--cream-dark);}
+.tab.cat-tab{background:var(--green-pale);border-color:var(--border);}
+.tab.active{background:var(--dark)!important;color:white!important;border-color:var(--dark)!important;box-shadow:0 2px 8px rgba(22,78,51,0.28);}
+.tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 3px;border-radius:1px;}
+.tab-edit-input{background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:80px;outline:none;cursor:text;}
 
 /* ── MAIN GRID ── */
-.main{flex:1;overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
+.main{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px;}
 .empty-state{text-align:center;padding:80px 20px;color:var(--ink4);}
 .empty-icon{font-size:40px;margin-bottom:12px;}
 .empty-text{font-size:14px;}
 
 /* ── CARD ── */
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:12px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;position:relative;box-shadow:var(--shadow);}
-.card:hover{border-color:var(--light);background:var(--pale2);box-shadow:0 4px 16px rgba(22,78,51,0.12);}
-.card.sel{border-color:var(--mid);background:var(--pale);border-width:2px;}
-.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;font-size:12px;transition:all 0.15s;z-index:2;}
-.card.sel .card-check{background:var(--mid);border-color:var(--mid);color:white;}
-.card-check::after{content:'✓';display:none;color:white;font-weight:900;font-size:11px;}
-.card.sel .card-check::after{display:block;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:11px;display:flex;gap:11px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;position:relative;box-shadow:var(--shadow);}
+.card:hover{border-color:var(--green-mid);background:var(--green-pale);box-shadow:0 4px 16px rgba(110,184,49,0.14);}
+.card.sel{border-color:var(--green);background:var(--green-light);border-width:2px;}
+.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;transition:all 0.18s;z-index:2;}
+.card.sel .card-check{background:var(--green);border-color:var(--green);color:white;}
+.check-icon{font-size:11px;font-weight:900;color:white;display:none;}
+.card.sel .check-icon{display:block;}
 
 /* IMAGE */
-.card-img{width:90px;height:75px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;position:relative;}
-.card-img img{width:100%;height:100%;object-fit:contain;}
+.card-img{width:86px;height:72px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;position:relative;}
+.card-img img{width:100%;height:100%;object-fit:contain;transition:opacity 0.2s;}
 .img-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink4);}
 .img-placeholder span{font-size:18px;}
 .img-placeholder small{font-size:9px;text-align:center;line-height:1.2;}
 
 /* BODY */
 .card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
-.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
-.card-id{font-size:10px;font-weight:700;background:var(--pale);color:var(--dark);padding:2px 6px;border-radius:4px;}
+.card-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.card-id{font-size:10px;font-weight:700;background:var(--green-light);color:var(--dark);padding:2px 6px;border-radius:4px;}
 .card-cat{font-size:10px;color:var(--ink4);}
-.card-name{font-size:14px;font-weight:900;color:var(--dark);line-height:1.3;margin-bottom:4px;}
-.card-specs{display:flex;gap:8px;flex-wrap:wrap;}
+.card-name{font-size:13px;font-weight:900;color:var(--dark);line-height:1.35;margin-bottom:4px;}
+.card-specs{display:flex;gap:6px;flex-wrap:wrap;}
 .spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
-.spec-r{background:var(--cream);color:#6B4A10;}
-.spec-m{background:var(--pale);color:#1B5E3B;}
-.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
-.sel-chip{font-size:10px;background:var(--pale);color:var(--dark);padding:3px 8px;border-radius:20px;font-weight:700;}
-.qty-ctrl{display:flex;align-items:center;gap:8px;}
+.spec-r{background:var(--cream);color:var(--cream-deep);}
+.spec-m{background:var(--green-pale);color:#1A5C20;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+.sel-chip{font-size:10px;background:var(--green);color:white;padding:3px 8px;border-radius:20px;font-weight:700;}
+.qty-ctrl{display:flex;align-items:center;gap:7px;}
 .qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink3);font-family:inherit;transition:all 0.15s;line-height:1;flex-shrink:0;}
-.qty-btn:hover{border-color:var(--mid);color:var(--mid);background:var(--pale2);}
-.qty-num{font-size:22px;font-weight:900;color:var(--mid);min-width:28px;text-align:center;line-height:1;}
+.qty-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-pale);}
+.qty-num{font-size:21px;font-weight:900;color:var(--green);min-width:26px;text-align:center;line-height:1;}
 
-/* admin inputs */
-.a-name{background:var(--cream2);border:1.5px dashed var(--cream-accent);border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:#6B3A00;width:100%;font-family:inherit;outline:none;}
-.a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:55px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
-.a-id{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:32px;font-family:inherit;outline:none;color:var(--dark);font-weight:700;padding:1px;}
+/* admin card inputs */
+.a-name{background:var(--cream);border:1.5px dashed var(--cream-dark);border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:var(--cream-deep);width:100%;font-family:inherit;outline:none;}
+.a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:52px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
+.admin-del-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--red);border:none;color:white;font-size:11px;cursor:pointer;display:none;place-items:center;z-index:3;font-family:inherit;}
+.isAdmin .card:hover .admin-del-btn{display:grid;}
 
 /* ── FOOTER ── */
-.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:12px 16px;flex-shrink:0;}
-.admin-panel{display:none;margin-bottom:10px;}
-.admin-panel.show{display:flex;gap:6px;flex-wrap:wrap;}
-.footer-main{display:flex;gap:10px;align-items:stretch;}
-.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:14px 16px;border-radius:var(--r2);font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s;box-shadow:0 4px 12px rgba(22,78,51,0.2);}
-.btn-report:hover{background:var(--mid);}
-.cart-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
-.btn-reset{background:var(--cream);color:#6B4A10;border:1.5px solid var(--cream-border);padding:14px 14px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;white-space:nowrap;}
+.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:11px 14px;flex-shrink:0;}
+.admin-panel{display:none;margin-bottom:9px;flex-wrap:wrap;gap:6px;}
+.admin-panel.show{display:flex;}
+.footer-main{display:flex;gap:9px;align-items:stretch;}
+.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:13px 14px;border-radius:var(--r2);font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;box-shadow:0 4px 14px rgba(22,78,51,0.22);}
+.btn-report:hover{background:var(--green);box-shadow:0 6px 18px rgba(110,184,49,0.32);}
+.cart-badge{background:rgba(255,255,255,0.22);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
+.btn-reset{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);padding:13px 13px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;white-space:nowrap;}
 .btn-reset:hover{background:#FDF3CC;}
 
-/* ── MODAL ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;display:none;align-items:flex-end;justify-content:center;padding:0;}
+/* ── PRINT MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
-.modal{background:white;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow-y:auto;animation:slideUp 0.25s ease;}
-@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 16px;display:block;}
-.modal-title{font-size:18px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:4px;}
-.modal-meta{display:flex;justify-content:space-around;font-size:12px;color:var(--ink3);font-weight:500;padding:10px 0 14px;border-bottom:1.5px solid var(--border);background:var(--pale2);border-radius:var(--r3);margin-bottom:4px;}
-.modal-meta span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;}
+.modal{background:white;width:100%;max-width:700px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp 0.26s cubic-bezier(.2,.7,0,1.1);}
+@keyframes slideUp{from{transform:translateY(56px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 14px;display:block;}
+.modal-title{font-size:17px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:8px;}
+.modal-meta{display:flex;justify-content:space-around;font-size:12px;color:var(--ink3);padding:9px 0;background:var(--green-pale);border-radius:var(--r3);margin-bottom:12px;border:1px solid var(--border);}
+.modal-meta span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;}
 .modal-meta strong{font-size:13px;color:var(--ink);font-weight:700;}
-.report-list{margin:12px 0;}
-.report-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #F1F5F9;}
+.report-list{margin:2px 0;}
+.report-item{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:0.5px solid #F1F5F9;}
 .report-item:last-child{border:none;}
-.rpt-num{font-size:12px;font-weight:700;color:var(--ink4);min-width:20px;}
-.rpt-img{width:52px;height:44px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:#F8FAFC;flex-shrink:0;}
+.rpt-num{font-size:11px;font-weight:700;color:var(--ink4);min-width:18px;text-align:center;}
+.rpt-img{width:50px;height:42px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:#F8FAFC;flex-shrink:0;}
 .rpt-info{flex:1;min-width:0;}
 .rpt-name{font-size:13px;font-weight:900;color:var(--ink);}
-.rpt-spec{font-size:11px;color:var(--ink3);margin-top:2px;}
-.rpt-qty{font-size:26px;font-weight:900;color:var(--dark);min-width:36px;text-align:right;}
-.rpt-total{display:flex;justify-content:space-between;padding:12px 0 4px;border-top:1.5px solid var(--border);margin-top:4px;font-size:13px;font-weight:700;color:var(--ink3);}
-.rpt-total strong{color:var(--dark);font-size:14px;}
-.modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+.rpt-spec{font-size:11px;color:var(--ink3);margin-top:1px;}
+.rpt-qty{font-size:22px;font-weight:900;color:var(--dark);min-width:32px;text-align:right;}
+.rpt-total{display:flex;justify-content:space-between;padding:10px 14px;background:var(--dark);color:white;border-radius:var(--r3);margin-top:10px;font-size:13px;font-weight:700;}
+.rpt-total strong{color:var(--green-mid);font-size:15px;}
+.modal-actions{display:flex;flex-direction:column;gap:7px;margin-top:13px;}
 .modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s;}
+.modal-hint{font-size:11px;color:var(--ink4);text-align:center;margin-top:5px;line-height:1.5;}
 
-/* ── PRINT ── */
+/* ── PRINT STYLES ── */
 @media print{
-  .hdr,.ctrl,.tabs-outer,.footer,.overlay,.no-print{display:none!important;}
-  .main{overflow:visible;padding:0;}
-  .card{break-inside:avoid;}
+  html,body{height:auto!important;overflow:visible!important;}
+  .hdr,.ctrl,.tabs-outer,.footer,.overlay .modal-actions,.overlay .modal-handle,.overlay .modal-hint,.no-print{display:none!important;}
+  .overlay{position:static!important;display:block!important;background:none!important;padding:0!important;}
+  .modal{max-height:none!important;overflow:visible!important;border-radius:0!important;animation:none!important;padding:0!important;max-width:100%!important;}
+  .report-item{break-inside:avoid;page-break-inside:avoid;}
+  .rpt-total{background:var(--dark)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .modal-meta{background:var(--green-pale)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @page{margin:12mm 14mm;}
 }
 
 /* ── SCROLLBAR ── */
-.main::-webkit-scrollbar{width:4px;}
-.main::-webkit-scrollbar-track{background:transparent;}
+.main::-webkit-scrollbar{width:3px;}
 .main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.modal::-webkit-scrollbar{width:3px;}
+.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 </style>
 </head>
 <body>
@@ -152,8 +175,8 @@ select{flex:1;}
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-brand">
-    <div class="hdr-logo">🦺</div>
-    <div>
+    <div class="hdr-logo" id="logoEl">🦺</div>
+    <div class="hdr-text">
       <div class="hdr-title" id="titleEl">工安標語採購系統</div>
       <div class="hdr-ver">鈺通營造 Construction Safety</div>
     </div>
@@ -167,7 +190,7 @@ select{flex:1;}
     <select id="siteSelect" onchange="save()"></select>
     <button class="btn btn-green" onclick="addSite()">＋</button>
   </div>
-  <input type="text" id="staffInput" placeholder="填單人員" style="width:120px;" oninput="save()">
+  <input type="text" id="staffInput" placeholder="填單人員" style="width:110px;" oninput="save()">
 </div>
 
 <!-- TABS -->
@@ -176,7 +199,7 @@ select{flex:1;}
 </div>
 
 <!-- GRID -->
-<div class="main">
+<div class="main" id="mainArea">
   <div class="grid" id="gridEl"></div>
 </div>
 
@@ -184,10 +207,13 @@ select{flex:1;}
 <div class="footer no-print">
   <div class="admin-panel" id="adminPanel">
     <button class="btn btn-blue" onclick="addNewSign()">➕ 新增標語</button>
+    <button class="btn btn-blue" onclick="addStep()">➕ 新增工序</button>
+    <button class="btn btn-blue" onclick="addCat()">➕ 新增類別</button>
     <button class="btn btn-blue" onclick="exportData()">📤 備份</button>
     <button class="btn btn-purple" onclick="importData()">📥 還原</button>
     <button class="btn btn-red" onclick="deleteSite()">🗑 刪除工地</button>
-    <button class="btn btn-blue" onclick="configImgBase()">🖼 設定圖片路徑</button>
+    <button class="btn btn-amber" onclick="configImgBase()">🖼 圖片路徑</button>
+    <button class="btn btn-amber" onclick="changeLogo()">🏷 更換圖示</button>
   </div>
   <div class="footer-main">
     <button class="btn-report" onclick="buildReport()">
@@ -198,108 +224,101 @@ select{flex:1;}
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- REPORT MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal" id="modalBox">
     <span class="modal-handle"></span>
-    <div class="modal-title" id="rptTitle">採購單</div>
+    <div class="modal-title" id="rptTitle"></div>
     <div class="modal-meta" id="rptMeta"></div>
     <div class="report-list" id="rptList"></div>
     <div class="rpt-total" id="rptTotal"></div>
-    <div class="modal-actions">
-      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="window.print()">🖨 列印採購單</button>
-      <button class="modal-btn" style="background:var(--cream-accent);color:white;" onclick="captureReport()">📸 儲存為圖片</button>
-      <button class="modal-btn" style="background:var(--pale);color:var(--dark);" onclick="closeModal()">← 返回編輯</button>
+    <div class="modal-actions no-print">
+      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="printReport()">🖨 列印 ／ 儲存 PDF</button>
+      <button class="modal-btn" style="background:var(--green);color:white;" onclick="saveImg()">📸 儲存為圖片（手機長按）</button>
+      <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);" onclick="closeModal()">← 返回編輯</button>
     </div>
+    <div class="modal-hint no-print" id="modalHint"></div>
   </div>
 </div>
 
+<!-- hidden canvas for image export -->
+<canvas id="imgCanvas" style="display:none;"></canvas>
+
 <script>
-// ─────────────────────────────────────────────
-//  DATA
-// ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════
+   DEFAULTS
+═══════════════════════════════════════════ */
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 
+// DB: no hardcoded id — auto-computed from cat + position
 const DEF_DB=[
-  // J 圖資與指引
-  {id:'J01',cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
-  {id:'J02',cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
-  {id:'J03',cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
-  // K 區域單位標示
-  {id:'K01',cat:'K',n:'守衛室',s:'30x10',m:'PVC'},
-  {id:'K02',cat:'K',n:'統包商辦公室',s:'30x10',m:'PVC'},
-  {id:'K03',cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
-  {id:'K04',cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},
-  {id:'K05',cat:'K',n:'會議室',s:'30x10',m:'PVC'},
-  {id:'K06',cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
-  {id:'K07',cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},
-  {id:'K08',cat:'K',n:'休息區',s:'30x10',m:'PVC'},
-  {id:'K09',cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
-  {id:'K10',cat:'K',n:'急救箱',s:'20x10',m:'PVC'},
-  {id:'K11',cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},
-  {id:'K12',cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
-  {id:'K13',cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},
-  {id:'K14',cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
-  // A 生活設施
-  {id:'A01',cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},
-  {id:'A02',cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},
-  {id:'A03',cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
-  // B 安全防護
-  {id:'B01',cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},
-  {id:'B02',cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
-  {id:'B03',cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},
-  {id:'B04',cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},
-  {id:'B05',cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},
-  {id:'B06',cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},
-  {id:'B07',cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},
-  {id:'B08',cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
-  // C 危險警示
-  {id:'C01',cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},
-  {id:'C02',cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},
-  {id:'C03',cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},
-  {id:'C04',cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},
-  {id:'C05',cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},
-  {id:'C06',cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},
-  {id:'C07',cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},
-  {id:'C08',cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
-  // D 禁止事項
-  {id:'D01',cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},
-  {id:'D02',cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},
-  {id:'D03',cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
-  // E 交通與動線
-  {id:'E01',cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},
-  {id:'E02',cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
-  // F 設備設施位置
-  {id:'F01',cat:'F',n:'滅火器',s:'20x10',m:'PVC'},
-  {id:'F02',cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},
-  {id:'F03',cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},
-  {id:'F04',cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},
-  {id:'F05',cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
-  // G 作業規範
-  {id:'G01',cat:'G',n:'工安標語6S',s:'60x40',m:'中空板'},
-  // H 宣導標語
-  {id:'H01',cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},
-  {id:'H02',cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},
-  {id:'H03',cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},
-  {id:'H04',cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},
-  {id:'H05',cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},
-  {id:'H06',cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
-  // I 物料環境管理
-  {id:'I01',cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},
-  {id:'I02',cat:'I',n:'資源回收',s:'30x20',m:'PVC'},
-  {id:'I03',cat:'I',n:'廚餘',s:'30x20',m:'PVC'},
-  {id:'I04',cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},
-  {id:'I05',cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},
-  {id:'I06',cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},
-  {id:'I07',cat:'I',n:'紙容器',s:'30x20',m:'PVC'},
-  {id:'I08',cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},
-  {id:'I09',cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},
-  {id:'I10',cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},
-  {id:'I11',cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
+  {cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
+  {cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
+  {cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
+  {cat:'K',n:'守衛室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'統包商辦公室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'會議室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
+  {cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'休息區',s:'30x10',m:'PVC'},
+  {cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
+  {cat:'K',n:'急救箱',s:'20x10',m:'PVC'},
+  {cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},
+  {cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
+  {cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},
+  {cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
+  {cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},
+  {cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},
+  {cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
+  {cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},
+  {cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
+  {cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},
+  {cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},
+  {cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},
+  {cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},
+  {cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},
+  {cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
+  {cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},
+  {cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},
+  {cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},
+  {cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},
+  {cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},
+  {cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},
+  {cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},
+  {cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
+  {cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},
+  {cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},
+  {cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
+  {cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},
+  {cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
+  {cat:'F',n:'滅火器',s:'20x10',m:'PVC'},
+  {cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},
+  {cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},
+  {cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},
+  {cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
+  {cat:'G',n:'工安標語6S',s:'60x40',m:'中空板'},
+  {cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},
+  {cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},
+  {cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},
+  {cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},
+  {cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},
+  {cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
+  {cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},
+  {cat:'I',n:'資源回收',s:'30x20',m:'PVC'},
+  {cat:'I',n:'廚餘',s:'30x20',m:'PVC'},
+  {cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},
+  {cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},
+  {cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},
+  {cat:'I',n:'紙容器',s:'30x20',m:'PVC'},
+  {cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},
+  {cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},
+  {cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},
+  {cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
 ];
 
-const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示',ALL:'📋 全部'};
-const CAT_KEYS=['A','B','C','D','E','F','G','H','I','J','K'];
+const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示'};
 
 const DEF_STEPS={
   S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01','E01','E02','D02']},
@@ -310,61 +329,169 @@ const DEF_STEPS={
   S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']},
 };
 
-// ─────────────────────────────────────────────
-//  STATE
-// ─────────────────────────────────────────────
-let db,cart,sites,config,stepData,cats,imgBase,isAdmin=false,currentTab='S1';
+/* ═══════════════════════════════════════════
+   AUTO-ID
+   IDs are computed on the fly; never stored.
+   Cart uses "cat::name" as stable key.
+═══════════════════════════════════════════ */
+function computeIds(arr){
+  const cnt={};
+  return arr.map(item=>{
+    const c=item.cat||'X';
+    cnt[c]=(cnt[c]||0)+1;
+    return {...item, id:c+String(cnt[c]).padStart(2,'0')};
+  });
+}
+function getDbWithIds(){return computeIds(db);}
+function cartKey(item){return item.cat+'::'+item.n;}
+function cartGet(item){return cart[cartKey(item)]||{sel:false,qty:1};}
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let db,cart,sites,config,stepData,cats,catOrder,imgBase,logoSrc,isAdmin=false,currentTab='S1';
 
 function init(){
-  db=JSON.parse(localStorage.getItem('ys2_db'))||DEF_DB;
-  cart=JSON.parse(localStorage.getItem('ys2_cart'))||{};
-  sites=JSON.parse(localStorage.getItem('ys2_sites'))||DEF_SITES;
-  config=JSON.parse(localStorage.getItem('ys2_config'))||{title:'工安標語採購系統'};
-  stepData=JSON.parse(localStorage.getItem('ys2_steps'))||DEF_STEPS;
-  cats=JSON.parse(localStorage.getItem('ys2_cats'))||DEF_CATS;
-  imgBase=localStorage.getItem('ys2_imgBase')||'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
-  document.getElementById('staffInput').value=localStorage.getItem('ys2_staff')||'';
-  renderTitle();renderSites();renderTabs();render();updateBadge();
+  db      = JSON.parse(localStorage.getItem('ys4_db'))   || DEF_DB;
+  // ★ cart is always cleared on page load
+  cart    = {};
+  sites   = JSON.parse(localStorage.getItem('ys4_sites')) || DEF_SITES;
+  config  = JSON.parse(localStorage.getItem('ys4_cfg'))   || {title:'工安標語採購系統'};
+  stepData= JSON.parse(localStorage.getItem('ys4_steps')) || DEF_STEPS;
+  cats    = JSON.parse(localStorage.getItem('ys4_cats'))  || DEF_CATS;
+  catOrder= JSON.parse(localStorage.getItem('ys4_catOrd'))|| Object.keys(DEF_CATS);
+  imgBase = localStorage.getItem('ys4_imgBase')           || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  logoSrc = localStorage.getItem('ys4_logo')              || '';
+  document.getElementById('staffInput').value = localStorage.getItem('ys4_staff')||'';
+  renderLogo();
+  renderTitle();
+  renderSites();
+  renderTabs();
+  render();
+  updateBadge();
 }
 
-// ─────────────────────────────────────────────
-//  RENDER
-// ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════
+   LOGO
+═══════════════════════════════════════════ */
+function renderLogo(){
+  const el=document.getElementById('logoEl');
+  el.className='hdr-logo'+(isAdmin?' admin-editable':'');
+  if(logoSrc){
+    el.innerHTML=`<img src="${logoSrc}" alt="logo">`;
+  } else {
+    el.innerHTML='🦺';
+  }
+  if(isAdmin){
+    el.onclick=changeLogo;
+  } else {
+    el.onclick=null;
+  }
+}
+function changeLogo(){
+  const input=document.createElement('input');
+  input.type='file';input.accept='image/*';
+  input.onchange=e=>{
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      logoSrc=ev.target.result;
+      localStorage.setItem('ys4_logo',logoSrc);
+      renderLogo();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+/* ═══════════════════════════════════════════
+   RENDER TITLE
+═══════════════════════════════════════════ */
 function renderTitle(){
   const el=document.getElementById('titleEl');
   el.innerHTML=isAdmin
-    ?`<input style="background:rgba(255,255,255,0.15);border:none;border-bottom:1.5px solid rgba(255,255,255,0.4);color:white;font-size:16px;font-weight:900;font-family:inherit;outline:none;width:200px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">`
+    ?`<input style="background:rgba(255,255,255,0.15);border:none;border-bottom:1.5px solid rgba(255,255,255,0.4);color:white;font-size:15px;font-weight:900;font-family:inherit;outline:none;width:190px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">`
     :config.title;
 }
 
+/* ═══════════════════════════════════════════
+   RENDER SITES
+═══════════════════════════════════════════ */
 function renderSites(){
   const s=document.getElementById('siteSelect');
   s.innerHTML=sites.map(x=>`<option value="${x}">${x}</option>`).join('');
-  s.value=localStorage.getItem('ys2_site')||sites[0];
+  s.value=localStorage.getItem('ys4_site')||sites[0];
 }
 
+/* ═══════════════════════════════════════════
+   RENDER TABS
+   Order: Step tabs | sep | 全部 | sep | A~K cats
+═══════════════════════════════════════════ */
 function renderTabs(){
   let h='';
+
+  // Step tabs
   Object.keys(stepData).sort().forEach(k=>{
     const t=stepData[k].t;
-    const isActive=currentTab===k;
-    h+=`<div class="tab step-tab${isActive?' active':''}" onclick="setTab('${k}')">${isAdmin?`<input style="background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:90px;outline:none;" value="${t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()">`:t}</div>`;
+    const active=currentTab===k?' active':'';
+    if(isAdmin){
+      h+=`<div class="tab step-tab${active}" onclick="setTab('${k}')">
+        <input class="tab-edit-input" value="${t}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()" title="點此編輯工序名稱">
+        <span style="font-size:10px;color:rgba(255,255,255,0.5);cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();deleteStep('${k}')">✕</span>
+      </div>`;
+    } else {
+      h+=`<div class="tab step-tab${active}" onclick="setTab('${k}')">${t}</div>`;
+    }
   });
+
   h+=`<span class="tab-sep"></span>`;
-  CAT_KEYS.forEach(k=>{
-    h+=`<div class="tab${currentTab===k?' active':''}" onclick="setTab('${k}')">${cats[k]||k}</div>`;
+
+  // 全部
+  h+=`<div class="tab all-tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">📋 全部</div>`;
+
+  h+=`<span class="tab-sep"></span>`;
+
+  // Category tabs
+  catOrder.forEach(k=>{
+    if(!cats[k])return;
+    const active=currentTab===k?' active':'';
+    if(isAdmin){
+      h+=`<div class="tab cat-tab${active}" onclick="setTab('${k}')">
+        <input class="tab-edit-input" style="width:70px;" value="${cats[k]}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()" title="點此編輯分類名稱">
+        <span style="font-size:10px;color:rgba(0,0,0,0.35);cursor:pointer;margin-left:2px;" onclick="event.stopPropagation();deleteCat('${k}')">✕</span>
+      </div>`;
+    } else {
+      h+=`<div class="tab cat-tab${active}" onclick="setTab('${k}')">${cats[k]}</div>`;
+    }
   });
-  h+=`<div class="tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">${cats['ALL']}</div>`;
+
   document.getElementById('tabsEl').innerHTML=h;
 }
 
-function setTab(t){currentTab=t;renderTabs();render();}
+function setTab(t){
+  currentTab=t;
+  renderTabs();
+  render();
+  setTimeout(()=>{
+    const active=document.querySelector('.tabs-scroll .tab.active');
+    if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  },60);
+}
 
+/* ═══════════════════════════════════════════
+   RENDER CARDS
+═══════════════════════════════════════════ */
 function render(){
+  const dbIds=getDbWithIds();
   let list;
-  if(stepData[currentTab]) list=db.filter(x=>stepData[currentTab].items.includes(x.id));
-  else if(currentTab==='ALL') list=[...db];
-  else list=db.filter(x=>x.cat===currentTab);
+  if(stepData[currentTab]){
+    const ids=stepData[currentTab].items;
+    list=dbIds.filter(x=>ids.includes(x.id));
+  } else if(currentTab==='ALL'){
+    list=[...dbIds];
+  } else {
+    list=dbIds.filter(x=>x.cat===currentTab);
+  }
 
   const grid=document.getElementById('gridEl');
   if(!list.length){
@@ -373,30 +500,36 @@ function render(){
   }
   grid.innerHTML='';
   list.forEach(item=>{
-    const st=cart[item.id]||{sel:false,qty:1};
+    const st=cartGet(item);
     const d=document.createElement('div');
     d.className='card'+(st.sel?' sel':'');
     const imgUrl=imgBase+item.id+'.jpg';
-    const checkHtml=`<div class="card-check">${st.sel?'✓':''}</div>`;
+
     const nameHtml=isAdmin
-      ?`<input class="a-name" value="${item.n}" oninput="updateField('${item.id}','n',this.value)">`
+      ?`<input class="a-name" value="${esc(item.n)}" oninput="updateNameInDb('${item.cat}','${escQ(item.n)}',this.value)">`
       :`<div class="card-name">${item.n}</div>`;
-    const specRHtml=isAdmin?`<input class="a-spec spec-tag spec-r" value="${item.s}" oninput="updateField('${item.id}','s',this.value)">`:`<span class="spec-tag spec-r">${item.s}</span>`;
-    const specMHtml=isAdmin?`<input class="a-spec spec-tag spec-m" value="${item.m}" oninput="updateField('${item.id}','m',this.value)">`:`<span class="spec-tag spec-m">${item.m}</span>`;
-    const idHtml=isAdmin?`<input class="a-id" value="${item.id}" onchange="updateID('${item.id}',this.value)">`:`${item.id}`;
+    const specRHtml=isAdmin
+      ?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateFieldInDb('${item.cat}','${escQ(item.n)}','s',this.value)">`
+      :`<span class="spec-tag spec-r">${item.s}</span>`;
+    const specMHtml=isAdmin
+      ?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateFieldInDb('${item.cat}','${escQ(item.n)}','m',this.value)">`
+      :`<span class="spec-tag spec-m">${item.m}</span>`;
+
+    const delBtn=isAdmin
+      ?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`
+      :'';
+
     d.innerHTML=`
-      ${checkHtml}
+      ${delBtn}
+      <div class="card-check"><span class="check-icon">✓</span></div>
       <div class="card-img">
-        <img src="${imgUrl}" alt="${item.n}"
-          onload="this.style.opacity=1"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-          style="opacity:0;transition:opacity 0.2s">
+        <img src="${imgUrl}" alt="${item.n}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity 0.2s">
         <div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖片</small></div>
       </div>
       <div class="card-body">
         <div>
           <div class="card-meta">
-            <span class="card-id">${idHtml}</span>
+            <span class="card-id">${item.id}</span>
             <span class="card-cat">${cats[item.cat]||item.cat}</span>
           </div>
           ${nameHtml}
@@ -405,49 +538,87 @@ function render(){
         <div class="card-footer">
           ${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
           <div class="qty-ctrl" onclick="event.stopPropagation()">
-            <button class="qty-btn" onclick="adjQty('${item.id}',-1)">−</button>
+            <button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',-1)">−</button>
             <span class="qty-num">${st.qty||1}</span>
-            <button class="qty-btn" onclick="adjQty('${item.id}',1)">＋</button>
+            <button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',1)">＋</button>
           </div>
         </div>
       </div>`;
-    d.addEventListener('click',e=>{if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON')toggleItem(item.id);});
+    d.addEventListener('click',e=>{
+      if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON')toggleItem(item.cat,item.n);
+    });
     grid.appendChild(d);
   });
+
+  // show del buttons on hover if admin
+  if(isAdmin){
+    document.getElementById('mainArea').classList.add('isAdmin');
+  } else {
+    document.getElementById('mainArea').classList.remove('isAdmin');
+  }
 }
 
-// ─────────────────────────────────────────────
-//  ACTIONS
-// ─────────────────────────────────────────────
-function toggleItem(id){
-  if(!cart[id])cart[id]={sel:false,qty:1};
-  cart[id].sel=!cart[id].sel;
-  save();render();updateBadge();
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+function escQ(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+/* ═══════════════════════════════════════════
+   CART / TOGGLE
+═══════════════════════════════════════════ */
+function toggleItem(cat,n){
+  const item=db.find(x=>x.cat===cat&&x.n===n);if(!item)return;
+  const k=cartKey(item);
+  if(!cart[k])cart[k]={sel:false,qty:1};
+  cart[k].sel=!cart[k].sel;
+  render();updateBadge();
 }
-function adjQty(id,d){
+function adjQty(cat,n,delta){
   event.stopPropagation();
-  if(!cart[id])cart[id]={sel:true,qty:1};
-  cart[id].qty=Math.max(1,(cart[id].qty||1)+d);
-  if(d>0&&!cart[id].sel)cart[id].sel=true;
-  save();render();updateBadge();
-}
-function updateField(id,f,v){const i=db.find(x=>x.id===id);if(i){i[f]=v;save();}}
-function updateID(old,nid){
-  nid=nid.toUpperCase().trim();
-  if(!nid||nid===old)return;
-  if(db.some(x=>x.id===nid))return alert('此 ID 已存在！');
-  const item=db.find(x=>x.id===old);if(!item)return;
-  const newCat=nid[0];
-  item.id=nid;item.cat=newCat;
-  Object.keys(stepData).forEach(k=>{stepData[k].items=stepData[k].items.map(x=>x===old?nid:x);});
-  if(cart[old]){cart[nid]=cart[old];delete cart[old];}
-  save();render();
+  const item=db.find(x=>x.cat===cat&&x.n===n);if(!item)return;
+  const k=cartKey(item);
+  if(!cart[k])cart[k]={sel:true,qty:1};
+  cart[k].qty=Math.max(1,(cart[k].qty||1)+delta);
+  if(delta>0&&!cart[k].sel)cart[k].sel=true;
+  render();updateBadge();
 }
 function updateBadge(){
-  const n=db.filter(x=>cart[x.id]?.sel).length;
-  document.getElementById('cartBadge').textContent=n;
+  const dbIds=getDbWithIds();
+  document.getElementById('cartBadge').textContent=dbIds.filter(x=>cartGet(x).sel).length;
 }
-function addSite(){const n=prompt('新增工地名稱：');if(n&&n.trim()){sites.push(n.trim());renderSites();document.getElementById('siteSelect').value=n.trim();save();}}
+function resetCart(){if(confirm('確認清除所有選取？')){cart={};render();updateBadge();}}
+
+/* ═══════════════════════════════════════════
+   DB MUTATIONS (admin)
+═══════════════════════════════════════════ */
+function updateNameInDb(cat,oldN,newN){
+  const item=db.find(x=>x.cat===cat&&x.n===oldN);
+  if(!item)return;
+  const oldKey=cartKey(item);
+  const saved=cart[oldKey];
+  delete cart[oldKey];
+  item.n=newN;
+  if(saved!==undefined)cart[cartKey(item)]=saved;
+  save();
+}
+function updateFieldInDb(cat,n,field,val){
+  const item=db.find(x=>x.cat===cat&&x.n===n);
+  if(item){item[field]=val;save();}
+}
+function deleteItem(cat,n){
+  if(!confirm(`確定刪除「${n}」？刪除後同類別後續項目將自動重新編號。`))return;
+  const k=db.findIndex(x=>x.cat===cat&&x.n===n);
+  if(k<0)return;
+  db.splice(k,1);
+  delete cart[cat+'::'+n];
+  save();render();updateBadge();
+}
+
+/* ═══════════════════════════════════════════
+   SITE MANAGEMENT
+═══════════════════════════════════════════ */
+function addSite(){
+  const nm=prompt('新增工地名稱：');
+  if(nm&&nm.trim()){sites.push(nm.trim());renderSites();document.getElementById('siteSelect').value=nm.trim();save();}
+}
 function deleteSite(){
   const v=document.getElementById('siteSelect').value;
   if(!confirm(`確定刪除「${v}」？`))return;
@@ -455,31 +626,65 @@ function deleteSite(){
   if(!sites.length)sites=['新工地'];
   renderSites();save();
 }
+
+/* ═══════════════════════════════════════════
+   ADD SIGN / STEP / CAT
+═══════════════════════════════════════════ */
 function addNewSign(){
-  const id=prompt('輸入新標語 ID（如 B09）：');
-  if(!id)return;
-  const uid=id.toUpperCase().trim();
-  if(db.some(x=>x.id===uid))return alert('ID已存在');
-  const cat=uid[0];
-  const n=prompt('標語名稱：')||'新標語';
-  db.push({id:uid,cat,n,s:'60x40',m:'中空板'});
-  save();render();
+  const catInput=prompt('類別代碼（現有：'+catOrder.join('、')+'）：');
+  if(!catInput)return;
+  const cat=catInput.toUpperCase().trim();
+  if(!cats[cat]&&!confirm(`類別「${cat}」不存在，是否自動建立？`))return;
+  if(!cats[cat]){cats[cat]=cat+'. 新分類';catOrder.push(cat);}
+  const n=prompt('標語名稱：');if(!n||!n.trim())return;
+  db.push({cat,n:n.trim(),s:'60x40',m:'中空板'});
+  save();renderTabs();render();setTab(cat);
 }
-function configImgBase(){
-  const v=prompt('圖片路徑 Base URL（請以 / 結尾）：',imgBase);
-  if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem('ys2_imgBase',imgBase);render();}
+function addStep(){
+  const key='S'+(Object.keys(stepData).length+1);
+  const t=prompt('工序標籤名稱（含 emoji）：',`🔧 Step${Object.keys(stepData).length+1} 新工序`);
+  if(!t)return;
+  stepData[key]={t,items:[]};
+  save();renderTabs();setTab(key);
+}
+function deleteStep(key){
+  if(!confirm(`確定刪除工序「${stepData[key].t}」？`))return;
+  delete stepData[key];
+  save();
+  if(currentTab===key)currentTab='ALL';
+  renderTabs();render();
+}
+function addCat(){
+  const key=prompt('新類別代碼（單一英文字母，如 L）：');
+  if(!key)return;
+  const k=key.toUpperCase().trim();
+  if(cats[k])return alert('此類別已存在');
+  const label=prompt('類別顯示名稱：',k+'. 新類別');
+  if(!label)return;
+  cats[k]=label;catOrder.push(k);
+  save();renderTabs();setTab(k);
+}
+function deleteCat(k){
+  if(db.some(x=>x.cat===k)){alert('此類別尚有標語，請先移除所有標語後再刪除類別。');return;}
+  if(!confirm(`確定刪除類別「${cats[k]}」？`))return;
+  delete cats[k];
+  catOrder=catOrder.filter(c=>c!==k);
+  if(currentTab===k)currentTab='ALL';
+  save();renderTabs();render();
 }
 
-// ─────────────────────────────────────────────
-//  REPORT
-// ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════
+   REPORT
+═══════════════════════════════════════════ */
 function buildReport(){
-  const sel=db.filter(i=>cart[i.id]?.sel);
+  const dbIds=getDbWithIds();
+  const sel=dbIds.filter(i=>cartGet(i).sel);
   if(!sel.length)return alert('請先點選標語項目');
+
   const site=document.getElementById('siteSelect').value;
   const staff=document.getElementById('staffInput').value||'（未填）';
   const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const totalQty=sel.reduce((a,i)=>a+(cart[i.id].qty||1),0);
+  const totalQty=sel.reduce((a,i)=>a+(cartGet(i).qty||1),0);
 
   document.getElementById('rptTitle').textContent=config.title+' 採購單';
   document.getElementById('rptMeta').innerHTML=
@@ -488,40 +693,121 @@ function buildReport(){
      <span><strong>${now}</strong>填單日期</span>`;
 
   let rows='';
-  sel.forEach((i,idx)=>{
+  sel.forEach((item,idx)=>{
+    const qty=cartGet(item).qty||1;
     rows+=`<div class="report-item">
       <span class="rpt-num">${idx+1}</span>
-      <img class="rpt-img" src="${imgBase+i.id+'.jpg'}" onerror="this.style.opacity=0.2" alt="">
+      <img class="rpt-img" src="${imgBase+item.id+'.jpg'}" onerror="this.style.opacity=0.15" alt="" crossorigin="anonymous">
       <div class="rpt-info">
-        <div class="rpt-name">[${i.id}] ${i.n}</div>
-        <div class="rpt-spec">規格：${i.s}　材質：${i.m}</div>
+        <div class="rpt-name">[${item.id}] ${item.n}</div>
+        <div class="rpt-spec">規格：${item.s}　材質：${item.m}</div>
       </div>
-      <div class="rpt-qty">${cart[i.id].qty||1}</div>
+      <div class="rpt-qty">${qty}</div>
     </div>`;
   });
+
   document.getElementById('rptList').innerHTML=rows;
-  document.getElementById('rptTotal').innerHTML=`<span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span>`;
+  document.getElementById('rptTotal').innerHTML=
+    `<span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span>`;
+
+  const isMobile=/Mobi|Android|iPhone/i.test(navigator.userAgent);
+  document.getElementById('modalHint').textContent=isMobile
+    ? '手機：點擊「儲存為圖片」後長按圖片即可儲存至相簿'
+    : '電腦：點擊「列印／儲存 PDF」，在列印視窗選擇「另存為 PDF」';
+
   document.getElementById('overlay').classList.add('show');
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
-function captureReport(){
-  if(typeof html2canvas==='undefined')return alert('截圖功能需要網路連線');
-  html2canvas(document.getElementById('modalBox'),{useCORS:true,scale:2}).then(c=>{
-    const a=document.createElement('a');a.href=c.toDataURL('image/png');
-    a.download=`採購單_${document.getElementById('siteSelect').value}.png`;a.click();
+
+/* ── Print (desktop → PDF) ── */
+function printReport(){window.print();}
+
+/* ── Save as image ──
+   Renders the report content onto a canvas without html2canvas:
+   we open a new window with the report HTML, let the user long-press / screenshot.
+   On desktop it auto-triggers print. On mobile opens a full-screen printable page.
+*/
+function saveImg(){
+  const dbIds=getDbWithIds();
+  const sel=dbIds.filter(i=>cartGet(i).sel);
+  const site=document.getElementById('siteSelect').value;
+  const staff=document.getElementById('staffInput').value||'（未填）';
+  const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  const totalQty=sel.reduce((a,i)=>a+(cartGet(i).qty||1),0);
+
+  let rows='';
+  sel.forEach((item,idx)=>{
+    const qty=cartGet(item).qty||1;
+    rows+=`<tr>
+      <td>${idx+1}</td>
+      <td style="font-weight:700;color:#164E33;">${item.id}</td>
+      <td style="font-weight:900;">${item.n}</td>
+      <td>${item.s}</td>
+      <td>${item.m}</td>
+      <td style="font-weight:900;font-size:17px;color:#164E33;text-align:right;">${qty}</td>
+    </tr>`;
   });
+
+  const html=`<!DOCTYPE html><html lang="zh-TW"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>採購單</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',sans-serif;}
+body{background:#fff;padding:20px;max-width:680px;margin:0 auto;}
+.hdr{background:#164E33;color:white;padding:14px 18px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.hdr-t{font-size:17px;font-weight:900;}
+.hdr-d{font-size:12px;opacity:0.7;}
+.meta{display:flex;gap:0;background:#F0FAE6;border:1px solid #C5DF98;border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.meta-item{flex:1;padding:9px 12px;border-right:1px solid #C5DF98;}
+.meta-item:last-child{border-right:none;}
+.meta-label{font-size:10px;color:#64748B;margin-bottom:2px;}
+.meta-value{font-size:13px;font-weight:700;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{background:#F0FAE6;}
+th{padding:8px 7px;font-weight:700;color:#164E33;text-align:left;border-bottom:2px solid #C5DF98;}
+td{padding:8px 7px;border-bottom:1px solid #F1F5F9;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.foot{display:flex;justify-content:space-between;background:#164E33;color:white;padding:11px 16px;border-radius:8px;margin-top:14px;font-size:13px;font-weight:700;}
+.foot strong{color:#8DD448;font-size:15px;}
+.hint{text-align:center;color:#94A3B8;font-size:12px;margin-top:18px;}
+@media print{.hint{display:none!important;}@page{margin:12mm;}}
+</style>
+</head><body>
+<div class="hdr"><div class="hdr-t">🦺 ${config.title} 採購單</div><div class="hdr-d">${now}</div></div>
+<div class="meta">
+  <div class="meta-item"><div class="meta-label">工地名稱</div><div class="meta-value">${site}</div></div>
+  <div class="meta-item"><div class="meta-label">負責人員</div><div class="meta-value">${staff}</div></div>
+  <div class="meta-item"><div class="meta-label">填單日期</div><div class="meta-value">${now}</div></div>
+</div>
+<table>
+<thead><tr><th>#</th><th>編號</th><th>名稱</th><th>規格</th><th>材質</th><th style="text-align:right;">數量</th></tr></thead>
+<tbody>${rows}</tbody>
+</table>
+<div class="foot"><span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span></div>
+<p class="hint">手機：長按此頁面截圖儲存 ／ 電腦：Ctrl+P 列印或另存 PDF</p>
+</body></html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  // open in new tab — user can long-press screenshot on mobile, or print on desktop
+  window.open(url,'_blank');
 }
 
-// ─────────────────────────────────────────────
-//  ADMIN
-// ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════
+   ADMIN TOGGLE
+═══════════════════════════════════════════ */
 function toggleAdmin(){
   if(!isAdmin){
-    if(prompt('請輸入管理員密碼：')==='751113'){
+    const pw=prompt('請輸入管理員密碼：');
+    if(pw==='751113'){
       isAdmin=true;
       document.getElementById('adminBtn').textContent='🔓 管理中';
       document.getElementById('adminBtn').classList.add('active');
       document.getElementById('adminPanel').classList.add('show');
+    } else if(pw!==null){
+      alert('密碼錯誤');
     }
   } else {
     isAdmin=false;
@@ -529,25 +815,35 @@ function toggleAdmin(){
     document.getElementById('adminBtn').classList.remove('active');
     document.getElementById('adminPanel').classList.remove('show');
   }
-  renderTitle();renderTabs();render();
+  renderLogo();
+  renderTitle();
+  renderTabs();
+  render();
 }
 
-// ─────────────────────────────────────────────
-//  DATA PERSISTENCE
-// ─────────────────────────────────────────────
-function resetCart(){if(confirm('確認清除所有選取？')){cart={};save();render();updateBadge();}}
+/* ═══════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════ */
+function configImgBase(){
+  const v=prompt('圖片路徑 Base URL（請以 / 結尾）：',imgBase);
+  if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem('ys4_imgBase',imgBase);render();}
+}
+
+/* ═══════════════════════════════════════════
+   PERSISTENCE
+═══════════════════════════════════════════ */
 function save(){
-  localStorage.setItem('ys2_db',JSON.stringify(db));
-  localStorage.setItem('ys2_cart',JSON.stringify(cart));
-  localStorage.setItem('ys2_staff',document.getElementById('staffInput').value);
-  localStorage.setItem('ys2_site',document.getElementById('siteSelect').value);
-  localStorage.setItem('ys2_config',JSON.stringify(config));
-  localStorage.setItem('ys2_steps',JSON.stringify(stepData));
-  localStorage.setItem('ys2_cats',JSON.stringify(cats));
-  localStorage.setItem('ys2_sites',JSON.stringify(sites));
+  localStorage.setItem('ys4_db',JSON.stringify(db));
+  localStorage.setItem('ys4_staff',document.getElementById('staffInput').value);
+  localStorage.setItem('ys4_site',document.getElementById('siteSelect').value);
+  localStorage.setItem('ys4_cfg',JSON.stringify(config));
+  localStorage.setItem('ys4_steps',JSON.stringify(stepData));
+  localStorage.setItem('ys4_cats',JSON.stringify(cats));
+  localStorage.setItem('ys4_catOrd',JSON.stringify(catOrder));
+  localStorage.setItem('ys4_sites',JSON.stringify(sites));
 }
 function exportData(){
-  const d={db,sites,config,stepData,cats,imgBase};
+  const d={db,sites,config,stepData,cats,catOrder,imgBase,logoSrc};
   const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
   a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();
@@ -557,14 +853,26 @@ function importData(){
   if(!j)return;
   try{
     const d=JSON.parse(j);
-    if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;
-    if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.imgBase)imgBase=d.imgBase;
+    if(d.db)db=d.db;
+    if(d.sites)sites=d.sites;
+    if(d.config)config=d.config;
+    if(d.stepData)stepData=d.stepData;
+    if(d.cats)cats=d.cats;
+    if(d.catOrder)catOrder=d.catOrder;
+    if(d.imgBase)imgBase=d.imgBase;
+    if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem('ys4_logo',logoSrc);}
     save();location.reload();
   }catch(e){alert('格式錯誤，請確認備份檔案');}
 }
 
-document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+/* ═══════════════════════════════════════════
+   OVERLAY CLOSE
+═══════════════════════════════════════════ */
+document.getElementById('overlay').addEventListener('click',function(e){
+  if(e.target===this)closeModal();
+});
 
+/* START */
 init();
 </script>
 </body>
