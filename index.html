@@ -251,6 +251,7 @@ select{flex:1;}
     <button class="btn btn-red" onclick="deleteSite()">🗑 刪除工地</button>
     <button class="btn btn-cream" onclick="configImgBase()">🖼 圖片路徑</button>
     <button class="btn btn-cream" onclick="changeLogo()">🏷 更換圖示</button>
+    <button class="btn btn-cream" onclick="showHistory()">📦 歷史紀錄</button>
   </div>
   <div class="footer-main">
     <button class="btn-report" onclick="buildReport()">
@@ -271,10 +272,35 @@ select{flex:1;}
     <div class="rpt-total" id="rptTotal"></div>
     <div class="modal-actions">
       <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印 ／ 儲存 PDF（電腦）</button>
-      <button class="modal-btn" style="background:var(--green);color:white;" onclick="openPrintPage()">📱 開啟列印頁（手機截圖儲存）</button>
+      <button class="modal-btn" style="background:var(--green);color:white;" onclick="showFullscreenReport()">📸 截圖模式（手機儲存）</button>
       <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);" onclick="closeModal()">← 返回編輯</button>
     </div>
     <div class="modal-hint" id="modalHint"></div>
+  </div>
+</div>
+
+<!-- FULLSCREEN SCREENSHOT OVERLAY -->
+<div id="fsOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div id="fsContent" style="max-width:700px;margin:0 auto;padding:16px 14px 10px;font-family:'Noto Sans TC',sans-serif;"></div>
+  <div style="max-width:700px;margin:0 auto;padding:0 14px 24px;">
+    <div style="text-align:center;font-size:12px;color:#64748B;padding:8px 0 12px;background:#FFFBF0;border-radius:8px;border:1px solid #E2C96A;margin-bottom:10px;">
+      📸 對畫面截圖即可儲存 ｜ 向上滑動可見全部項目
+    </div>
+    <button onclick="document.getElementById('fsOverlay').style.display='none'" style="width:100%;padding:13px;background:#164E33;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">← 關閉截圖模式</button>
+  </div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div id="histOverlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;">
+  <div id="histModal" style="background:white;width:100%;max-width:700px;border-radius:20px 20px 0 0;padding:18px;max-height:88vh;overflow-y:auto;animation:slideUp .26s cubic-bezier(.2,.7,0,1.1);">
+    <div style="width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 14px;display:block;"></div>
+    <div style="font-size:17px;font-weight:900;color:#164E33;text-align:center;margin-bottom:14px;">📦 採購歷史紀錄</div>
+    <div id="histList"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button onclick="exportHistory()" style="flex:1;padding:12px;background:#FEF8E6;color:#6B4700;border:1.5px solid #E2C96A;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">📥 匯出 CSV</button>
+      <button onclick="clearHistory()" style="padding:12px;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 清除紀錄</button>
+      <button onclick="closeHistory()" style="flex:1;padding:12px;background:#164E33;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 關閉</button>
+    </div>
   </div>
 </div>
 
@@ -404,31 +430,38 @@ function renderLogo(){
   el.onclick=isAdmin?changeLogo:null;
 }
 function changeLogo(){
-  // compress large images before storing
   const inp=document.createElement('input');
-  inp.type='file';inp.accept='image/*';
+  inp.type='file'; inp.accept='image/*';
   inp.onchange=e=>{
-    const file=e.target.files[0];if(!file)return;
+    const file=e.target.files[0]; if(!file) return;
     const reader=new FileReader();
     reader.onload=ev=>{
-      // draw onto canvas to resize to max 120px
       const img=new Image();
       img.onload=()=>{
-        const MAX=120;
+        // resize to max 200px (keeps it crisp at 40px display but not too large for storage)
+        const MAX=200;
+        const scale=Math.min(1, MAX/Math.max(img.width, img.height));
         const canvas=document.createElement('canvas');
-        const scale=Math.min(1,MAX/Math.max(img.width,img.height));
-        canvas.width=img.width*scale;
-        canvas.height=img.height*scale;
-        canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-        logoSrc=canvas.toDataURL('image/png',0.85);
+        canvas.width=Math.round(img.width*scale);
+        canvas.height=Math.round(img.height*scale);
+        const ctx=canvas.getContext('2d');
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        logoSrc=canvas.toDataURL('image/png',0.92);
         localStorage.setItem('ys5_logo',logoSrc);
         renderLogo();
+        alert('✅ 圖示已更新！');
       };
+      img.onerror=()=>alert('圖片讀取失敗，請換一張試試');
       img.src=ev.target.result;
     };
     reader.readAsDataURL(file);
   };
+  // must append to body for iOS Safari to fire onchange
+  inp.style.position='fixed'; inp.style.top='-999px';
+  document.body.appendChild(inp);
   inp.click();
+  setTimeout(()=>document.body.removeChild(inp),30000);
 }
 
 /* ═══════ TITLE ═══════ */
@@ -774,6 +807,8 @@ function buildReport(){
 
   // store for print/export
   window._rptSel=sel;window._rptSite=site;window._rptStaff=staff;window._rptNow=now;window._rptTotalQty=totalQty;
+  // save to history
+  saveToHistory(sel,site,staff,now,totalQty);
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
@@ -827,15 +862,128 @@ function doPrint(){
   setTimeout(()=>{pc.innerHTML='';},2000);
 }
 
-/* ── Open standalone print page (mobile screenshot) ── */
-function openPrintPage(){
+/* ── Fullscreen inline screenshot mode (no new window, no permissions) ── */
+function showFullscreenReport(){
   const {_rptSel:sel,_rptSite:site,_rptStaff:staff,_rptNow:now,_rptTotalQty:totalQty}=window;
   if(!sel)return;
-  const html=buildReportHtml(sel,site,staff,now,totalQty);
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
+  let rows="";
+  sel.forEach((item,idx)=>{
+    const qty=cartGet(item).qty||1;
+    const bg=idx%2===0?"#fff":"#FEFDF8";
+    rows+=`<tr style="background:${bg};">
+      <td style="padding:7px 5px;text-align:center;color:#94A3B8;font-size:11px;">${idx+1}</td>
+      <td style="padding:7px 5px;font-weight:700;color:#164E33;font-size:11px;">${item.id}</td>
+      <td style="padding:7px 5px;font-weight:900;font-size:13px;color:#0F172A;">${item.n}</td>
+      <td style="padding:7px 5px;font-size:11px;color:#64748B;">${item.s}</td>
+      <td style="padding:7px 5px;font-size:11px;color:#64748B;">${item.m}</td>
+      <td style="padding:7px 5px;font-weight:900;font-size:17px;color:#164E33;text-align:right;">${qty}</td>
+    </tr>`;
+  });
+  const content=`
+    <div style="background:#164E33;color:white;padding:12px 16px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-size:16px;font-weight:900;">🦺 ${config.title}</span>
+      <span style="font-size:11px;opacity:.75;">${now}</span>
+    </div>
+    <div style="display:flex;background:#FFFBF0;border:1px solid #E2C96A;border-radius:8px;margin-bottom:12px;overflow:hidden;">
+      <div style="flex:1;padding:8px 10px;border-right:1px solid #E2C96A;"><div style="font-size:9px;color:#64748B;">工地名稱</div><div style="font-size:12px;font-weight:700;">${site}</div></div>
+      <div style="flex:1;padding:8px 10px;border-right:1px solid #E2C96A;"><div style="font-size:9px;color:#64748B;">負責人員</div><div style="font-size:12px;font-weight:700;">${staff}</div></div>
+      <div style="flex:1;padding:8px 10px;"><div style="font-size:9px;color:#64748B;">填單日期</div><div style="font-size:12px;font-weight:700;">${now}</div></div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#FFFBF0;">
+          <th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;text-align:center;">#</th>
+          <th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">編號</th>
+          <th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">名稱</th>
+          <th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">規格</th>
+          <th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">材質</th>
+          <th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;text-align:right;">數量</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;background:#164E33;color:white;padding:10px 14px;border-radius:8px;margin-top:10px;font-size:13px;font-weight:700;">
+      <span>合計 <span style="color:#A8D96A;font-size:15px;">${sel.length}</span> 品項</span>
+      <span>合計 <span style="color:#A8D96A;font-size:15px;">${totalQty}</span> 件</span>
+    </div>`;
+  document.getElementById("fsContent").innerHTML=content;
+  document.getElementById("overlay").classList.remove("show");
+  const fs=document.getElementById("fsOverlay");
+  fs.style.display="block";
+  fs.scrollTop=0;
 }
+
+/* ═══════ HISTORY ═══════ */
+function saveToHistory(sel,site,staff,now,totalQty){
+  let history=JSON.parse(localStorage.getItem('ys5_hist')||'[]');
+  const record={
+    id:Date.now(),
+    date:now,
+    site,staff,totalQty,
+    items:sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1}))
+  };
+  history.unshift(record);
+  if(history.length>200)history=history.slice(0,200);
+  localStorage.setItem('ys5_hist',JSON.stringify(history));
+}
+function showHistory(){
+  const history=JSON.parse(localStorage.getItem('ys5_hist')||'[]');
+  const list=document.getElementById('histList');
+  if(!history.length){
+    list.innerHTML='<div style="text-align:center;padding:40px;color:#94A3B8;font-size:14px;">尚無採購紀錄</div>';
+  } else {
+    list.innerHTML=history.map((rec,ri)=>{
+      const itemRows=rec.items.map(i=>
+        `<div style="display:flex;justify-content:space-between;padding:4px 8px;font-size:12px;border-bottom:.5px solid #F1F5F9;">
+          <span style="color:#64748B;">[${i.id}] ${i.n}</span>
+          <span style="font-weight:700;color:#164E33;">×${i.qty}</span>
+        </div>`).join('');
+      return `<div style="background:#FAFAFA;border:1.5px solid #E2E8F0;border-radius:10px;margin-bottom:10px;overflow:hidden;">
+        <div style="background:#164E33;color:white;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:13px;font-weight:900;">${rec.site}</div>
+          <div style="font-size:11px;opacity:.75;">${rec.date}</div>
+        </div>
+        <div style="padding:6px 8px;background:#FFFBF0;border-bottom:.5px solid #E2C96A;font-size:11px;color:#64748B;">
+          負責人：${rec.staff}　合計：${rec.items.length} 品項　${rec.totalQty} 件
+        </div>
+        ${itemRows}
+        <div style="padding:6px 8px;text-align:right;">
+          <button onclick="deleteHistRecord(${rec.id})" style="font-size:10px;padding:3px 8px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:4px;cursor:pointer;font-family:inherit;">刪除</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  const overlay=document.getElementById('histOverlay');
+  overlay.style.display='flex';
+}
+function closeHistory(){document.getElementById('histOverlay').style.display='none';}
+function deleteHistRecord(id){
+  let h=JSON.parse(localStorage.getItem('ys5_hist')||'[]');
+  h=h.filter(r=>r.id!==id);
+  localStorage.setItem('ys5_hist',JSON.stringify(h));
+  showHistory();
+}
+function clearHistory(){
+  if(!confirm('確定清除所有歷史紀錄？'))return;
+  localStorage.removeItem('ys5_hist');
+  showHistory();
+}
+function exportHistory(){
+  const history=JSON.parse(localStorage.getItem('ys5_hist')||'[]');
+  if(!history.length)return alert('尚無紀錄');
+  let csv='日期,工地名稱,負責人員,編號,標語名稱,規格,材質,數量
+';
+  history.forEach(rec=>{
+    rec.items.forEach(i=>{
+      csv+=`"${rec.date}","${rec.site}","${rec.staff}","${i.id}","${i.n}","${i.s}","${i.m}","${i.qty}"
+`;
+    });
+  });
+  const b=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download=`採購紀錄_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+document.addEventListener('click',function(e){if(e.target===document.getElementById('histOverlay'))closeHistory();});
 
 /* ═══════ ADMIN ═══════ */
 function toggleAdmin(){
