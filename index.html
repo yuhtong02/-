@@ -104,6 +104,7 @@ select{flex:1;}
 .qty-num{font-size:21px;font-weight:900;color:var(--dark);min-width:26px;text-align:center;line-height:1;}
 .a-name{background:var(--cream);border:1.5px dashed var(--cream-dark);border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:var(--cream-deep);width:100%;font-family:inherit;outline:none;}
 .a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:52px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
+.a-id-input{font-size:10px;font-weight:700;background:rgba(254,248,230,.8);border:1px dashed var(--cream-dark);border-radius:3px;color:var(--cream-deep);padding:1px 4px;width:52px;font-family:inherit;outline:none;}
 .admin-del-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--red);border:none;color:white;font-size:11px;cursor:pointer;display:none;place-items:center;z-index:3;font-family:inherit;}
 .isAdmin .card:hover .admin-del-btn{display:grid;}
 
@@ -230,7 +231,7 @@ select{flex:1;}
     <button class="btn btn-red"    onclick="deleteSite()">🗑 刪除工地</button>
     <button class="btn btn-cream"  onclick="configImgBase()">🖼 圖片路徑</button>
     <button class="btn btn-cream"  onclick="changeLogo()">🏷 更換圖示</button>
-    <button class="btn btn-cream"  onclick="configGSheets()">☁️ 雲端設定</button>
+    <button class="btn btn-cream"  onclick="openCloudSetup()">☁️ 雲端設定</button>
     <button class="btn btn-cream"  onclick="pushToCloud()">⬆️ 推送雲端</button>
     <button class="btn btn-cream"  onclick="pullFromCloud()">⬇️ 從雲端同步</button>
   </div>
@@ -253,8 +254,8 @@ select{flex:1;}
     <div id="rptList"></div>
     <div class="rpt-total" id="rptTotal"></div>
     <div class="modal-actions">
-      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印 ／ 儲存 PDF（電腦）</button>
-      <button class="modal-btn" style="background:var(--green);color:white;" onclick="showFsReport()">📸 截圖模式（手機儲存）</button>
+      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印 ／ 儲存 PDF</button>
+      <button class="modal-btn" style="background:var(--green);color:white;" id="submitBtn" onclick="submitOrder()">📤 提交採購單到後台</button>
       <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);" onclick="closeModal()">← 返回編輯</button>
     </div>
     <div class="hint-txt" id="modalHint"></div>
@@ -336,7 +337,9 @@ function computeIds(arr){
   const cnt={};
   return arr.map(item=>{
     const c=item.cat||'X';cnt[c]=(cnt[c]||0)+1;
-    return {...item,id:c+String(cnt[c]).padStart(2,'0')};
+    // use manual id if set, otherwise auto-generate
+    const autoId=c+String(cnt[c]).padStart(2,'0');
+    return {...item,id:item.manualId||autoId,_autoId:autoId};
   });
 }
 function getDbWithIds(){return computeIds(db);}
@@ -472,13 +475,16 @@ function render(){
     const st=cartGet(item);const d=document.createElement('div');
     d.className='card'+(st.sel?' sel':'');
     const imgUrl=imgBase+item.id+'.jpg';
+    const idDisplay=isAdmin
+      ?`<input class="a-id-input" value="${esc(item.manualId||item._autoId||item.id)}" title="手動編號（留空=自動）" oninput="updateManualId('${item.cat}','${escQ(item.n)}',this.value)" placeholder="${item._autoId||item.id}">`
+      :item.id;
     const nameH=isAdmin?`<input class="a-name" value="${esc(item.n)}" oninput="updateName('${item.cat}','${escQ(item.n)}',this.value)">`:`<div class="card-name">${item.n}</div>`;
     const specR=isAdmin?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateField('${item.cat}','${escQ(item.n)}','s',this.value)">`:`<span class="spec-tag spec-r">${item.s}</span>`;
     const specM=isAdmin?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateField('${item.cat}','${escQ(item.n)}','m',this.value)">`:`<span class="spec-tag spec-m">${item.m}</span>`;
     const delB=isAdmin?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`:'';
     d.innerHTML=`${delB}<div class="card-check"><span class="check-icon">✓</span></div>
       <div class="card-img"><img src="${imgUrl}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity .2s" alt=""><div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖</small></div></div>
-      <div class="card-body"><div><div class="card-meta"><span class="card-id">${item.id}</span><span class="card-cat">${cats[item.cat]||item.cat}</span></div>${nameH}<div class="card-specs">${specR}${specM}</div></div>
+      <div class="card-body"><div><div class="card-meta"><span class="card-id">${idDisplay}</span><span class="card-cat">${cats[item.cat]||item.cat}</span></div>${nameH}<div class="card-specs">${specR}${specM}</div></div>
         <div class="card-footer">${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
           <div class="qty-ctrl" onclick="event.stopPropagation()"><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',-1)">−</button><span class="qty-num">${st.qty||1}</span><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',1)">＋</button></div></div></div>`;
     d.addEventListener('click',e=>{if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON')toggleItem(item.cat,item.n);});
@@ -499,6 +505,13 @@ function resetCart(){if(confirm('確認清除所有選取？')){cart={};render()
 /* ═══════ DB MUTATIONS ═══════ */
 function updateName(cat,oldN,newN){const item=db.find(x=>x.cat===cat&&x.n===oldN);if(!item)return;const ok=cartKey(item),sv=cart[ok];delete cart[ok];item.n=newN;if(sv!==undefined)cart[cartKey(item)]=sv;save();}
 function updateField(cat,n,f,v){const item=db.find(x=>x.cat===cat&&x.n===n);if(item){item[f]=v;save();}}
+function updateManualId(cat,n,val){
+  const item=db.find(x=>x.cat===cat&&x.n===n);
+  if(!item)return;
+  const trimmed=val.trim();
+  item.manualId=trimmed||undefined;
+  save();render();
+}
 function deleteItem(cat,n){if(!confirm(`確定刪除「${n}」？`))return;const idx=db.findIndex(x=>x.cat===cat&&x.n===n);if(idx<0)return;db.splice(idx,1);delete cart[cat+'::'+n];save();render();updateBadge();}
 
 /* ═══════ SITES ═══════ */
@@ -520,6 +533,33 @@ function deleteStep(key){if(!confirm(`確定刪除工序「${stepData[key].t}」
 function addCat(){const key=prompt('新類別代碼（單一英文字母）：');if(!key)return;const k=key.toUpperCase().trim();if(cats[k])return alert('此類別已存在');const label=prompt('類別顯示名稱：',k+'. 新類別');if(!label)return;cats[k]=label;catOrder.push(k);save();renderTabs();setTab(k);}
 function deleteCat(k){if(db.some(x=>x.cat===k)){alert('此類別尚有標語，請先移除後再刪除。');return;}if(!confirm(`確定刪除類別「${cats[k]}」？`))return;delete cats[k];catOrder=catOrder.filter(c=>c!==k);if(currentTab===k)currentTab='ALL';save();renderTabs();render();}
 
+/* ═══════ SUBMIT ORDER ═══════ */
+async function submitOrder(){
+  if(!_sel||!_sel.length)return alert('請先生成採購單');
+  const btn=document.getElementById('submitBtn');
+  const record={id:Date.now(),date:_now,site:_site,staff:_staff,totalQty:_totalQty,
+    items:_sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1})),note:''};
+  // always save locally first
+  saveHistLocal(record);
+  if(!gsUrl){
+    showToast('✅ 採購單已儲存至本機紀錄');
+    document.getElementById('modalHint').innerHTML='<span style="color:var(--green);font-weight:700;">✅ 已儲存！</span> 未設定雲端，資料儲存於本機。';
+    return;
+  }
+  btn.textContent='⏳ 提交中...';btn.disabled=true;
+  const res=await cloudPost({action:'saveHistory',record});
+  btn.textContent='📤 提交採購單到後台';btn.disabled=false;
+  if(res&&res.ok){
+    showToast('✅ 採購單已送至 Google Sheets！',3000);
+    document.getElementById('modalHint').innerHTML='<span style="color:var(--green);font-weight:700;">✅ 已送至後台！</span> 管理員可在 Google Sheets 查看此筆紀錄。';
+    resetCart();
+    setTimeout(closeModal,1800);
+  } else {
+    showToast('⚠️ 提交失敗，已儲存本機',3000);
+    document.getElementById('modalHint').innerHTML='<span style="color:#DC2626;">⚠️ 雲端提交失敗，資料已存本機。</span> 錯誤：'+(res?res.error:'網路錯誤');
+  }
+}
+
 /* ═══════ REPORT ═══════ */
 let _sel,_site,_staff,_now,_totalQty;
 function buildReport(){
@@ -539,10 +579,7 @@ function buildReport(){
   document.getElementById('rptTotal').innerHTML=`<span>合計 <strong>${_sel.length}</strong> 品項</span><span>合計 <strong>${_totalQty}</strong> 件</span>`;
   document.getElementById('modalHint').innerHTML='📱 手機：點截圖模式後截圖<br>💻 電腦：列印→另存PDF';
   document.getElementById('overlay').classList.add('show');
-  // save to history
-  saveHistLocal({id:Date.now(),date:_now,site:_site,staff:_staff,totalQty:_totalQty,items:_sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1})),note:''});
-  // push to cloud if configured
-  if(gsUrl) pushHistToCloud({id:Date.now(),date:_now,site:_site,staff:_staff,totalQty:_totalQty,items:_sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1})),note:''});
+  // note: saving to history is done when user clicks "提交採購單"
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
@@ -656,12 +693,49 @@ function exportHistPdf(){
 }
 
 /* ═══════ CLOUD (Google Apps Script) ═══════ */
-function configGSheets(){
-  const v=prompt('請輸入 Google Apps Script 網址：\n（部署後取得的網頁應用程式網址）',gsUrl||'');
-  if(v===null)return;
-  gsUrl=v.trim();localStorage.setItem(LS+'gsUrl',gsUrl);
+function openCloudSetup(){
+  document.getElementById('gsUrlInput').value=gsUrl||'';
+  document.getElementById('cloudPwInput').value=localStorage.getItem(LS+'adminPw')||'751113';
+  document.getElementById('testResult').style.display='none';
+  document.getElementById('cloudOverlay').classList.add('show');
+}
+function saveCloudConfig(){
+  const url=document.getElementById('gsUrlInput').value.trim();
+  const pw=document.getElementById('cloudPwInput').value.trim();
+  if(url&&!url.includes('script.google.com')){
+    alert('網址格式不對，應包含 script.google.com');return;
+  }
+  gsUrl=url;
+  if(pw)localStorage.setItem(LS+'adminPw',pw);
+  localStorage.setItem(LS+'gsUrl',gsUrl);
   updateSyncDot();
-  if(gsUrl)showToast('☁️ 雲端網址已儲存');
+  document.getElementById('cloudOverlay').classList.remove('show');
+  showToast(gsUrl?'☁️ 雲端設定已儲存':'已清除雲端設定');
+}
+async function testCloudConn(){
+  const url=document.getElementById('gsUrlInput').value.trim();
+  const pw=document.getElementById('cloudPwInput').value.trim()||'751113';
+  const res=document.getElementById('testResult');
+  res.style.display='block';
+  res.style.background='#FFF9ED';res.style.border='1px solid #E2C96A';res.style.color='#6B4700';
+  res.textContent='⏳ 測試中...';
+  if(!url){res.style.background='#FEF2F2';res.style.border='1px solid #FECACA';res.style.color='#DC2626';res.textContent='⚠️ 請先填入網址';return;}
+  try{
+    const testUrl=url+'?action=ping&pw='+encodeURIComponent(pw);
+    const r=await fetch(testUrl,{method:'GET'});
+    const text=await r.text();
+    let data;try{data=JSON.parse(text);}catch{data=null;}
+    if(data&&data.ok){
+      res.style.background='#F0FAE6';res.style.border='1px solid #C5DF98';res.style.color='#164E33';
+      res.textContent='✅ 連線成功！伺服器時間：'+data.ts;
+    } else {
+      res.style.background='#FEF2F2';res.style.border='1px solid #FECACA';res.style.color='#DC2626';
+      res.textContent='⚠️ 連線失敗：'+(data?data.error:('回應：'+text.slice(0,200)));
+    }
+  }catch(e){
+    res.style.background='#FEF2F2';res.style.border='1px solid #FECACA';res.style.color='#DC2626';
+    res.textContent='⚠️ 網路錯誤：'+e.message+' — 請確認：1)Apps Script已部署 2)存取對象=所有人 3)網址正確';
+  }
 }
 
 async function cloudReq(params){
@@ -670,13 +744,14 @@ async function cloudReq(params){
   dot.className='sync-dot syncing';
   try{
     const url=gsUrl+'?'+new URLSearchParams({...params,pw:localStorage.getItem(LS+'adminPw')||'751113'});
-    const res=await fetch(url,{method:'GET',mode:'cors'});
-    const data=await res.json();
+    const res=await fetch(url,{method:'GET'});
+    const text=await res.text();
+    let data;try{data=JSON.parse(text);}catch{data={ok:false,error:'回應格式錯誤：'+text.slice(0,120)};}
     dot.className='sync-dot'+(gsUrl?'':' off');
     return data;
   }catch(e){
     dot.className='sync-dot off';
-    return {ok:false,error:e.toString()};
+    return {ok:false,error:'網路錯誤：'+e.message};
   }
 }
 
@@ -684,24 +759,34 @@ async function cloudPost(body){
   if(!gsUrl)return null;
   const dot=document.getElementById('syncDot');
   dot.className='sync-dot syncing';
+  // GAS requires GET for CORS; encode payload as base64 param
   try{
-    const res=await fetch(gsUrl,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({...body,pw:localStorage.getItem(LS+'adminPw')||'751113'})});
-    const data=await res.json();
+    const payload=btoa(unescape(encodeURIComponent(JSON.stringify({...body,pw:localStorage.getItem(LS+'adminPw')||'751113'}))));
+    const url=gsUrl+(gsUrl.includes('?')?'&':'?')+'payload='+encodeURIComponent(payload);
+    const res=await fetch(url,{method:'GET'});
+    const text=await res.text();
+    let data;try{data=JSON.parse(text);}catch{data={ok:false,error:'回應格式錯誤：'+text.slice(0,120)};}
     dot.className='sync-dot'+(gsUrl?'':' off');
     return data;
   }catch(e){
     dot.className='sync-dot off';
-    return {ok:false,error:e.toString()};
+    console.error('cloudPost error',e);
+    return {ok:false,error:'網路錯誤，請確認：1)Apps Script 已部署 2)存取對象=所有人 3)網址正確。詳情：'+e.message};
   }
 }
 
 async function pushToCloud(){
-  if(!gsUrl)return alert('請先設定雲端網址（管理員→☁️ 雲端設定）');
+  if(!gsUrl){openCloudSetup();return;}
+  showToast('⬆️ 推送中...',5000);
   const data={db,sites,config,stepData,cats,catOrder,imgBase,logo:logoSrc};
   const res=await cloudPost({action:'saveAll',data});
-  if(res&&res.ok)showToast('⬆️ 已推送至 Google Sheets');
-  else showToast('⚠️ 推送失敗：'+(res?res.error:'網路錯誤'));
+  if(res&&res.ok){
+    showToast('✅ 已推送至 Google Sheets！');
+  } else {
+    const msg='推送失敗：'+(res?res.error:'網路錯誤');
+    showToast('⚠️ '+msg,5000);
+    setTimeout(()=>{if(confirm(msg+'\n\n要開啟雲端設定診斷嗎？'))openCloudSetup();},300);
+  }
 }
 
 async function pullFromCloud(silent=false){
@@ -760,8 +845,56 @@ function exportData(){const d={db,sites,config,stepData,cats,catOrder,imgBase,lo
 function importData(){const j=prompt('貼上備份 JSON：');if(!j)return;try{const d=JSON.parse(j);if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.catOrder)catOrder=d.catOrder;if(d.imgBase)imgBase=d.imgBase;if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem(LS+'logo',logoSrc);}save();location.reload();}catch(e){alert('格式錯誤');}}
 
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('cloudOverlay').addEventListener('click',function(e){if(e.target===this)document.getElementById('cloudOverlay').classList.remove('show');});
 document.getElementById('histOverlay').addEventListener('click',function(e){if(e.target===this)closeHistory();});
 init();
 </script>
+
+<!-- ── CLOUD SETUP MODAL ── -->
+<div class="overlay" id="cloudOverlay">
+  <div class="sheet" style="max-height:90vh;">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title">☁️ Google Sheets 雲端設定</div>
+
+    <!-- Step guide -->
+    <div style="background:#F0FAE6;border:1.5px solid #C5DF98;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.8;color:#0F172A;">
+      <div style="font-weight:900;color:#164E33;font-size:13px;margin-bottom:8px;">📋 首次設定步驟</div>
+      <div><span style="background:#164E33;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;margin-right:6px;">1</span>開啟 <a href="https://sheets.google.com" target="_blank" style="color:#164E33;font-weight:700;">Google Sheets</a> 建立新試算表</div>
+      <div style="margin-top:4px;"><span style="background:#164E33;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;margin-right:6px;">2</span>點上方「擴充功能」→「Apps Script」</div>
+      <div style="margin-top:4px;"><span style="background:#164E33;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;margin-right:6px;">3</span>清空內容，貼上 <b>GoogleAppsScript_v2.js</b> 全部程式碼，儲存</div>
+      <div style="margin-top:4px;"><span style="background:#164E33;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;margin-right:6px;">4</span>點「部署」→「新增部署」→ 類型選「<b>網頁應用程式</b>」</div>
+      <div style="margin-top:4px;"><span style="background:#164E33;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;margin-right:6px;">5</span>執行身份：<b>我</b> ／ 存取對象：<b>所有人（包含匿名）</b></div>
+      <div style="margin-top:4px;"><span style="background:#164E33;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;margin-right:6px;">6</span>按「部署」→ 授予權限 → 複製網頁應用程式網址，貼入下方</div>
+      <div style="margin-top:8px;background:#FEF8E6;border:1px solid #E2C96A;border-radius:6px;padding:8px;font-size:11px;color:#6B4700;">
+        ⚠️ <b>已設定過舊版？</b> 請回到 Apps Script → 部署 → 管理部署 → 編輯 → 版本選「新版本」→ 重新部署
+      </div>
+    </div>
+
+    <!-- URL input -->
+    <div style="margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:#164E33;margin-bottom:6px;">網頁應用程式網址</div>
+      <input id="gsUrlInput" type="text" placeholder="https://script.google.com/macros/s/...../exec"
+        style="width:100%;font-size:12px;padding:10px;border:1.5px solid #C5DF98;border-radius:8px;background:#FFFBF0;font-family:inherit;outline:none;"
+        oninput="this.style.borderColor=this.value.includes('script.google.com')?'#6EB831':'#E2C96A'">
+    </div>
+
+    <!-- Password -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:#164E33;margin-bottom:6px;">管理員密碼（同步至雲端用）</div>
+      <input id="cloudPwInput" type="password" placeholder="預設：751113"
+        style="width:100%;font-size:13px;padding:10px;border:1.5px solid #C5DF98;border-radius:8px;background:#FFFBF0;font-family:inherit;outline:none;">
+    </div>
+
+    <!-- Test result -->
+    <div id="testResult" style="display:none;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:12px;"></div>
+
+    <!-- Actions -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="testCloudConn()" style="padding:12px;background:#FEF8E6;color:#6B4700;border:1.5px solid #E2C96A;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔍 測試連線</button>
+      <button onclick="saveCloudConfig()" style="padding:12px;background:#164E33;color:white;border:none;border-radius:8px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;">✅ 儲存設定</button>
+      <button onclick="document.getElementById('cloudOverlay').classList.remove('show')" style="padding:12px;background:#F1F5F9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 關閉</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
