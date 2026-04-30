@@ -8,21 +8,14 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --dark:#164E33;
-  --green:#6EB831;
-  --cream:#FEF8E6;
-  --cream2:#FFFBF0;
-  --cream-border:#E2C96A;
-  --cream-dark:#B8942A;
-  --cream-deep:#6B4700;
+  --dark:#164E33;--green:#6EB831;
+  --cream:#FEF8E6;--cream2:#FFFBF0;
+  --cream-border:#E2C96A;--cream-dark:#B8942A;--cream-deep:#6B4700;
   --ink:#0F172A;--ink3:#64748B;--ink4:#94A3B8;
-  --bg:#FFFDF5;
-  --surface:#FFFFFF;
-  --border:#D8EAB8;
-  --card-bg:#FFFEF8;
+  --bg:#FFFDF5;--surface:#FFFFFF;--border:#D8EAB8;--card-bg:#FFFEF8;
   --red:#DC2626;--blue:#1D4ED8;--purple:#6D28D9;
   --r:14px;--r2:10px;--r3:8px;
-  --shadow:0 1px 3px rgba(22,78,51,0.06),0 3px 10px rgba(22,78,51,0.04);
+  --shadow:0 1px 3px rgba(22,78,51,.06),0 3px 10px rgba(22,78,51,.04);
 }
 html,body{height:100%;overflow:hidden;}
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;}
@@ -30,23 +23,17 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink)
 /* ─── HEADER ─── */
 .hdr{background:var(--dark);color:white;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .hdr-brand{display:flex;align-items:center;gap:10px;}
-/* LOGO — fixed size 40×40, no background, no border */
-.hdr-logo{
-  width:40px;height:40px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:26px;line-height:1;
-  cursor:default;overflow:hidden;position:relative;
-}
+.hdr-logo{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:default;overflow:hidden;position:relative;}
 .hdr-logo img{width:100%;height:100%;object-fit:contain;display:block;}
 .hdr-logo.editable{cursor:pointer;}
-.hdr-logo.editable::after{
-  content:'✏';position:absolute;bottom:0;right:0;
-  font-size:9px;background:var(--green);color:white;
-  border-radius:50%;width:13px;height:13px;
-  display:flex;align-items:center;justify-content:center;line-height:1;
-}
+.hdr-logo.editable::after{content:'✏';position:absolute;bottom:0;right:0;font-size:9px;background:var(--green);color:white;border-radius:50%;width:13px;height:13px;display:flex;align-items:center;justify-content:center;}
 .hdr-title{font-size:15px;font-weight:900;letter-spacing:.3px;}
 .hdr-ver{font-size:10px;opacity:.55;margin-top:1px;color:#A8D96A;}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#4CAF50;flex-shrink:0;transition:background .3s;}
+.sync-dot.off{background:#94A3B8;}
+.sync-dot.syncing{background:#F59E0B;animation:pulse .8s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .admin-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;}
 .admin-btn:hover{background:rgba(255,255,255,.2);}
 .admin-btn.active{background:rgba(110,184,49,.28);border-color:rgba(110,184,49,.5);color:#C8F07A;}
@@ -59,40 +46,24 @@ select:focus,input[type=text]:focus{border-color:var(--green);}
 select{flex:1;}
 .btn{font-family:inherit;font-size:12px;font-weight:700;padding:7px 11px;border-radius:var(--r3);border:none;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .btn-dark{background:var(--dark);color:white;}.btn-dark:hover{background:#1E6840;}
-.btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}.btn-red:hover{background:#FEE2E2;}
-.btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}.btn-blue:hover{background:#DBEAFE;}
-.btn-purple{background:#F5F3FF;color:var(--purple);border:1.5px solid #DDD6FE;}.btn-purple:hover{background:#EDE9FE;}
-.btn-cream{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);}.btn-cream:hover{background:#FEF0C0;}
+.btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}
+.btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}
+.btn-purple{background:#F5F3FF;color:var(--purple);border:1.5px solid #DDD6FE;}
+.btn-cream{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);}
 
 /* ─── TABS ─── */
 .tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;position:relative;}
-.tabs-scroll{
-  display:flex;overflow-x:auto;padding:9px 14px;gap:5px;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;
-  /* smooth native scroll — no JS needed */
-  scroll-behavior:smooth;
-}
+.tabs-scroll{display:flex;overflow-x:auto;padding:9px 14px;gap:5px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-behavior:smooth;}
 .tabs-scroll::-webkit-scrollbar{display:none;}
-/* scroll arrows */
-.tabs-arrow{position:absolute;top:0;bottom:0;width:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:opacity .2s;}
-.tabs-arrow.left{left:0;background:linear-gradient(to right,var(--surface) 60%,transparent);}
-.tabs-arrow.right{right:0;background:linear-gradient(to left,var(--surface) 60%,transparent);}
-.tabs-arrow svg{width:16px;height:16px;stroke:var(--ink3);stroke-width:2.5;fill:none;}
-.tab{
-  padding:6px 13px;border-radius:20px;font-size:12px;font-weight:700;
-  cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);
-  white-space:nowrap;transition:all .15s;flex-shrink:0;user-select:none;
-  display:flex;align-items:center;gap:4px;
-}
+.tabs-arrow{position:absolute;top:0;bottom:0;width:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
+.tabs-arrow.left{left:0;background:linear-gradient(to right,var(--surface) 55%,transparent);}
+.tabs-arrow.right{right:0;background:linear-gradient(to left,var(--surface) 55%,transparent);}
+.tabs-arrow svg{width:15px;height:15px;stroke:var(--ink3);stroke-width:2.5;fill:none;}
+.tab{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all .15s;flex-shrink:0;user-select:none;display:flex;align-items:center;gap:4px;}
 .tab:hover{border-color:var(--green);color:var(--dark);}
-/* step tabs — cream tint */
 .tab.step-tab{background:var(--cream);border-color:var(--cream-border);color:var(--cream-deep);}
-.tab.step-tab:hover{background:#FEF0C0;border-color:var(--cream-dark);}
-/* all tab — slightly stronger cream */
 .tab.all-tab{background:var(--cream);border-color:var(--cream-dark);color:var(--cream-deep);font-weight:900;}
-/* category tabs — very light */
 .tab.cat-tab{background:var(--surface);border-color:var(--border);color:var(--ink3);}
-/* active — always dark green */
 .tab.active{background:var(--dark)!important;color:white!important;border-color:var(--dark)!important;box-shadow:0 2px 8px rgba(22,78,51,.25);}
 .tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 4px;border-radius:1px;}
 .tab-edit-input{background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:78px;outline:none;cursor:text;}
@@ -102,28 +73,20 @@ select{flex:1;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px;}
 .empty-state{text-align:center;padding:80px 20px;color:var(--ink4);}
 .empty-icon{font-size:40px;margin-bottom:12px;}
-.empty-text{font-size:14px;}
 
 /* ─── CARD ─── */
-.card{
-  background:var(--card-bg);border:1.5px solid var(--border);
-  border-radius:var(--r);padding:11px;display:flex;gap:11px;
-  cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s;
-  position:relative;box-shadow:var(--shadow);
-}
+.card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px;display:flex;gap:11px;cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s;position:relative;box-shadow:var(--shadow);}
 .card:hover{border-color:var(--cream-border);background:var(--cream2);box-shadow:0 4px 14px rgba(22,78,51,.08);}
 .card.sel{border-color:var(--green);background:#F4FCE8;border-width:2px;}
 .card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;transition:all .18s;z-index:2;}
 .card.sel .card-check{background:var(--green);border-color:var(--green);}
 .check-icon{font-size:11px;font-weight:900;color:white;display:none;}
 .card.sel .check-icon{display:block;}
-
 .card-img{width:86px;height:72px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;}
 .card-img img{width:100%;height:100%;object-fit:contain;transition:opacity .2s;}
 .img-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink4);}
 .img-placeholder span{font-size:18px;}
 .img-placeholder small{font-size:9px;text-align:center;line-height:1.2;}
-
 .card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
 .card-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
 .card-id{font-size:10px;font-weight:700;background:var(--cream);color:var(--cream-deep);padding:2px 6px;border-radius:4px;border:1px solid var(--cream-border);}
@@ -139,8 +102,6 @@ select{flex:1;}
 .qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink3);font-family:inherit;transition:all .15s;line-height:1;flex-shrink:0;}
 .qty-btn:hover{border-color:var(--green);color:var(--green);background:#F4FCE8;}
 .qty-num{font-size:21px;font-weight:900;color:var(--dark);min-width:26px;text-align:center;line-height:1;}
-
-/* admin inputs in cards */
 .a-name{background:var(--cream);border:1.5px dashed var(--cream-dark);border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:var(--cream-deep);width:100%;font-family:inherit;outline:none;}
 .a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:52px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
 .admin-del-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--red);border:none;color:white;font-size:11px;cursor:pointer;display:none;place-items:center;z-index:3;font-family:inherit;}
@@ -152,22 +113,21 @@ select{flex:1;}
 .admin-panel.show{display:flex;}
 .footer-main{display:flex;gap:9px;align-items:stretch;}
 .btn-report{flex:1;background:var(--dark);color:white;border:none;padding:13px 14px;border-radius:var(--r2);font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 4px 14px rgba(22,78,51,.2);}
-.btn-report:hover{background:#1E6840;box-shadow:0 6px 18px rgba(22,78,51,.28);}
+.btn-report:hover{background:#1E6840;}
 .cart-badge{background:rgba(255,255,255,.22);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
 .btn-reset{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);padding:13px 13px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;}
 .btn-reset:hover{background:#FEF0C0;}
 
-/* ─── MODAL ─── */
+/* ─── MODALS base ─── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
 .overlay.show{display:flex;}
-.modal{background:white;width:100%;max-width:700px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp .26s cubic-bezier(.2,.7,0,1.1);}
+.sheet{background:white;width:100%;max-width:700px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp .26s cubic-bezier(.2,.7,0,1.1);}
 @keyframes slideUp{from{transform:translateY(56px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 14px;display:block;}
-.modal-title{font-size:17px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:8px;}
+.sheet-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 14px;display:block;}
+.sheet-title{font-size:17px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:14px;}
 .modal-meta{display:flex;justify-content:space-around;font-size:12px;color:var(--ink3);padding:9px 0;background:var(--cream2);border-radius:var(--r3);margin-bottom:12px;border:1px solid var(--cream-border);}
 .modal-meta span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;}
 .modal-meta strong{font-size:13px;color:var(--ink);font-weight:700;}
-.report-list{margin:2px 0;}
 .report-item{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:.5px solid #F1F5F9;}
 .report-item:last-child{border:none;}
 .rpt-num{font-size:11px;font-weight:700;color:var(--ink4);min-width:18px;text-align:center;}
@@ -180,28 +140,44 @@ select{flex:1;}
 .rpt-total strong{color:#A8D96A;font-size:15px;}
 .modal-actions{display:flex;flex-direction:column;gap:7px;margin-top:13px;}
 .modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
-.modal-hint{font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;line-height:1.6;padding:0 8px;}
+.hint-txt{font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;line-height:1.6;}
+
+/* ─── HISTORY ─── */
+.hist-rec{background:#FAFAFA;border:1.5px solid #E2E8F0;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.hist-hdr{background:var(--dark);color:white;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}
+.hist-sub{padding:6px 10px;background:var(--cream2);border-bottom:.5px solid var(--cream-border);font-size:11px;color:var(--ink3);}
+.hist-row{display:flex;justify-content:space-between;padding:5px 10px;font-size:12px;border-bottom:.5px solid #F1F5F9;}
+.hist-row:last-child{border:none;}
+.hist-foot{padding:6px 10px;text-align:right;}
 
 /* ─── PRINT ─── */
 @media print{
   html,body{height:auto!important;overflow:visible!important;}
-  /* Hide everything except the print container */
   body>*:not(#printContainer){display:none!important;}
   #printContainer{display:block!important;}
+  tr{page-break-inside:avoid;}
+  @page{margin:12mm;}
 }
 #printContainer{display:none;}
+
+/* ─── FULLSCREEN SCREENSHOT ─── */
+#fsOverlay{display:none;position:fixed;inset:0;z-index:99999;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* ─── SYNC TOAST ─── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(22,78,51,.92);color:white;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:99999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
 
 /* scrollbars */
 .main::-webkit-scrollbar{width:3px;}
 .main::-webkit-scrollbar-thumb{background:#C5DF98;border-radius:2px;}
-.modal::-webkit-scrollbar{width:3px;}
-.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.sheet::-webkit-scrollbar{width:3px;}
+.sheet::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 </style>
 </head>
 <body>
 
-<!-- ── PRINT CONTAINER (hidden; only shown on print) ── -->
 <div id="printContainer"></div>
+<div class="toast" id="toast"></div>
 
 <!-- HEADER -->
 <div class="hdr">
@@ -212,7 +188,10 @@ select{flex:1;}
       <div class="hdr-ver">鈺通營造 Construction Safety</div>
     </div>
   </div>
-  <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理員</button>
+  <div class="hdr-right">
+    <div class="sync-dot off" id="syncDot" title="雲端同步狀態"></div>
+    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理員</button>
+  </div>
 </div>
 
 <!-- CONTROLS -->
@@ -226,11 +205,11 @@ select{flex:1;}
 
 <!-- TABS -->
 <div class="tabs-outer">
-  <div class="tabs-arrow left" id="tabLeft" onclick="scrollTabs(-120)">
+  <div class="tabs-arrow left" onclick="scrollTabs(-120)">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
   </div>
   <div class="tabs-scroll" id="tabsEl"></div>
-  <div class="tabs-arrow right" id="tabRight" onclick="scrollTabs(120)">
+  <div class="tabs-arrow right" onclick="scrollTabs(120)">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   </div>
 </div>
@@ -243,109 +222,104 @@ select{flex:1;}
 <!-- FOOTER -->
 <div class="footer">
   <div class="admin-panel" id="adminPanel">
-    <button class="btn btn-dark" onclick="addNewSign()">➕ 新增標語</button>
-    <button class="btn btn-dark" onclick="addStep()">➕ 新增工序</button>
-    <button class="btn btn-dark" onclick="addCat()">➕ 新增類別</button>
-    <button class="btn btn-blue" onclick="exportData()">📤 備份</button>
-    <button class="btn btn-purple" onclick="importData()">📥 還原</button>
-    <button class="btn btn-red" onclick="deleteSite()">🗑 刪除工地</button>
-    <button class="btn btn-cream" onclick="configImgBase()">🖼 圖片路徑</button>
-    <button class="btn btn-cream" onclick="changeLogo()">🏷 更換圖示</button>
+    <button class="btn btn-dark"   onclick="addNewSign()">➕ 新增標語</button>
+    <button class="btn btn-dark"   onclick="addStep()">➕ 新增工序</button>
+    <button class="btn btn-dark"   onclick="addCat()">➕ 新增類別</button>
+    <button class="btn btn-blue"   onclick="exportData()">📤 備份JSON</button>
+    <button class="btn btn-purple" onclick="importData()">📥 還原JSON</button>
+    <button class="btn btn-red"    onclick="deleteSite()">🗑 刪除工地</button>
+    <button class="btn btn-cream"  onclick="configImgBase()">🖼 圖片路徑</button>
+    <button class="btn btn-cream"  onclick="changeLogo()">🏷 更換圖示</button>
+    <button class="btn btn-cream"  onclick="configGSheets()">☁️ 雲端設定</button>
+    <button class="btn btn-cream"  onclick="pushToCloud()">⬆️ 推送雲端</button>
+    <button class="btn btn-cream"  onclick="pullFromCloud()">⬇️ 從雲端同步</button>
   </div>
   <div class="footer-main">
     <button class="btn-report" onclick="buildReport()">
       <span>📋 生成採購單</span>
       <span class="cart-badge" id="cartBadge">0</span>
     </button>
+    <button class="btn btn-cream" style="padding:13px 10px;border-radius:var(--r2);font-size:11px;" onclick="showHistory()">📦<br>紀錄</button>
     <button class="btn-reset" onclick="resetCart()">清除<br>重選</button>
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- ── REPORT MODAL ── -->
 <div class="overlay" id="overlay">
-  <div class="modal" id="modalBox">
-    <span class="modal-handle"></span>
-    <div class="modal-title" id="rptTitle"></div>
+  <div class="sheet" id="modalBox">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title" id="rptTitle"></div>
     <div class="modal-meta" id="rptMeta"></div>
-    <div class="report-list" id="rptList"></div>
+    <div id="rptList"></div>
     <div class="rpt-total" id="rptTotal"></div>
     <div class="modal-actions">
       <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印 ／ 儲存 PDF（電腦）</button>
-      <button class="modal-btn" style="background:var(--green);color:white;" onclick="openPrintPage()">📱 開啟列印頁（手機截圖儲存）</button>
+      <button class="modal-btn" style="background:var(--green);color:white;" onclick="showFsReport()">📸 截圖模式（手機儲存）</button>
       <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);" onclick="closeModal()">← 返回編輯</button>
     </div>
-    <div class="modal-hint" id="modalHint"></div>
+    <div class="hint-txt" id="modalHint"></div>
+  </div>
+</div>
+
+<!-- ── HISTORY MODAL ── -->
+<div class="overlay" id="histOverlay">
+  <div class="sheet" style="max-height:90vh;">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title">📦 採購歷史紀錄</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="btn btn-dark"   onclick="exportHistExcel()" style="flex:1;">📊 匯出 Excel</button>
+      <button class="btn btn-cream"  onclick="exportHistPdf()"   style="flex:1;">📄 列印 PDF</button>
+      <button class="btn btn-red"    onclick="clearHistory()">🗑 清除全部</button>
+      <button class="btn btn-dark"   onclick="closeHistory()" style="flex:1;">← 關閉</button>
+    </div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- ── FULLSCREEN SCREENSHOT ── -->
+<div id="fsOverlay">
+  <div id="fsContent" style="max-width:700px;margin:0 auto;padding:16px 14px 10px;font-family:'Noto Sans TC',sans-serif;"></div>
+  <div style="max-width:700px;margin:0 auto;padding:0 14px 28px;">
+    <div style="text-align:center;font-size:12px;color:#64748B;padding:10px;background:var(--cream2);border-radius:8px;border:1px solid var(--cream-border);margin-bottom:10px;">
+      📸 對畫面截圖即可儲存 ｜ 向上滑動可見全部項目
+    </div>
+    <button onclick="document.getElementById('fsOverlay').style.display='none'" style="width:100%;padding:13px;background:var(--dark);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">← 關閉截圖模式</button>
   </div>
 </div>
 
 <script>
-/* ═══════ DEFAULTS ═══════ */
+/* ═══════════════════════════════════════════════
+   DEFAULTS
+═══════════════════════════════════════════════ */
 const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
 const DEF_DB=[
-  {cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},
-  {cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},
-  {cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
-  {cat:'K',n:'守衛室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'統包商辦公室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'會議室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
-  {cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},
-  {cat:'K',n:'休息區',s:'30x10',m:'PVC'},
-  {cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
-  {cat:'K',n:'急救箱',s:'20x10',m:'PVC'},
-  {cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},
-  {cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
-  {cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},
-  {cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
-  {cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},
-  {cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},
-  {cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
-  {cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},
-  {cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
-  {cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},
-  {cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},
-  {cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},
-  {cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},
-  {cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},
-  {cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
-  {cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},
-  {cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},
-  {cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},
-  {cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},
-  {cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},
-  {cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},
-  {cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},
-  {cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
-  {cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},
-  {cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},
-  {cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
-  {cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},
-  {cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
-  {cat:'F',n:'滅火器',s:'20x10',m:'PVC'},
-  {cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},
-  {cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},
-  {cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},
-  {cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
+  {cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},{cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},{cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
+  {cat:'K',n:'守衛室',s:'30x10',m:'PVC'},{cat:'K',n:'統包商辦公室',s:'30x10',m:'PVC'},{cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},{cat:'K',n:'會議室',s:'30x10',m:'PVC'},{cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
+  {cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},{cat:'K',n:'休息區',s:'30x10',m:'PVC'},{cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
+  {cat:'K',n:'急救箱',s:'20x10',m:'PVC'},{cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},{cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
+  {cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},{cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
+  {cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},{cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},{cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
+  {cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},{cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
+  {cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},{cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},
+  {cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},{cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},
+  {cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},{cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
+  {cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},{cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},
+  {cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},{cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},
+  {cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},{cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},
+  {cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},{cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
+  {cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},{cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},{cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
+  {cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},{cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
+  {cat:'F',n:'滅火器',s:'20x10',m:'PVC'},{cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},{cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},
+  {cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},{cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
   {cat:'G',n:'工安標語6S',s:'60x40',m:'中空板'},
-  {cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},
-  {cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},
-  {cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},
-  {cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},
-  {cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},
-  {cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
-  {cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},
-  {cat:'I',n:'資源回收',s:'30x20',m:'PVC'},
-  {cat:'I',n:'廚餘',s:'30x20',m:'PVC'},
-  {cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},
-  {cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},
-  {cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},
-  {cat:'I',n:'紙容器',s:'30x20',m:'PVC'},
-  {cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},
-  {cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},
-  {cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},
-  {cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
+  {cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},{cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},
+  {cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},{cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},
+  {cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},{cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
+  {cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},{cat:'I',n:'資源回收',s:'30x20',m:'PVC'},{cat:'I',n:'廚餘',s:'30x20',m:'PVC'},
+  {cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},{cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},{cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},
+  {cat:'I',n:'紙容器',s:'30x20',m:'PVC'},{cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},
+  {cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},{cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},{cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
 ];
 const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示'};
 const DEF_STEPS={
@@ -357,85 +331,93 @@ const DEF_STEPS={
   S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']},
 };
 
-/* ═══════ AUTO-ID ═══════
-   IDs computed on-the-fly per category.
-   Cart stable key = "cat::name"
-*/
+/* ═══════ AUTO-ID ═══════ */
 function computeIds(arr){
   const cnt={};
   return arr.map(item=>{
-    const c=item.cat||'X';
-    cnt[c]=(cnt[c]||0)+1;
+    const c=item.cat||'X';cnt[c]=(cnt[c]||0)+1;
     return {...item,id:c+String(cnt[c]).padStart(2,'0')};
   });
 }
 function getDbWithIds(){return computeIds(db);}
-function cartKey(item){return item.cat+'::'+item.n;}
-function cartGet(item){return cart[cartKey(item)]||{sel:false,qty:1};}
+function cartKey(i){return i.cat+'::'+i.n;}
+function cartGet(i){return cart[cartKey(i)]||{sel:false,qty:1};}
 
 /* ═══════ STATE ═══════ */
-let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,isAdmin=false,currentTab='S1';
+const LS='ys7_';
+let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='S1';
 
 function init(){
-  db       = JSON.parse(localStorage.getItem('ys5_db'))    || DEF_DB;
-  cart     = {};   // ← always clear on load
-  sites    = JSON.parse(localStorage.getItem('ys5_sites')) || DEF_SITES;
-  config   = JSON.parse(localStorage.getItem('ys5_cfg'))   || {title:'工安標語採購系統'};
-  stepData = JSON.parse(localStorage.getItem('ys5_steps')) || DEF_STEPS;
-  cats     = JSON.parse(localStorage.getItem('ys5_cats'))  || DEF_CATS;
-  catOrder = JSON.parse(localStorage.getItem('ys5_catOrd'))|| Object.keys(DEF_CATS);
-  imgBase  = localStorage.getItem('ys5_imgBase')           || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
-  logoSrc  = localStorage.getItem('ys5_logo')              || '';
-  document.getElementById('staffInput').value = localStorage.getItem('ys5_staff')||'';
-  renderLogo(); renderTitle(); renderSites(); renderTabs(); render(); updateBadge();
+  db       = JSON.parse(localStorage.getItem(LS+'db'))    || DEF_DB;
+  cart     = {};
+  sites    = JSON.parse(localStorage.getItem(LS+'sites')) || DEF_SITES;
+  config   = JSON.parse(localStorage.getItem(LS+'cfg'))   || {title:'工安標語採購系統'};
+  stepData = JSON.parse(localStorage.getItem(LS+'steps')) || DEF_STEPS;
+  cats     = JSON.parse(localStorage.getItem(LS+'cats'))  || DEF_CATS;
+  catOrder = JSON.parse(localStorage.getItem(LS+'catOrd'))|| Object.keys(DEF_CATS);
+  imgBase  = localStorage.getItem(LS+'imgBase')           || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  logoSrc  = localStorage.getItem(LS+'logo')              || '';
+  gsUrl    = localStorage.getItem(LS+'gsUrl')             || '';
+  document.getElementById('staffInput').value = localStorage.getItem(LS+'staff')||'';
+  renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
+  updateSyncDot();
+  // auto-pull on load if cloud configured
+  if(gsUrl) pullFromCloud(true);
 }
 
-/* ═══════ TAB SCROLLING ═══════ */
-function scrollTabs(delta){
-  const el=document.getElementById('tabsEl');
-  el.scrollBy({left:delta,behavior:'smooth'});
+/* ═══════ TOAST ═══════ */
+function showToast(msg,ms=2200){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+/* ═══════ SYNC DOT ═══════ */
+function updateSyncDot(){
+  const dot=document.getElementById('syncDot');
+  dot.className='sync-dot'+(gsUrl?'':' off');
+  dot.title=gsUrl?'雲端已連線':'未設定雲端（點管理員→雲端設定）';
 }
 
 /* ═══════ LOGO ═══════ */
 function renderLogo(){
   const el=document.getElementById('logoEl');
   el.className='hdr-logo'+(isAdmin?' editable':'');
-  el.innerHTML=logoSrc?`<img src="${logoSrc}" alt="logo">`:'🦺';
+  el.innerHTML=logoSrc?`<img src="${logoSrc}" alt="">`:'🦺';
   el.onclick=isAdmin?changeLogo:null;
 }
 function changeLogo(){
-  // compress large images before storing
   const inp=document.createElement('input');
   inp.type='file';inp.accept='image/*';
+  inp.style.cssText='position:fixed;top:-999px;';
   inp.onchange=e=>{
     const file=e.target.files[0];if(!file)return;
     const reader=new FileReader();
     reader.onload=ev=>{
-      // draw onto canvas to resize to max 120px
       const img=new Image();
       img.onload=()=>{
-        const MAX=120;
-        const canvas=document.createElement('canvas');
-        const scale=Math.min(1,MAX/Math.max(img.width,img.height));
-        canvas.width=img.width*scale;
-        canvas.height=img.height*scale;
-        canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-        logoSrc=canvas.toDataURL('image/png',0.85);
-        localStorage.setItem('ys5_logo',logoSrc);
-        renderLogo();
+        const MAX=200,scale=Math.min(1,MAX/Math.max(img.width,img.height));
+        const c=document.createElement('canvas');
+        c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        logoSrc=c.toDataURL('image/png',.92);
+        localStorage.setItem(LS+'logo',logoSrc);
+        renderLogo();showToast('✅ 圖示已更新');
       };
+      img.onerror=()=>alert('圖片讀取失敗，請換一張試試');
       img.src=ev.target.result;
     };
     reader.readAsDataURL(file);
   };
-  inp.click();
+  document.body.appendChild(inp);inp.click();
+  setTimeout(()=>{if(inp.parentNode)inp.parentNode.removeChild(inp);},30000);
 }
 
 /* ═══════ TITLE ═══════ */
 function renderTitle(){
   const el=document.getElementById('titleEl');
   el.innerHTML=isAdmin
-    ?`<input style="background:rgba(255,255,255,.15);border:none;border-bottom:1.5px solid rgba(255,255,255,.4);color:white;font-size:15px;font-weight:900;font-family:inherit;outline:none;width:185px;padding:0;" value="${config.title}" oninput="config.title=this.value;save()">`
+    ?`<input style="background:rgba(255,255,255,.15);border:none;border-bottom:1.5px solid rgba(255,255,255,.4);color:white;font-size:15px;font-weight:900;font-family:inherit;outline:none;width:180px;padding:0;" value="${esc(config.title)}" oninput="config.title=this.value;save()">`
     :config.title;
 }
 
@@ -443,25 +425,18 @@ function renderTitle(){
 function renderSites(){
   const s=document.getElementById('siteSelect');
   s.innerHTML=sites.map(x=>`<option value="${x}">${x}</option>`).join('');
-  s.value=localStorage.getItem('ys5_site')||sites[0];
+  s.value=localStorage.getItem(LS+'site')||sites[0];
 }
 
-/* ═══════ TABS ═══════
-   Order: Step tabs | sep | 全部 | sep | A~K cats
-*/
+/* ═══════ TABS ═══════ */
+function scrollTabs(d){document.getElementById('tabsEl').scrollBy({left:d,behavior:'smooth'});}
 function renderTabs(){
   let h='';
   Object.keys(stepData).sort().forEach(k=>{
-    const t=stepData[k].t;
-    const act=currentTab===k?' active':'';
-    if(isAdmin){
-      h+=`<div class="tab step-tab${act}" onclick="setTab('${k}')">
-        <input class="tab-edit-input" value="${esc(t)}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()" title="編輯工序名稱">
-        <span style="margin-left:2px;opacity:.5;font-size:10px;cursor:pointer;" onclick="event.stopPropagation();deleteStep('${k}')">✕</span>
-      </div>`;
-    } else {
-      h+=`<div class="tab step-tab${act}" onclick="setTab('${k}')">${t}</div>`;
-    }
+    const t=stepData[k].t,act=currentTab===k?' active':'';
+    h+=isAdmin
+      ?`<div class="tab step-tab${act}" onclick="setTab('${k}')"><input class="tab-edit-input" value="${esc(t)}" onclick="event.stopPropagation()" oninput="stepData['${k}'].t=this.value;save()"><span style="margin-left:2px;opacity:.5;font-size:10px;cursor:pointer;" onclick="event.stopPropagation();deleteStep('${k}')">✕</span></div>`
+      :`<div class="tab step-tab${act}" onclick="setTab('${k}')">${t}</div>`;
   });
   h+=`<span class="tab-sep"></span>`;
   h+=`<div class="tab all-tab${currentTab==='ALL'?' active':''}" onclick="setTab('ALL')">📋 全部</div>`;
@@ -469,372 +444,285 @@ function renderTabs(){
   catOrder.forEach(k=>{
     if(!cats[k])return;
     const act=currentTab===k?' active':'';
-    if(isAdmin){
-      h+=`<div class="tab cat-tab${act}" onclick="setTab('${k}')">
-        <input class="tab-edit-input" style="width:66px;" value="${esc(cats[k])}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()" title="編輯類別名稱">
-        <span style="margin-left:2px;opacity:.45;font-size:10px;cursor:pointer;" onclick="event.stopPropagation();deleteCat('${k}')">✕</span>
-      </div>`;
-    } else {
-      h+=`<div class="tab cat-tab${act}" onclick="setTab('${k}')">${cats[k]}</div>`;
-    }
+    h+=isAdmin
+      ?`<div class="tab cat-tab${act}" onclick="setTab('${k}')"><input class="tab-edit-input" style="width:66px;" value="${esc(cats[k])}" onclick="event.stopPropagation()" oninput="cats['${k}']=this.value;save()"><span style="margin-left:2px;opacity:.45;font-size:10px;cursor:pointer;" onclick="event.stopPropagation();deleteCat('${k}')">✕</span></div>`
+      :`<div class="tab cat-tab${act}" onclick="setTab('${k}')">${cats[k]}</div>`;
   });
   document.getElementById('tabsEl').innerHTML=h;
 }
-
 function setTab(t){
-  currentTab=t;
-  renderTabs();
-  render();
-  // smooth-scroll active tab into view
+  currentTab=t;renderTabs();render();
   requestAnimationFrame(()=>{
     const el=document.querySelector('.tabs-scroll .tab.active');
     if(el)el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   });
 }
 
-/* ═══════ RENDER CARDS ═══════ */
+/* ═══════ RENDER ═══════ */
 function render(){
   const dbIds=getDbWithIds();
   let list;
-  if(stepData[currentTab]){
-    const ids=stepData[currentTab].items;
-    list=dbIds.filter(x=>ids.includes(x.id));
-  } else if(currentTab==='ALL'){
-    list=[...dbIds];
-  } else {
-    list=dbIds.filter(x=>x.cat===currentTab);
-  }
-
+  if(stepData[currentTab]) list=dbIds.filter(x=>stepData[currentTab].items.includes(x.id));
+  else if(currentTab==='ALL') list=[...dbIds];
+  else list=dbIds.filter(x=>x.cat===currentTab);
   const grid=document.getElementById('gridEl');
-  if(!list.length){
-    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">此分類暫無標語</div></div>`;
-    document.getElementById('mainArea').classList.remove('isAdmin');
-    return;
-  }
+  if(!list.length){grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div style="font-size:14px;color:var(--ink4);">此分類暫無標語</div></div>`;document.getElementById('mainArea').classList.remove('isAdmin');return;}
   grid.innerHTML='';
   list.forEach(item=>{
-    const st=cartGet(item);
-    const d=document.createElement('div');
+    const st=cartGet(item);const d=document.createElement('div');
     d.className='card'+(st.sel?' sel':'');
     const imgUrl=imgBase+item.id+'.jpg';
-
-    const nameHtml=isAdmin
-      ?`<input class="a-name" value="${esc(item.n)}" oninput="updateName('${item.cat}','${escQ(item.n)}',this.value)">`
-      :`<div class="card-name">${item.n}</div>`;
-    const specR=isAdmin
-      ?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateField('${item.cat}','${escQ(item.n)}','s',this.value)">`
-      :`<span class="spec-tag spec-r">${item.s}</span>`;
-    const specM=isAdmin
-      ?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateField('${item.cat}','${escQ(item.n)}','m',this.value)">`
-      :`<span class="spec-tag spec-m">${item.m}</span>`;
-    const delBtn=isAdmin
-      ?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`
-      :'';
-
-    d.innerHTML=`${delBtn}
-      <div class="card-check"><span class="check-icon">✓</span></div>
-      <div class="card-img">
-        <img src="${imgUrl}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity .2s" alt="${item.n}">
-        <div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖</small></div>
-      </div>
-      <div class="card-body">
-        <div>
-          <div class="card-meta">
-            <span class="card-id">${item.id}</span>
-            <span class="card-cat">${cats[item.cat]||item.cat}</span>
-          </div>
-          ${nameHtml}
-          <div class="card-specs">${specR}${specM}</div>
-        </div>
-        <div class="card-footer">
-          ${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
-          <div class="qty-ctrl" onclick="event.stopPropagation()">
-            <button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',-1)">−</button>
-            <span class="qty-num">${st.qty||1}</span>
-            <button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',1)">＋</button>
-          </div>
-        </div>
-      </div>`;
-    d.addEventListener('click',e=>{
-      if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON')toggleItem(item.cat,item.n);
-    });
+    const nameH=isAdmin?`<input class="a-name" value="${esc(item.n)}" oninput="updateName('${item.cat}','${escQ(item.n)}',this.value)">`:`<div class="card-name">${item.n}</div>`;
+    const specR=isAdmin?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateField('${item.cat}','${escQ(item.n)}','s',this.value)">`:`<span class="spec-tag spec-r">${item.s}</span>`;
+    const specM=isAdmin?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateField('${item.cat}','${escQ(item.n)}','m',this.value)">`:`<span class="spec-tag spec-m">${item.m}</span>`;
+    const delB=isAdmin?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`:'';
+    d.innerHTML=`${delB}<div class="card-check"><span class="check-icon">✓</span></div>
+      <div class="card-img"><img src="${imgUrl}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity .2s" alt=""><div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖</small></div></div>
+      <div class="card-body"><div><div class="card-meta"><span class="card-id">${item.id}</span><span class="card-cat">${cats[item.cat]||item.cat}</span></div>${nameH}<div class="card-specs">${specR}${specM}</div></div>
+        <div class="card-footer">${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
+          <div class="qty-ctrl" onclick="event.stopPropagation()"><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',-1)">−</button><span class="qty-num">${st.qty||1}</span><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',1)">＋</button></div></div></div>`;
+    d.addEventListener('click',e=>{if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON')toggleItem(item.cat,item.n);});
     grid.appendChild(d);
   });
-  if(isAdmin) document.getElementById('mainArea').classList.add('isAdmin');
+  if(isAdmin)document.getElementById('mainArea').classList.add('isAdmin');
   else document.getElementById('mainArea').classList.remove('isAdmin');
 }
-
-/* helpers */
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
 function escQ(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
 /* ═══════ CART ═══════ */
-function toggleItem(cat,n){
-  const item=db.find(x=>x.cat===cat&&x.n===n);if(!item)return;
-  const k=cartKey(item);
-  if(!cart[k])cart[k]={sel:false,qty:1};
-  cart[k].sel=!cart[k].sel;
-  render();updateBadge();
-}
-function adjQty(cat,n,delta){
-  event.stopPropagation();
-  const item=db.find(x=>x.cat===cat&&x.n===n);if(!item)return;
-  const k=cartKey(item);
-  if(!cart[k])cart[k]={sel:true,qty:1};
-  cart[k].qty=Math.max(1,(cart[k].qty||1)+delta);
-  if(delta>0&&!cart[k].sel)cart[k].sel=true;
-  render();updateBadge();
-}
-function updateBadge(){
-  document.getElementById('cartBadge').textContent=getDbWithIds().filter(x=>cartGet(x).sel).length;
-}
+function toggleItem(cat,n){const item=db.find(x=>x.cat===cat&&x.n===n);if(!item)return;const k=cartKey(item);if(!cart[k])cart[k]={sel:false,qty:1};cart[k].sel=!cart[k].sel;render();updateBadge();}
+function adjQty(cat,n,delta){event.stopPropagation();const item=db.find(x=>x.cat===cat&&x.n===n);if(!item)return;const k=cartKey(item);if(!cart[k])cart[k]={sel:true,qty:1};cart[k].qty=Math.max(1,(cart[k].qty||1)+delta);if(delta>0&&!cart[k].sel)cart[k].sel=true;render();updateBadge();}
+function updateBadge(){document.getElementById('cartBadge').textContent=getDbWithIds().filter(x=>cartGet(x).sel).length;}
 function resetCart(){if(confirm('確認清除所有選取？')){cart={};render();updateBadge();}}
 
 /* ═══════ DB MUTATIONS ═══════ */
-function updateName(cat,oldN,newN){
-  const item=db.find(x=>x.cat===cat&&x.n===oldN);if(!item)return;
-  const oldKey=cartKey(item);
-  const saved=cart[oldKey];
-  delete cart[oldKey];
-  item.n=newN;
-  if(saved!==undefined)cart[cartKey(item)]=saved;
-  save();
-}
-function updateField(cat,n,field,val){
-  const item=db.find(x=>x.cat===cat&&x.n===n);
-  if(item){item[field]=val;save();}
-}
-function deleteItem(cat,n){
-  if(!confirm(`確定刪除「${n}」？刪除後同類別後續項目將自動重新編號。`))return;
-  const idx=db.findIndex(x=>x.cat===cat&&x.n===n);
-  if(idx<0)return;
-  db.splice(idx,1);
-  delete cart[cat+'::'+n];
-  save();render();updateBadge();
-}
+function updateName(cat,oldN,newN){const item=db.find(x=>x.cat===cat&&x.n===oldN);if(!item)return;const ok=cartKey(item),sv=cart[ok];delete cart[ok];item.n=newN;if(sv!==undefined)cart[cartKey(item)]=sv;save();}
+function updateField(cat,n,f,v){const item=db.find(x=>x.cat===cat&&x.n===n);if(item){item[f]=v;save();}}
+function deleteItem(cat,n){if(!confirm(`確定刪除「${n}」？`))return;const idx=db.findIndex(x=>x.cat===cat&&x.n===n);if(idx<0)return;db.splice(idx,1);delete cart[cat+'::'+n];save();render();updateBadge();}
 
-/* ═══════ SITE ═══════ */
-function addSite(){
-  const nm=prompt('新增工地名稱：');
-  if(nm&&nm.trim()){sites.push(nm.trim());renderSites();document.getElementById('siteSelect').value=nm.trim();save();}
-}
-function deleteSite(){
-  const v=document.getElementById('siteSelect').value;
-  if(!confirm(`確定刪除「${v}」？`))return;
-  sites=sites.filter(s=>s!==v);
-  if(!sites.length)sites=['新工地'];
-  renderSites();save();
-}
+/* ═══════ SITES ═══════ */
+function addSite(){const nm=prompt('新增工地名稱：');if(nm&&nm.trim()){sites.push(nm.trim());renderSites();document.getElementById('siteSelect').value=nm.trim();save();}}
+function deleteSite(){const v=document.getElementById('siteSelect').value;if(!confirm(`確定刪除「${v}」？`))return;sites=sites.filter(s=>s!==v);if(!sites.length)sites=['新工地'];renderSites();save();}
 
 /* ═══════ ADD SIGN ═══════ */
 function addNewSign(){
-  // show category selector then name prompt
-  const catList=catOrder.filter(k=>cats[k]);
-  const catStr=catList.map((k,i)=>`${i+1}. ${cats[k]} (${k})`).join('\n');
-  const choice=prompt(`請選擇要新增標語的類別（輸入代碼，如 A）：\n\n${catStr}`);
-  if(!choice)return;
+  const catStr=catOrder.filter(k=>cats[k]).map((k,i)=>`${i+1}. ${cats[k]} (${k})`).join('\n');
+  const choice=prompt(`選擇類別代碼（如 A）：\n\n${catStr}`);if(!choice)return;
   const cat=choice.toUpperCase().trim();
-  if(!cats[cat]){
-    if(!confirm(`類別「${cat}」不存在，要自動建立嗎？`))return;
-    cats[cat]=cat+'. 新分類';catOrder.push(cat);
-  }
-  const nm=prompt(`在「${cats[cat]}」中新增標語名稱：`);
-  if(!nm||!nm.trim())return;
+  if(!cats[cat]){if(!confirm(`類別「${cat}」不存在，要自動建立嗎？`))return;cats[cat]=cat+'. 新分類';catOrder.push(cat);}
+  const nm=prompt(`在「${cats[cat]}」中新增標語名稱：`);if(!nm||!nm.trim())return;
   db.push({cat,n:nm.trim(),s:'60x40',m:'中空板'});
   save();renderTabs();render();setTab(cat);
 }
+function addStep(){const t=prompt('工序標籤名稱（含emoji）：',`🔧 Step${Object.keys(stepData).length+1} 新工序`);if(!t)return;let key='S'+(Object.keys(stepData).length+1);while(stepData[key])key='S'+(parseInt(key.slice(1))+1);stepData[key]={t,items:[]};save();renderTabs();setTab(key);}
+function deleteStep(key){if(!confirm(`確定刪除工序「${stepData[key].t}」？`))return;delete stepData[key];if(currentTab===key)currentTab='ALL';save();renderTabs();render();}
+function addCat(){const key=prompt('新類別代碼（單一英文字母）：');if(!key)return;const k=key.toUpperCase().trim();if(cats[k])return alert('此類別已存在');const label=prompt('類別顯示名稱：',k+'. 新類別');if(!label)return;cats[k]=label;catOrder.push(k);save();renderTabs();setTab(k);}
+function deleteCat(k){if(db.some(x=>x.cat===k)){alert('此類別尚有標語，請先移除後再刪除。');return;}if(!confirm(`確定刪除類別「${cats[k]}」？`))return;delete cats[k];catOrder=catOrder.filter(c=>c!==k);if(currentTab===k)currentTab='ALL';save();renderTabs();render();}
 
-/* ═══════ STEP / CAT ═══════ */
-function addStep(){
-  const t=prompt('工序標籤名稱（含 emoji）：',`🔧 Step${Object.keys(stepData).length+1} 新工序`);
-  if(!t)return;
-  let key='S'+(Object.keys(stepData).length+1);
-  while(stepData[key])key='S'+(parseInt(key.slice(1))+1);
-  stepData[key]={t,items:[]};
-  save();renderTabs();setTab(key);
-}
-function deleteStep(key){
-  if(!confirm(`確定刪除工序「${stepData[key].t}」？`))return;
-  delete stepData[key];
-  if(currentTab===key)currentTab='ALL';
-  save();renderTabs();render();
-}
-function addCat(){
-  const key=prompt('新類別代碼（單一英文字母，如 L）：');
-  if(!key)return;
-  const k=key.toUpperCase().trim();
-  if(cats[k])return alert('此類別已存在');
-  const label=prompt('類別顯示名稱：',k+'. 新類別');
-  if(!label)return;
-  cats[k]=label;catOrder.push(k);
-  save();renderTabs();setTab(k);
-}
-function deleteCat(k){
-  if(db.some(x=>x.cat===k)){alert('此類別尚有標語，請先移除所有標語後再刪除。');return;}
-  if(!confirm(`確定刪除類別「${cats[k]}」？`))return;
-  delete cats[k];catOrder=catOrder.filter(c=>c!==k);
-  if(currentTab===k)currentTab='ALL';
-  save();renderTabs();render();
-}
-
-/* ═══════ BUILD REPORT HTML ═══════ */
-function buildReportHtml(sel,site,staff,now,totalQty){
-  let rows='';
-  sel.forEach((item,idx)=>{
-    const qty=cartGet(item).qty||1;
-    rows+=`<tr>
-      <td style="text-align:center;color:#94A3B8;font-size:11px;">${idx+1}</td>
-      <td style="font-weight:700;color:#164E33;font-size:12px;">${item.id}</td>
-      <td style="font-weight:900;font-size:13px;">${item.n}</td>
-      <td style="font-size:11px;color:#64748B;">${item.s}</td>
-      <td style="font-size:11px;color:#64748B;">${item.m}</td>
-      <td style="font-weight:900;font-size:18px;color:#164E33;text-align:right;">${qty}</td>
-    </tr>`;
-  });
-  return `<!DOCTYPE html><html lang="zh-TW"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>採購單 ${site}</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans TC',sans-serif;}
-body{background:#fff;padding:20px;max-width:700px;margin:0 auto;}
-.hdr{background:#164E33;color:white;padding:14px 18px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-.hdr-t{font-size:17px;font-weight:900;}
-.hdr-d{font-size:12px;opacity:.7;}
-.meta{display:flex;background:#FFFBF0;border:1px solid #E2C96A;border-radius:8px;margin-bottom:14px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-.mi{flex:1;padding:9px 12px;border-right:1px solid #E2C96A;}
-.mi:last-child{border-right:none;}
-.ml{font-size:10px;color:#64748B;margin-bottom:2px;}
-.mv{font-size:13px;font-weight:700;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-thead tr{background:#FFFBF0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-th{padding:8px 6px;font-weight:700;color:#164E33;text-align:left;border-bottom:2px solid #E2C96A;}
-td{padding:7px 6px;border-bottom:1px solid #F1F5F9;vertical-align:middle;}
-tr:nth-child(even) td{background:#FEFDF8;}
-tr:last-child td{border-bottom:none;}
-.foot{display:flex;justify-content:space-between;background:#164E33;color:white;padding:11px 16px;border-radius:8px;margin-top:14px;font-size:13px;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-.foot strong{color:#A8D96A;font-size:15px;}
-.hint{text-align:center;color:#94A3B8;font-size:11px;margin-top:18px;line-height:1.6;}
-@media print{.hint{display:none!important;} tr{page-break-inside:avoid;} @page{margin:12mm;}}
-</style>
-</head><body>
-<div class="hdr"><div class="hdr-t">🦺 ${config.title} 採購單</div><div class="hdr-d">${now}</div></div>
-<div class="meta">
-  <div class="mi"><div class="ml">工地名稱</div><div class="mv">${site}</div></div>
-  <div class="mi"><div class="ml">負責人員</div><div class="mv">${staff}</div></div>
-  <div class="mi"><div class="ml">填單日期</div><div class="mv">${now}</div></div>
-</div>
-<table><thead><tr>
-  <th>#</th><th>編號</th><th>名稱</th><th>規格</th><th>材質</th>
-  <th style="text-align:right;">數量</th>
-</tr></thead><tbody>${rows}</tbody></table>
-<div class="foot">
-  <span>合計 <strong>${sel.length}</strong> 品項</span>
-  <span>合計 <strong>${totalQty}</strong> 件</span>
-</div>
-<p class="hint">📱 手機：對此頁面截圖或使用瀏覽器「分享→儲存PDF」<br>💻 電腦：Ctrl+P → 另存為PDF</p>
-</body></html>`;
-}
-
-/* ═══════ REPORT MODAL ═══════ */
+/* ═══════ REPORT ═══════ */
+let _sel,_site,_staff,_now,_totalQty;
 function buildReport(){
   const dbIds=getDbWithIds();
-  const sel=dbIds.filter(i=>cartGet(i).sel);
-  if(!sel.length)return alert('請先點選標語項目');
-  const site=document.getElementById('siteSelect').value;
-  const staff=document.getElementById('staffInput').value||'（未填）';
-  const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const totalQty=sel.reduce((a,i)=>a+(cartGet(i).qty||1),0);
+  _sel=dbIds.filter(i=>cartGet(i).sel);
+  if(!_sel.length)return alert('請先點選標語項目');
+  _site=document.getElementById('siteSelect').value;
+  _staff=document.getElementById('staffInput').value||'（未填）';
+  _now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  _totalQty=_sel.reduce((a,i)=>a+(cartGet(i).qty||1),0);
 
   document.getElementById('rptTitle').textContent=config.title+' 採購單';
-  document.getElementById('rptMeta').innerHTML=
-    `<span><strong>${site}</strong>工地名稱</span>
-     <span><strong>${staff}</strong>負責人員</span>
-     <span><strong>${now}</strong>填單日期</span>`;
-
+  document.getElementById('rptMeta').innerHTML=`<span><strong>${_site}</strong>工地名稱</span><span><strong>${_staff}</strong>負責人員</span><span><strong>${_now}</strong>填單日期</span>`;
   let rows='';
-  sel.forEach((item,idx)=>{
-    rows+=`<div class="report-item">
-      <span class="rpt-num">${idx+1}</span>
-      <img class="rpt-img" src="${imgBase+item.id+'.jpg'}" onerror="this.style.opacity=.12" alt="">
-      <div class="rpt-info">
-        <div class="rpt-name">[${item.id}] ${item.n}</div>
-        <div class="rpt-spec">規格：${item.s}　材質：${item.m}</div>
-      </div>
-      <div class="rpt-qty">${cartGet(item).qty||1}</div>
-    </div>`;
-  });
+  _sel.forEach((item,idx)=>{rows+=`<div class="report-item"><span class="rpt-num">${idx+1}</span><img class="rpt-img" src="${imgBase+item.id+'.jpg'}" onerror="this.style.opacity=.1" alt=""><div class="rpt-info"><div class="rpt-name">[${item.id}] ${item.n}</div><div class="rpt-spec">規格：${item.s}　材質：${item.m}</div></div><div class="rpt-qty">${cartGet(item).qty||1}</div></div>`;});
   document.getElementById('rptList').innerHTML=rows;
-  document.getElementById('rptTotal').innerHTML=
-    `<span>合計 <strong>${sel.length}</strong> 品項</span><span>合計 <strong>${totalQty}</strong> 件</span>`;
-  document.getElementById('modalHint').innerHTML=
-    '📱 手機：點「開啟列印頁」→ 截圖或分享儲存PDF<br>💻 電腦：點「列印／儲存PDF」→ 在列印視窗選另存PDF';
+  document.getElementById('rptTotal').innerHTML=`<span>合計 <strong>${_sel.length}</strong> 品項</span><span>合計 <strong>${_totalQty}</strong> 件</span>`;
+  document.getElementById('modalHint').innerHTML='📱 手機：點截圖模式後截圖<br>💻 電腦：列印→另存PDF';
   document.getElementById('overlay').classList.add('show');
-
-  // store for print/export
-  window._rptSel=sel;window._rptSite=site;window._rptStaff=staff;window._rptNow=now;window._rptTotalQty=totalQty;
+  // save to history
+  saveHistLocal({id:Date.now(),date:_now,site:_site,staff:_staff,totalQty:_totalQty,items:_sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1})),note:''});
+  // push to cloud if configured
+  if(gsUrl) pushHistToCloud({id:Date.now(),date:_now,site:_site,staff:_staff,totalQty:_totalQty,items:_sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1})),note:''});
 }
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 
-/* ── Print (desktop): inject clean HTML into printContainer, then window.print() ── */
+/* ═══════ PRINT (desktop) ═══════ */
 function doPrint(){
-  const {_rptSel:sel,_rptSite:site,_rptStaff:staff,_rptNow:now,_rptTotalQty:totalQty}=window;
-  if(!sel)return;
-  const pc=document.getElementById('printContainer');
-  // Build print-only content inline (avoids new window, no popup blocker)
+  if(!_sel)return;
   let rows='';
-  sel.forEach((item,idx)=>{
+  _sel.forEach((item,idx)=>{
     const qty=cartGet(item).qty||1;
-    rows+=`<tr style="page-break-inside:avoid;">
-      <td style="text-align:center;color:#94A3B8;font-size:11px;padding:7px 5px;">${idx+1}</td>
-      <td style="font-weight:700;color:#164E33;font-size:12px;padding:7px 5px;">${item.id}</td>
-      <td style="font-weight:900;font-size:13px;padding:7px 5px;">${item.n}</td>
-      <td style="font-size:11px;color:#64748B;padding:7px 5px;">${item.s}</td>
-      <td style="font-size:11px;color:#64748B;padding:7px 5px;">${item.m}</td>
-      <td style="font-weight:900;font-size:18px;color:#164E33;text-align:right;padding:7px 5px;">${qty}</td>
-    </tr>`;
+    rows+=`<tr><td style="text-align:center;color:#94A3B8;font-size:11px;padding:7px 5px;">${idx+1}</td><td style="font-weight:700;color:#164E33;padding:7px 5px;">${item.id}</td><td style="font-weight:900;padding:7px 5px;">${item.n}</td><td style="font-size:11px;color:#64748B;padding:7px 5px;">${item.s}</td><td style="font-size:11px;color:#64748B;padding:7px 5px;">${item.m}</td><td style="font-weight:900;font-size:18px;color:#164E33;text-align:right;padding:7px 5px;">${qty}</td></tr>`;
   });
-  pc.innerHTML=`
-    <div style="font-family:'Noto Sans TC',sans-serif;max-width:700px;margin:0 auto;padding:10px;">
-      <div style="background:#164E33;color:white;padding:13px 18px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-        <span style="font-size:17px;font-weight:900;">🦺 ${config.title} 採購單</span>
-        <span style="font-size:12px;opacity:.7;">${now}</span>
-      </div>
-      <div style="display:flex;background:#FFFBF0;border:1px solid #E2C96A;border-radius:8px;margin-bottom:12px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-        <div style="flex:1;padding:8px 12px;border-right:1px solid #E2C96A;"><div style="font-size:10px;color:#64748B;">工地名稱</div><div style="font-size:13px;font-weight:700;">${site}</div></div>
-        <div style="flex:1;padding:8px 12px;border-right:1px solid #E2C96A;"><div style="font-size:10px;color:#64748B;">負責人員</div><div style="font-size:13px;font-weight:700;">${staff}</div></div>
-        <div style="flex:1;padding:8px 12px;"><div style="font-size:10px;color:#64748B;">填單日期</div><div style="font-size:13px;font-weight:700;">${now}</div></div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px;font-family:'Noto Sans TC',sans-serif;">
-        <thead><tr style="background:#FFFBF0;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;text-align:center;">#</th>
-          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">編號</th>
-          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">名稱</th>
-          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">規格</th>
-          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">材質</th>
-          <th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;text-align:right;">數量</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <div style="display:flex;justify-content:space-between;background:#164E33;color:white;padding:11px 16px;border-radius:8px;margin-top:12px;font-size:13px;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-        <span>合計 <span style="color:#A8D96A;font-size:15px;">${sel.length}</span> 品項</span>
-        <span>合計 <span style="color:#A8D96A;font-size:15px;">${totalQty}</span> 件</span>
-      </div>
-    </div>`;
+  document.getElementById('printContainer').innerHTML=`<div style="font-family:'Noto Sans TC',sans-serif;max-width:700px;margin:0 auto;padding:10px;">
+    <div style="background:#164E33;color:white;padding:13px 18px;border-radius:10px;display:flex;justify-content:space-between;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span style="font-size:17px;font-weight:900;">${config.title} 採購單</span><span style="font-size:12px;opacity:.7;">${_now}</span></div>
+    <div style="display:flex;background:#FFFBF0;border:1px solid #E2C96A;border-radius:8px;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+      <div style="flex:1;padding:8px 12px;border-right:1px solid #E2C96A;"><div style="font-size:10px;color:#64748B;">工地名稱</div><div style="font-size:13px;font-weight:700;">${_site}</div></div>
+      <div style="flex:1;padding:8px 12px;border-right:1px solid #E2C96A;"><div style="font-size:10px;color:#64748B;">負責人員</div><div style="font-size:13px;font-weight:700;">${_staff}</div></div>
+      <div style="flex:1;padding:8px 12px;"><div style="font-size:10px;color:#64748B;">填單日期</div><div style="font-size:13px;font-weight:700;">${_now}</div></div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;font-family:'Noto Sans TC',sans-serif;">
+      <thead><tr style="background:#FFFBF0;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;text-align:center;">#</th><th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">編號</th><th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">名稱</th><th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">規格</th><th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;">材質</th><th style="padding:8px 5px;font-weight:700;color:#164E33;border-bottom:2px solid #E2C96A;text-align:right;">數量</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;background:#164E33;color:white;padding:11px 16px;border-radius:8px;margin-top:12px;font-size:13px;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span>合計 <span style="color:#A8D96A;font-size:15px;">${_sel.length}</span> 品項</span><span>合計 <span style="color:#A8D96A;font-size:15px;">${_totalQty}</span> 件</span></div>
+  </div>`;
   window.print();
-  // clean up after print dialog
-  setTimeout(()=>{pc.innerHTML='';},2000);
+  setTimeout(()=>{document.getElementById('printContainer').innerHTML='';},3000);
 }
 
-/* ── Open standalone print page (mobile screenshot) ── */
-function openPrintPage(){
-  const {_rptSel:sel,_rptSite:site,_rptStaff:staff,_rptNow:now,_rptTotalQty:totalQty}=window;
-  if(!sel)return;
-  const html=buildReportHtml(sel,site,staff,now,totalQty);
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
+/* ═══════ FULLSCREEN SCREENSHOT ═══════ */
+function showFsReport(){
+  if(!_sel)return;
+  let rows='';
+  _sel.forEach((item,idx)=>{
+    const qty=cartGet(item).qty||1,bg=idx%2===0?'#fff':'#FEFDF8';
+    rows+=`<tr style="background:${bg};"><td style="padding:7px 5px;text-align:center;color:#94A3B8;font-size:11px;">${idx+1}</td><td style="padding:7px 5px;font-weight:700;color:#164E33;font-size:11px;">${item.id}</td><td style="padding:7px 5px;font-weight:900;font-size:13px;">${item.n}</td><td style="padding:7px 5px;font-size:11px;color:#64748B;">${item.s}</td><td style="padding:7px 5px;font-size:11px;color:#64748B;">${item.m}</td><td style="padding:7px 5px;font-weight:900;font-size:17px;color:#164E33;text-align:right;">${qty}</td></tr>`;
+  });
+  document.getElementById('fsContent').innerHTML=`
+    <div style="background:#164E33;color:white;padding:12px 16px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-size:16px;font-weight:900;">${config.title}</span><span style="font-size:11px;opacity:.75;">${_now}</span></div>
+    <div style="display:flex;background:#FFFBF0;border:1px solid #E2C96A;border-radius:8px;margin-bottom:12px;overflow:hidden;">
+      <div style="flex:1;padding:8px 10px;border-right:1px solid #E2C96A;"><div style="font-size:9px;color:#64748B;">工地名稱</div><div style="font-size:12px;font-weight:700;">${_site}</div></div>
+      <div style="flex:1;padding:8px 10px;border-right:1px solid #E2C96A;"><div style="font-size:9px;color:#64748B;">負責人員</div><div style="font-size:12px;font-weight:700;">${_staff}</div></div>
+      <div style="flex:1;padding:8px 10px;"><div style="font-size:9px;color:#64748B;">填單日期</div><div style="font-size:12px;font-weight:700;">${_now}</div></div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#FFFBF0;"><th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;text-align:center;">#</th><th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">編號</th><th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">名稱</th><th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">規格</th><th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;">材質</th><th style="padding:7px 5px;font-size:10px;color:#164E33;font-weight:700;border-bottom:2px solid #E2C96A;text-align:right;">數量</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;background:#164E33;color:white;padding:10px 14px;border-radius:8px;margin-top:10px;font-size:13px;font-weight:700;"><span>合計 <span style="color:#A8D96A;font-size:15px;">${_sel.length}</span> 品項</span><span>合計 <span style="color:#A8D96A;font-size:15px;">${_totalQty}</span> 件</span></div>`;
+  document.getElementById('overlay').classList.remove('show');
+  const fs=document.getElementById('fsOverlay');fs.style.display='block';fs.scrollTop=0;
+}
+
+/* ═══════ HISTORY (local) ═══════ */
+function saveHistLocal(rec){
+  let h=JSON.parse(localStorage.getItem(LS+'hist')||'[]');
+  h.unshift(rec);if(h.length>300)h=h.slice(0,300);
+  localStorage.setItem(LS+'hist',JSON.stringify(h));
+}
+function getHistLocal(){return JSON.parse(localStorage.getItem(LS+'hist')||'[]');}
+
+function showHistory(){
+  let history=getHistLocal();
+  const list=document.getElementById('histList');
+  if(!history.length){list.innerHTML='<div style="text-align:center;padding:40px;color:#94A3B8;font-size:14px;">尚無採購紀錄</div>';}
+  else{
+    list.innerHTML=history.map(rec=>`
+      <div class="hist-rec">
+        <div class="hist-hdr"><span style="font-size:13px;font-weight:900;">${rec.site}</span><span style="font-size:11px;opacity:.75;">${rec.date}</span></div>
+        <div class="hist-sub">負責人：${rec.staff}　${rec.items?rec.items.length:0} 品項　${rec.totalQty} 件</div>
+        ${(rec.items||[]).map(i=>`<div class="hist-row"><span style="color:#164E33;font-weight:700;">[${i.id}] ${i.n}</span><span style="font-weight:700;">×${i.qty}</span></div>`).join('')}
+        <div class="hist-foot"><button onclick="deleteHistLocal(${rec.id})" style="font-size:10px;padding:3px 8px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:4px;cursor:pointer;font-family:inherit;">刪除</button></div>
+      </div>`).join('');
+  }
+  document.getElementById('histOverlay').classList.add('show');
+}
+function closeHistory(){document.getElementById('histOverlay').classList.remove('show');}
+function deleteHistLocal(id){let h=getHistLocal().filter(r=>r.id!==id);localStorage.setItem(LS+'hist',JSON.stringify(h));showHistory();}
+function clearHistory(){if(!confirm('確定清除所有本機紀錄？'))return;localStorage.removeItem(LS+'hist');showHistory();}
+
+/* ── Export Excel (CSV with BOM — opens in Excel) ── */
+function exportHistExcel(){
+  const h=getHistLocal();if(!h.length)return alert('尚無紀錄');
+  let csv='\uFEFF日期,工地名稱,負責人員,編號,標語名稱,規格(cm),材質,數量,備註\n';
+  h.forEach(rec=>{(rec.items||[]).forEach(i=>{csv+=`"${rec.date}","${rec.site}","${rec.staff}","${i.id}","${i.n}","${i.s}","${i.m}","${i.qty}","${rec.note||''}"\n`;});});
+  const b=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download=`採購紀錄_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  showToast('📊 CSV 已下載，請用 Excel 開啟');
+}
+
+/* ── Export PDF via print ── */
+function exportHistPdf(){
+  const h=getHistLocal();if(!h.length)return alert('尚無紀錄');
+  let rows='';
+  h.forEach((rec,ri)=>{
+    rows+=`<tr style="background:#F0FAE6;"><td colspan="6" style="padding:8px 8px 4px;font-weight:900;font-size:13px;color:#164E33;">${ri+1}. ${rec.site} ─ ${rec.date} ／ ${rec.staff}</td></tr>`;
+    (rec.items||[]).forEach((item,ii)=>{rows+=`<tr style="background:${ii%2===0?'#fff':'#FEFDF8'};"><td style="padding:5px 8px;color:#94A3B8;font-size:11px;text-align:center;">${ii+1}</td><td style="padding:5px 8px;font-weight:700;color:#164E33;">${item.id}</td><td style="padding:5px 8px;font-weight:900;">${item.n}</td><td style="padding:5px 8px;font-size:11px;color:#64748B;">${item.s}</td><td style="padding:5px 8px;font-size:11px;color:#64748B;">${item.m}</td><td style="padding:5px 8px;font-weight:900;font-size:16px;color:#164E33;text-align:right;">×${item.qty}</td></tr>`;});
+    rows+=`<tr style="background:#FEF8E6;"><td colspan="5" style="padding:5px 8px;font-size:11px;color:#64748B;">合計 ${(rec.items||[]).length} 品項</td><td style="padding:5px 8px;font-weight:900;color:#164E33;text-align:right;">共 ${rec.totalQty} 件</td></tr>`;
+    rows+=`<tr><td colspan="6" style="padding:6px 0;"></td></tr>`;
+  });
+  const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  document.getElementById('printContainer').innerHTML=`<div style="font-family:'Noto Sans TC',sans-serif;max-width:720px;margin:0 auto;padding:12px;">
+    <div style="background:#164E33;color:white;padding:12px 18px;border-radius:10px;margin-bottom:14px;display:flex;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span style="font-size:16px;font-weight:900;">${config.title} — 採購歷史紀錄</span><span style="font-size:11px;opacity:.7;">列印日期：${now}</span></div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'Noto Sans TC',sans-serif;">
+      <thead><tr style="background:#FFFBF0;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;text-align:center;">#</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">編號</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">名稱</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">規格</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">材質</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;text-align:right;">數量</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+  window.print();
+  setTimeout(()=>{document.getElementById('printContainer').innerHTML='';},3000);
+}
+
+/* ═══════ CLOUD (Google Apps Script) ═══════ */
+function configGSheets(){
+  const v=prompt('請輸入 Google Apps Script 網址：\n（部署後取得的網頁應用程式網址）',gsUrl||'');
+  if(v===null)return;
+  gsUrl=v.trim();localStorage.setItem(LS+'gsUrl',gsUrl);
+  updateSyncDot();
+  if(gsUrl)showToast('☁️ 雲端網址已儲存');
+}
+
+async function cloudReq(params){
+  if(!gsUrl)return null;
+  const dot=document.getElementById('syncDot');
+  dot.className='sync-dot syncing';
+  try{
+    const url=gsUrl+'?'+new URLSearchParams({...params,pw:localStorage.getItem(LS+'adminPw')||'751113'});
+    const res=await fetch(url,{method:'GET',mode:'cors'});
+    const data=await res.json();
+    dot.className='sync-dot'+(gsUrl?'':' off');
+    return data;
+  }catch(e){
+    dot.className='sync-dot off';
+    return {ok:false,error:e.toString()};
+  }
+}
+
+async function cloudPost(body){
+  if(!gsUrl)return null;
+  const dot=document.getElementById('syncDot');
+  dot.className='sync-dot syncing';
+  try{
+    const res=await fetch(gsUrl,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...body,pw:localStorage.getItem(LS+'adminPw')||'751113'})});
+    const data=await res.json();
+    dot.className='sync-dot'+(gsUrl?'':' off');
+    return data;
+  }catch(e){
+    dot.className='sync-dot off';
+    return {ok:false,error:e.toString()};
+  }
+}
+
+async function pushToCloud(){
+  if(!gsUrl)return alert('請先設定雲端網址（管理員→☁️ 雲端設定）');
+  const data={db,sites,config,stepData,cats,catOrder,imgBase,logo:logoSrc};
+  const res=await cloudPost({action:'saveAll',data});
+  if(res&&res.ok)showToast('⬆️ 已推送至 Google Sheets');
+  else showToast('⚠️ 推送失敗：'+(res?res.error:'網路錯誤'));
+}
+
+async function pullFromCloud(silent=false){
+  if(!gsUrl){if(!silent)alert('請先設定雲端網址');return;}
+  const res=await cloudReq({action:'loadAll'});
+  if(!res||!res.ok){if(!silent)showToast('⚠️ 同步失敗：'+(res?res.error:'網路錯誤'));return;}
+  if(res.db&&res.db.length)   db=res.db;
+  if(res.sites&&res.sites.length) sites=res.sites;
+  if(res.config)  config=res.config;
+  if(res.steps)   stepData=res.steps;
+  if(res.cats)    cats=res.cats;
+  if(res.catOrder&&res.catOrder.length) catOrder=res.catOrder;
+  if(res.imgBase) imgBase=res.imgBase;
+  if(res.logo)    {logoSrc=res.logo;localStorage.setItem(LS+'logo',logoSrc);}
+  save();renderLogo();renderTitle();renderSites();renderTabs();render();
+  if(!silent)showToast('⬇️ 已從雲端同步最新內容');
+}
+
+async function pushHistToCloud(record){
+  if(!gsUrl)return;
+  await cloudPost({action:'saveHistory',record});
 }
 
 /* ═══════ ADMIN ═══════ */
@@ -842,11 +730,11 @@ function toggleAdmin(){
   if(!isAdmin){
     const pw=prompt('請輸入管理員密碼：');
     if(pw==='751113'){
-      isAdmin=true;
+      isAdmin=true;localStorage.setItem(LS+'adminPw',pw);
       document.getElementById('adminBtn').textContent='🔓 管理中';
       document.getElementById('adminBtn').classList.add('active');
       document.getElementById('adminPanel').classList.add('show');
-    } else if(pw!==null){alert('密碼錯誤');}
+    } else if(pw!==null)alert('密碼錯誤');
   } else {
     isAdmin=false;
     document.getElementById('adminBtn').textContent='🔒 管理員';
@@ -856,42 +744,23 @@ function toggleAdmin(){
   renderLogo();renderTitle();renderTabs();render();
 }
 
-/* ═══════ SETTINGS ═══════ */
-function configImgBase(){
-  const v=prompt('圖片路徑 Base URL（請以 / 結尾）：',imgBase);
-  if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem('ys5_imgBase',imgBase);render();}
-}
-
 /* ═══════ PERSISTENCE ═══════ */
 function save(){
-  localStorage.setItem('ys5_db',JSON.stringify(db));
-  localStorage.setItem('ys5_staff',document.getElementById('staffInput').value);
-  localStorage.setItem('ys5_site',document.getElementById('siteSelect').value);
-  localStorage.setItem('ys5_cfg',JSON.stringify(config));
-  localStorage.setItem('ys5_steps',JSON.stringify(stepData));
-  localStorage.setItem('ys5_cats',JSON.stringify(cats));
-  localStorage.setItem('ys5_catOrd',JSON.stringify(catOrder));
-  localStorage.setItem('ys5_sites',JSON.stringify(sites));
+  localStorage.setItem(LS+'db',JSON.stringify(db));
+  localStorage.setItem(LS+'staff',document.getElementById('staffInput').value);
+  localStorage.setItem(LS+'site',document.getElementById('siteSelect').value);
+  localStorage.setItem(LS+'cfg',JSON.stringify(config));
+  localStorage.setItem(LS+'steps',JSON.stringify(stepData));
+  localStorage.setItem(LS+'cats',JSON.stringify(cats));
+  localStorage.setItem(LS+'catOrd',JSON.stringify(catOrder));
+  localStorage.setItem(LS+'sites',JSON.stringify(sites));
 }
-function exportData(){
-  const d={db,sites,config,stepData,cats,catOrder,imgBase,logoSrc};
-  const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();
-}
-function importData(){
-  const j=prompt('貼上備份 JSON：');if(!j)return;
-  try{
-    const d=JSON.parse(j);
-    if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;
-    if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.catOrder)catOrder=d.catOrder;
-    if(d.imgBase)imgBase=d.imgBase;
-    if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem('ys5_logo',logoSrc);}
-    save();location.reload();
-  }catch(e){alert('格式錯誤，請確認備份檔案');}
-}
+function configImgBase(){const v=prompt('圖片路徑 Base URL（以 / 結尾）：',imgBase);if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem(LS+'imgBase',imgBase);render();}}
+function exportData(){const d={db,sites,config,stepData,cats,catOrder,imgBase,logoSrc};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();}
+function importData(){const j=prompt('貼上備份 JSON：');if(!j)return;try{const d=JSON.parse(j);if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.catOrder)catOrder=d.catOrder;if(d.imgBase)imgBase=d.imgBase;if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem(LS+'logo',logoSrc);}save();location.reload();}catch(e){alert('格式錯誤');}}
 
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('histOverlay').addEventListener('click',function(e){if(e.target===this)closeHistory();});
 init();
 </script>
 </body>
