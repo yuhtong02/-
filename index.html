@@ -712,102 +712,114 @@ function saveCloudConfig(){
   document.getElementById('cloudOverlay').classList.remove('show');
   showToast(gsUrl?'☁️ 雲端設定已儲存':'已清除雲端設定');
 }
+/* ── JSONP: 100% CORS-free, works from any server/domain ── */
+function jsonpCall(url, ms){
+  return new Promise((resolve,reject)=>{
+    const cb='__gs'+Date.now();
+    const el=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();reject(new Error('逾時10秒，請確認：①已部署為網頁應用程式 ②存取對象=所有人（包含匿名） ③網址結尾是/exec'));},ms||12000);
+    function cleanup(){clearTimeout(t);if(el.parentNode)el.parentNode.removeChild(el);delete window[cb];}
+    window[cb]=d=>{cleanup();resolve(d);};
+    el.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    el.onerror=()=>{cleanup();reject(new Error('Script 載入失敗，網址可能錯誤'));};
+    document.head.appendChild(el);
+  });
+}
+function gasParams(obj){
+  const pw=localStorage.getItem(LS+'adminPw')||'751113';
+  return Object.entries({...obj,pw}).map(([k,v])=>k+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):v)).join('&');
+}
+async function gasCall(params){
+  if(!gsUrl)return null;
+  const dot=document.getElementById('syncDot');dot.className='sync-dot syncing';
+  try{const d=await jsonpCall(gsUrl+'?'+gasParams(params));dot.className='sync-dot';return d;}
+  catch(e){dot.className='sync-dot off';return{ok:false,error:e.message};}
+}
+/* gasSend: encode payload as base64, split into chunks if too large */
+async function gasSend(action, payload){
+  if(!gsUrl)return null;
+  const dot=document.getElementById('syncDot'); dot.className='sync-dot syncing';
+  try{
+    const pw=localStorage.getItem(LS+'adminPw')||'751113';
+    const json=JSON.stringify({action,...payload,pw});
+    const enc=btoa(unescape(encodeURIComponent(json)));
+    // URL safe limit ~1800 chars for encoded param
+    const CHUNK=1800;
+    if(enc.length<=CHUNK){
+      const d=await jsonpCall(gsUrl+'?encoded='+encodeURIComponent(enc));
+      dot.className='sync-dot'; return d;
+    }
+    // Split into chunks
+    const chunks=[];
+    for(let i=0;i<enc.length;i+=CHUNK) chunks.push(enc.slice(i,i+CHUNK));
+    const sid='ch'+Date.now();
+    for(let i=0;i<chunks.length;i++){
+      const isLast=(i===chunks.length-1);
+      const params=gasParams({action:'chunk',sid,idx:i,total:chunks.length,last:isLast?1:0,data:chunks[i],pw});
+      const d=await jsonpCall(gsUrl+'?'+params);
+      if(!d||!d.ok) throw new Error('分批傳送第'+(i+1)+'批失敗：'+(d?d.error:'無回應'));
+    }
+    dot.className='sync-dot';
+    return {ok:true};
+  }catch(e){dot.className='sync-dot off'; return{ok:false,error:e.message};}
+}
+
 async function testCloudConn(){
   const url=document.getElementById('gsUrlInput').value.trim();
   const pw=document.getElementById('cloudPwInput').value.trim()||'751113';
-  const res=document.getElementById('testResult');
-  res.style.display='block';
-  res.style.background='#FFF9ED';res.style.border='1px solid #E2C96A';res.style.color='#6B4700';
-  res.textContent='⏳ 測試中...';
-  if(!url){res.style.background='#FEF2F2';res.style.border='1px solid #FECACA';res.style.color='#DC2626';res.textContent='⚠️ 請先填入網址';return;}
+  const box=document.getElementById('testResult');
+  const show=(ok,msg)=>{
+    box.style.display='block';
+    box.style.cssText=`display:block;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:12px;background:${ok?'#F0FAE6':'#FEF2F2'};border:1px solid ${ok?'#C5DF98':'#FECACA'};color:${ok?'#164E33':'#DC2626'};`;
+    box.textContent=msg;
+  };
+  if(!url){show(false,'⚠️ 請先填入網址');return;}
+  if(!url.includes('script.google.com')){show(false,'⚠️ 網址格式不對，應包含 script.google.com');return;}
+  show(null,'⏳ 測試中（最多12秒）...');box.style.background='#FFF9ED';box.style.borderColor='#E2C96A';box.style.color='#6B4700';
+  const savedUrl=gsUrl; gsUrl=url;
   try{
-    const testUrl=url+'?action=ping&pw='+encodeURIComponent(pw);
-    const r=await fetch(testUrl,{method:'GET'});
-    const text=await r.text();
-    let data;try{data=JSON.parse(text);}catch{data=null;}
-    if(data&&data.ok){
-      res.style.background='#F0FAE6';res.style.border='1px solid #C5DF98';res.style.color='#164E33';
-      res.textContent='✅ 連線成功！伺服器時間：'+data.ts;
-    } else {
-      res.style.background='#FEF2F2';res.style.border='1px solid #FECACA';res.style.color='#DC2626';
-      res.textContent='⚠️ 連線失敗：'+(data?data.error:('回應：'+text.slice(0,200)));
-    }
-  }catch(e){
-    res.style.background='#FEF2F2';res.style.border='1px solid #FECACA';res.style.color='#DC2626';
-    res.textContent='⚠️ 網路錯誤：'+e.message+' — 請確認：1)Apps Script已部署 2)存取對象=所有人 3)網址正確';
-  }
-}
-
-async function cloudReq(params){
-  if(!gsUrl)return null;
-  const dot=document.getElementById('syncDot');
-  dot.className='sync-dot syncing';
-  try{
-    const url=gsUrl+'?'+new URLSearchParams({...params,pw:localStorage.getItem(LS+'adminPw')||'751113'});
-    const res=await fetch(url,{method:'GET'});
-    const text=await res.text();
-    let data;try{data=JSON.parse(text);}catch{data={ok:false,error:'回應格式錯誤：'+text.slice(0,120)};}
-    dot.className='sync-dot'+(gsUrl?'':' off');
-    return data;
-  }catch(e){
-    dot.className='sync-dot off';
-    return {ok:false,error:'網路錯誤：'+e.message};
-  }
-}
-
-async function cloudPost(body){
-  if(!gsUrl)return null;
-  const dot=document.getElementById('syncDot');
-  dot.className='sync-dot syncing';
-  // GAS requires GET for CORS; encode payload as base64 param
-  try{
-    const payload=btoa(unescape(encodeURIComponent(JSON.stringify({...body,pw:localStorage.getItem(LS+'adminPw')||'751113'}))));
-    const url=gsUrl+(gsUrl.includes('?')?'&':'?')+'payload='+encodeURIComponent(payload);
-    const res=await fetch(url,{method:'GET'});
-    const text=await res.text();
-    let data;try{data=JSON.parse(text);}catch{data={ok:false,error:'回應格式錯誤：'+text.slice(0,120)};}
-    dot.className='sync-dot'+(gsUrl?'':' off');
-    return data;
-  }catch(e){
-    dot.className='sync-dot off';
-    console.error('cloudPost error',e);
-    return {ok:false,error:'網路錯誤，請確認：1)Apps Script 已部署 2)存取對象=所有人 3)網址正確。詳情：'+e.message};
-  }
+    const d=await jsonpCall(url+'?action=ping&pw='+encodeURIComponent(pw));
+    show(d&&d.ok, d&&d.ok ? '✅ 連線成功！GAS 回應正常。時間：'+d.ts : '⚠️ '+(d?d.error:'無回應'));
+  }catch(e){show(false,'⚠️ '+e.message);}
+  gsUrl=savedUrl;
 }
 
 async function pushToCloud(){
   if(!gsUrl){openCloudSetup();return;}
-  showToast('⬆️ 推送中...',5000);
-  const data={db,sites,config,stepData,cats,catOrder,imgBase,logo:logoSrc};
-  const res=await cloudPost({action:'saveAll',data});
+  showToast('⬆️ 推送中，請稍候...',15000);
+  // strip logo from cloud push (too large; stays local only)
+  const payload={data:{db,sites,config,stepData,cats,catOrder,imgBase}};
+  const res=await gasSend('saveAll',payload);
   if(res&&res.ok){
     showToast('✅ 已推送至 Google Sheets！');
   } else {
-    const msg='推送失敗：'+(res?res.error:'網路錯誤');
-    showToast('⚠️ '+msg,5000);
-    setTimeout(()=>{if(confirm(msg+'\n\n要開啟雲端設定診斷嗎？'))openCloudSetup();},300);
+    const m=res?res.error:'推送無回應';
+    showToast('⚠️ 推送失敗：'+m,8000);
+    setTimeout(()=>{
+      if(confirm('推送失敗：'+m+'\n\n建議：\n1. 點「測試連線」確認連線狀態\n2. 確認 Apps Script 已貼上 v3 版程式碼並重新部署\n\n開啟雲端設定？'))openCloudSetup();
+    },400);
   }
 }
 
-async function pullFromCloud(silent=false){
-  if(!gsUrl){if(!silent)alert('請先設定雲端網址');return;}
-  const res=await cloudReq({action:'loadAll'});
-  if(!res||!res.ok){if(!silent)showToast('⚠️ 同步失敗：'+(res?res.error:'網路錯誤'));return;}
-  if(res.db&&res.db.length)   db=res.db;
-  if(res.sites&&res.sites.length) sites=res.sites;
-  if(res.config)  config=res.config;
-  if(res.steps)   stepData=res.steps;
-  if(res.cats)    cats=res.cats;
+async function pullFromCloud(silent){
+  if(!gsUrl){if(!silent)openCloudSetup();return;}
+  const res=await gasCall({action:'loadAll'});
+  if(!res||!res.ok){if(!silent)showToast('⚠️ 同步失敗：'+(res?res.error:'逾時'),5000);return;}
+  if(res.db&&res.db.length)         db=res.db;
+  if(res.sites&&res.sites.length)   sites=res.sites;
+  if(res.config)                    config=res.config;
+  if(res.steps)                     stepData=res.steps;
+  if(res.cats)                      cats=res.cats;
   if(res.catOrder&&res.catOrder.length) catOrder=res.catOrder;
-  if(res.imgBase) imgBase=res.imgBase;
-  if(res.logo)    {logoSrc=res.logo;localStorage.setItem(LS+'logo',logoSrc);}
-  save();renderLogo();renderTitle();renderSites();renderTabs();render();
+  if(res.imgBase)                   imgBase=res.imgBase;
+  if(res.logo&&res.logo.length>5)   {logoSrc=res.logo;localStorage.setItem(LS+'logo',logoSrc);}
+  save();renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
   if(!silent)showToast('⬇️ 已從雲端同步最新內容');
 }
 
 async function pushHistToCloud(record){
   if(!gsUrl)return;
-  await cloudPost({action:'saveHistory',record});
+  await gasSend('saveHistory',{record});
 }
 
 /* ═══════ ADMIN ═══════ */
