@@ -254,6 +254,10 @@ select{flex:1;}
     <div class="modal-meta" id="rptMeta"></div>
     <div id="rptList"></div>
     <div class="rpt-total" id="rptTotal"></div>
+    <div style="margin-top:10px;">
+      <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:5px;">備註（選填）</div>
+      <input id="orderNote" type="text" placeholder="例：急件、請優先處理..." style="width:100%;font-size:12px;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--cream2);font-family:inherit;outline:none;">
+    </div>
     <div class="modal-actions">
       <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印 ／ 儲存 PDF（電腦）</button>
       <button class="modal-btn" style="background:var(--green);color:white;" id="imgDownBtn" onclick="downloadReportImage()">📥 儲存採購單圖片（手機長按）</button>
@@ -348,24 +352,30 @@ function cartKey(i){return i.cat+'::'+i.n;}
 function cartGet(i){return cart[cartKey(i)]||{sel:false,qty:1};}
 
 /* ═══════ STATE ═══════ */
-const LS='ys7_';
-let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='S1';
+const LS='ys11_'; // bumped — avoids stale localStorage from old versions
+let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='ALL';
 
 function init(){
   db       = JSON.parse(localStorage.getItem(LS+'db'))    || DEF_DB;
   cart     = {};
   sites    = JSON.parse(localStorage.getItem(LS+'sites')) || DEF_SITES;
   config   = JSON.parse(localStorage.getItem(LS+'cfg'))   || {title:'工安標語採購系統'};
-  stepData = JSON.parse(localStorage.getItem(LS+'steps')) || DEF_STEPS;
   cats     = JSON.parse(localStorage.getItem(LS+'cats'))  || DEF_CATS;
   catOrder = JSON.parse(localStorage.getItem(LS+'catOrd'))|| Object.keys(DEF_CATS);
   imgBase  = localStorage.getItem(LS+'imgBase')           || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
   logoSrc  = localStorage.getItem(LS+'logo')              || '';
   gsUrl    = localStorage.getItem(LS+'gsUrl')             || '';
-  document.getElementById('staffInput').value = localStorage.getItem(LS+'staff')||'';
+  // stepData: if saved version has all-empty items, restore defaults
+  const savedSteps=JSON.parse(localStorage.getItem(LS+'steps'));
+  if(savedSteps){
+    const hasItems=Object.values(savedSteps).some(s=>s.items&&s.items.length>0);
+    stepData=hasItems?savedSteps:DEF_STEPS;
+  } else {
+    stepData=DEF_STEPS;
+  }
+  document.getElementById('staffInput').value=localStorage.getItem(LS+'staff')||'';
   renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
   updateSyncDot();
-  // auto-pull on load if cloud configured
   if(gsUrl) pullFromCloud(true);
 }
 
@@ -525,7 +535,28 @@ function addNewSign(){
   const cat=choice.toUpperCase().trim();
   if(!cats[cat]){if(!confirm(`類別「${cat}」不存在，要自動建立嗎？`))return;cats[cat]=cat+'. 新分類';catOrder.push(cat);}
   const nm=prompt(`在「${cats[cat]}」中新增標語名稱：`);if(!nm||!nm.trim())return;
-  db.push({cat,n:nm.trim(),s:'60x40',m:'中空板'});
+  const name=nm.trim();
+  // Detect duplicate or similar names in same category
+  const dbIds=getDbWithIds();
+  const same=dbIds.filter(x=>x.cat===cat&&x.n===name);
+  const similar=dbIds.filter(x=>x.cat===cat&&x.n!==name&&(x.n.includes(name)||name.includes(x.n)));
+  let manualId=undefined;
+  if(same.length>0){
+    // exact duplicate exists — auto-assign suffix id
+    const existId=same[same.length-1].manualId||same[same.length-1].id;
+    const suggested=existId+'-1';
+    const ans=prompt(`「${name}」在 ${cat} 類已存在（${existId}）。\n新編號建議：${suggested}\n（可修改或留空自動編號）`, suggested);
+    if(ans===null)return;
+    if(ans.trim())manualId=ans.trim();
+  } else if(similar.length>0){
+    const names=similar.map(x=>`${x.id} ${x.n}`).join('、');
+    const ans=prompt(`偵測到相似標語：${names}\n是否為新圖案指定手動編號？（留空則自動編號）`,'');
+    if(ans===null)return;
+    if(ans.trim())manualId=ans.trim();
+  }
+  const newItem={cat,n:name,s:'60x40',m:'中空板'};
+  if(manualId)newItem.manualId=manualId;
+  db.push(newItem);
   save();renderTabs();render();setTab(cat);
 }
 function addStep(){const t=prompt('工序標籤名稱（含emoji）：',`🔧 Step${Object.keys(stepData).length+1} 新工序`);if(!t)return;let key='S'+(Object.keys(stepData).length+1);while(stepData[key])key='S'+(parseInt(key.slice(1))+1);stepData[key]={t,items:[]};save();renderTabs();setTab(key);}
@@ -706,26 +737,41 @@ function downloadReportImage(){
 
 /* ═══════ SUBMIT ORDER TO BACKEND ═══════ */
 async function submitOrder(){
-  if(!_sel||!_sel.length)return;
+  if(!_sel||!_sel.length){alert('請先生成採購單');return;}
   const btn=document.getElementById('submitBtn');
-  const record={id:Date.now(),date:_now,site:_site,staff:_staff,totalQty:_totalQty,
-    items:_sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1})),note:''};
+  const hint=document.getElementById('modalHint');
+  const note=document.getElementById('orderNote')?document.getElementById('orderNote').value:'';
+  const record={
+    id:Date.now(),date:_now,site:_site,staff:_staff,totalQty:_totalQty,
+    items:_sel.map(i=>({id:i.id,n:i.n,s:i.s,m:i.m,qty:cartGet(i).qty||1})),
+    note
+  };
+  // Always save locally first
   saveHistLocal(record);
   if(!gsUrl){
-    document.getElementById('modalHint').innerHTML='<span style="color:var(--green);font-weight:700;">✅ 已儲存至本機紀錄</span>（未設定雲端）';
+    hint.innerHTML='<span style="color:var(--green);font-weight:700;">✅ 已儲存至本機紀錄</span><br><small style="color:var(--ink3);">（未設定雲端，僅本機）</small>';
+    showToast('✅ 已儲存本機紀錄');
     return;
   }
-  btn.textContent='⏳ 提交中...'; btn.disabled=true;
-  const res=await pushHistToCloud(record);
-  btn.textContent='📤 提交採購單至後台'; btn.disabled=false;
-  if(res&&res.ok){
-    document.getElementById('modalHint').innerHTML='<span style="color:var(--green);font-weight:700;">✅ 已送至 Google Sheets！</span>';
-    showToast('✅ 採購單已提交後台！',3000);
-    resetCart();
-    setTimeout(closeModal,2000);
-  } else {
-    document.getElementById('modalHint').innerHTML='<span style="color:var(--red);">⚠️ 雲端失敗，已存本機。</span>';
-    showToast('⚠️ 雲端失敗，已存本機',3500);
+  btn.textContent='⏳ 提交中，請稍候...'; btn.disabled=true;
+  hint.innerHTML='<span style="color:var(--ink3);">⏳ 正在送出...</span>';
+  try{
+    const res=await pushHistToCloud(record);
+    if(res&&res.ok){
+      hint.innerHTML='<span style="color:var(--green);font-weight:700;">✅ 採購單已送至 Google Sheets！</span>';
+      showToast('✅ 採購單已提交後台！',3500);
+      resetCart();
+      setTimeout(closeModal,2200);
+    } else {
+      const err=res?res.error:'無回應';
+      hint.innerHTML=`<span style="color:#DC2626;">⚠️ 雲端失敗（${err}），資料已存本機。</span>`;
+      showToast('⚠️ 雲端失敗，已存本機',4000);
+    }
+  }catch(e){
+    hint.innerHTML=`<span style="color:#DC2626;">⚠️ 錯誤：${e.message}，資料已存本機。</span>`;
+    showToast('⚠️ 發生錯誤，已存本機',4000);
+  }finally{
+    btn.textContent='📤 提交採購單至後台'; btn.disabled=false;
   }
 }
 
@@ -798,104 +844,66 @@ function configGSheets(){
   if(gsUrl)showToast('☁️ 雲端網址已儲存');
 }
 
-async function cloudReq(params){
-  if(!gsUrl)return null;
-  const dot=document.getElementById('syncDot');
-  dot.className='sync-dot syncing';
-  try{
-    const url=gsUrl+'?'+new URLSearchParams({...params,pw:localStorage.getItem(LS+'adminPw')||'751113'});
-    const res=await fetch(url,{method:'GET',mode:'cors'});
-    const data=await res.json();
-    dot.className='sync-dot'+(gsUrl?'':' off');
-    return data;
-  }catch(e){
-    dot.className='sync-dot off';
-    return {ok:false,error:e.toString()};
-  }
+/* ── JSONP: works from any domain, no CORS issues ── */
+function jsonpCall(url, ms){
+  return new Promise((resolve,reject)=>{
+    const cb='__gs_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const el=document.createElement('script');
+    const t=setTimeout(()=>{
+      cleanup();
+      reject(new Error('逾時12秒。請確認：①已部署網頁應用程式 ②存取對象=所有人（包含匿名）③網址結尾是/exec'));
+    }, ms||12000);
+    function cleanup(){clearTimeout(t);el.parentNode&&el.parentNode.removeChild(el);delete window[cb];}
+    window[cb]=d=>{cleanup();resolve(d);};
+    el.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    el.onerror=()=>{cleanup();reject(new Error('無法載入 Script，請確認 Apps Script 網址正確'));};
+    document.head.appendChild(el);
+  });
 }
-
-async function cloudPost(body){
-  if(!gsUrl)return null;
-  const dot=document.getElementById('syncDot');
-  dot.className='sync-dot syncing';
-  try{
-    const res=await fetch(gsUrl,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({...body,pw:localStorage.getItem(LS+'adminPw')||'751113'})});
-    const data=await res.json();
-    dot.className='sync-dot'+(gsUrl?'':' off');
-    return data;
-  }catch(e){
-    dot.className='sync-dot off';
-    return {ok:false,error:e.toString()};
-  }
+function buildGasUrl(params){
+  const pw=localStorage.getItem(LS+'adminPw')||'751113';
+  const all={...params,pw};
+  return gsUrl+'?'+Object.entries(all).map(([k,v])=>
+    encodeURIComponent(k)+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):v)
+  ).join('&');
 }
-
-async function pushToCloud(){
-  if(!gsUrl)return alert('請先設定雲端網址（管理員→☁️ 雲端設定）');
-  const data={db,sites,config,stepData,cats,catOrder,imgBase,logo:logoSrc};
-  const res=await cloudPost({action:'saveAll',data});
-  if(res&&res.ok)showToast('⬆️ 已推送至 Google Sheets');
-  else showToast('⚠️ 推送失敗：'+(res?res.error:'網路錯誤'));
+function setSyncDot(state){
+  const d=document.getElementById('syncDot');
+  d.className='sync-dot'+(state==='off'?' off':state==='syncing'?' syncing':'');
+}
+async function gasGet(params){
+  if(!gsUrl)return null;
+  setSyncDot('syncing');
+  try{const d=await jsonpCall(buildGasUrl(params));setSyncDot('ok');return d;}
+  catch(e){setSyncDot('off');return{ok:false,error:e.message};}
+}
+/* For large payloads: encode as base64, chunk if needed */
+async function gasSend(action, extra){
+  if(!gsUrl)return null;
+  setSyncDot('syncing');
+  try{
+    const pw=localStorage.getItem(LS+'adminPw')||'751113';
+    const json=JSON.stringify({action,...extra,pw});
+    const enc=btoa(unescape(encodeURIComponent(json)));
+    const CHUNK=1600;
+    if(enc.length<=CHUNK){
+      const d=await jsonpCall(gsUrl+'?encoded='+encodeURIComponent(enc));
+      setSyncDot('ok');return d;
+    }
+    // chunked
+    const chunks=[];
+    for(let i=0;i<enc.length;i+=CHUNK)chunks.push(enc.slice(i,i+CHUNK));
+    const sid='s'+Date.now();
+    for(let i=0;i<chunks.length;i++){
+      const last=i===chunks.length-1;
+      const url=buildGasUrl({action:'chunk',sid,idx:i,total:chunks.length,last:last?1:0,data:chunks[i]});
+      const d=await jsonpCall(url);
+      if(!d||!d.ok)throw new Error('第'+(i+1)+'批失敗：'+(d?d.error:'無回應'));
+    }
+    setSyncDot('ok');return{ok:true};
+  }catch(e){setSyncDot('off');return{ok:false,error:e.message};}
 }
 
 async function pullFromCloud(silent=false){
-  if(!gsUrl){if(!silent)alert('請先設定雲端網址');return;}
-  const res=await cloudReq({action:'loadAll'});
-  if(!res||!res.ok){if(!silent)showToast('⚠️ 同步失敗：'+(res?res.error:'網路錯誤'));return;}
-  if(res.db&&res.db.length)   db=res.db;
-  if(res.sites&&res.sites.length) sites=res.sites;
-  if(res.config)  config=res.config;
-  if(res.steps)   stepData=res.steps;
-  if(res.cats)    cats=res.cats;
-  if(res.catOrder&&res.catOrder.length) catOrder=res.catOrder;
-  if(res.imgBase) imgBase=res.imgBase;
-  if(res.logo)    {logoSrc=res.logo;localStorage.setItem(LS+'logo',logoSrc);}
-  save();renderLogo();renderTitle();renderSites();renderTabs();render();
-  if(!silent)showToast('⬇️ 已從雲端同步最新內容');
-}
-
-async function pushHistToCloud(record){
-  if(!gsUrl)return null;
-  return await cloudPost({action:'saveHistory',record});
-}
-
-/* ═══════ ADMIN ═══════ */
-function toggleAdmin(){
-  if(!isAdmin){
-    const pw=prompt('請輸入管理員密碼：');
-    if(pw==='751113'){
-      isAdmin=true;localStorage.setItem(LS+'adminPw',pw);
-      document.getElementById('adminBtn').textContent='🔓 管理中';
-      document.getElementById('adminBtn').classList.add('active');
-      document.getElementById('adminPanel').classList.add('show');
-    } else if(pw!==null)alert('密碼錯誤');
-  } else {
-    isAdmin=false;
-    document.getElementById('adminBtn').textContent='🔒 管理員';
-    document.getElementById('adminBtn').classList.remove('active');
-    document.getElementById('adminPanel').classList.remove('show');
-  }
-  renderLogo();renderTitle();renderTabs();render();
-}
-
-/* ═══════ PERSISTENCE ═══════ */
-function save(){
-  localStorage.setItem(LS+'db',JSON.stringify(db));
-  localStorage.setItem(LS+'staff',document.getElementById('staffInput').value);
-  localStorage.setItem(LS+'site',document.getElementById('siteSelect').value);
-  localStorage.setItem(LS+'cfg',JSON.stringify(config));
-  localStorage.setItem(LS+'steps',JSON.stringify(stepData));
-  localStorage.setItem(LS+'cats',JSON.stringify(cats));
-  localStorage.setItem(LS+'catOrd',JSON.stringify(catOrder));
-  localStorage.setItem(LS+'sites',JSON.stringify(sites));
-}
-function configImgBase(){const v=prompt('圖片路徑 Base URL（以 / 結尾）：',imgBase);if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem(LS+'imgBase',imgBase);render();}}
-function exportData(){const d={db,sites,config,stepData,cats,catOrder,imgBase,logoSrc};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();}
-function importData(){const j=prompt('貼上備份 JSON：');if(!j)return;try{const d=JSON.parse(j);if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.catOrder)catOrder=d.catOrder;if(d.imgBase)imgBase=d.imgBase;if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem(LS+'logo',logoSrc);}save();location.reload();}catch(e){alert('格式錯誤');}}
-
-document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
-document.getElementById('histOverlay').addEventListener('click',function(e){if(e.target===this)closeHistory();});
-init();
-</script>
-</body>
-</html>
+  if(!gsUrl){if(!silent)openCloudSetup&&openCloudSetup();return;}
+  const res=await gasGet({action:
