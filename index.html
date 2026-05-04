@@ -360,106 +360,79 @@ function cartKey(i){return i.cat+'::'+i.n;}
 function cartGet(i){return cart[cartKey(i)]||{sel:false,qty:1};}
 
 /* ═══════ STATE ═══════ */
-const LS='ys11_'; // bumped — avoids stale localStorage from old versions
+const LS='ys12_'; // bumped — avoids stale localStorage from old versions
 let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='S1';
 
 function lsGet(key){
-  try{const raw=localStorage.getItem(key);if(raw===null||raw==='null'||raw===''||raw==='undefined')return null;return JSON.parse(raw);}catch(e){return null;}
+  try{const r=localStorage.getItem(key);if(!r||r==='null'||r==='undefined')return null;return JSON.parse(r);}
+  catch(e){return null;}
 }
-
 function clearAllCache(){
-  const keys=[];for(let i=0;i<localStorage.length;i++)keys.push(localStorage.key(i));
-  keys.filter(k=>/^ys/.test(k)).forEach(k=>localStorage.removeItem(k));
+  const keys=[];
+  for(let i=0;i<localStorage.length;i++)keys.push(localStorage.key(i));
+  keys.forEach(k=>localStorage.removeItem(k));
+  console.log('Cleared',keys.length,'keys');
 }
-
 function init(){
-  if(location.search.includes('reset=1')){clearAllCache();location.replace(location.pathname);return;}
-  // Start with hardcoded defaults
-  db=DEF_DB; sites=DEF_SITES; config={title:'工安標語採購系統'};
-  cats=Object.assign({},DEF_CATS); catOrder=Object.keys(DEF_CATS);
-  stepData=JSON.parse(JSON.stringify(DEF_STEPS));
-  cart={}; imgBase='https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
-  logoSrc=''; gsUrl='';
-  // Override with stored values only if valid
-  const sDb=lsGet(LS+'db'); if(sDb&&sDb.length)db=sDb;
-  const sS=lsGet(LS+'sites'); if(sS&&sS.length)sites=sS;
-  const sCfg=lsGet(LS+'cfg'); if(sCfg&&sCfg.title)config=sCfg;
-  const sCats=lsGet(LS+'cats'); if(sCats&&Object.keys(sCats).length)cats=sCats;
-  const sOrd=lsGet(LS+'catOrd'); if(sOrd&&sOrd.length)catOrder=sOrd;
-  const sSteps=lsGet(LS+'steps');
-  if(sSteps&&Object.keys(sSteps).length){
-    const ok=Object.values(sSteps).some(s=>s&&Array.isArray(s.items)&&s.items.length);
-    if(ok)stepData=sSteps;
+  // ?reset=1 clears everything
+  if(location.search.includes('reset=1')){
+    clearAllCache();
+    history.replaceState(null,'',location.pathname);
   }
-  const sImg=localStorage.getItem(LS+'imgBase'); if(sImg&&sImg.startsWith('http'))imgBase=sImg;
-  logoSrc=localStorage.getItem(LS+'logo')||'';
-  gsUrl=localStorage.getItem(LS+'gsUrl')||'';
+  // ALWAYS start from hardcoded defaults
+  db       = JSON.parse(JSON.stringify(DEF_DB));
+  sites    = JSON.parse(JSON.stringify(DEF_SITES));
+  config   = {title:'工安標語採購系統'};
+  cats     = JSON.parse(JSON.stringify(DEF_CATS));
+  catOrder = Object.keys(DEF_CATS);
+  stepData = JSON.parse(JSON.stringify(DEF_STEPS));
+  cart     = {};
+  imgBase  = 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  logoSrc  = '';
+  gsUrl    = '';
+
+  // Only override if stored value passes strict validation
+  try{
+    const sDb=lsGet(LS+'db');
+    if(Array.isArray(sDb)&&sDb.length>0&&sDb[0].cat&&sDb[0].n) db=sDb;
+  }catch(e){}
+  try{
+    const sS=lsGet(LS+'sites');
+    if(Array.isArray(sS)&&sS.length>0&&typeof sS[0]==='string') sites=sS;
+  }catch(e){}
+  try{
+    const sCfg=lsGet(LS+'cfg');
+    if(sCfg&&typeof sCfg.title==='string'&&sCfg.title.length>0) config=sCfg;
+  }catch(e){}
+  try{
+    const sCats=lsGet(LS+'cats');
+    if(sCats&&typeof sCats==='object'&&!Array.isArray(sCats)&&Object.keys(sCats).length>=5) cats=sCats;
+  }catch(e){}
+  try{
+    const sOrd=lsGet(LS+'catOrd');
+    if(Array.isArray(sOrd)&&sOrd.length>=5) catOrder=sOrd;
+  }catch(e){}
+  try{
+    const sSteps=lsGet(LS+'steps');
+    if(sSteps&&typeof sSteps==='object'&&!Array.isArray(sSteps)){
+      const keys=Object.keys(sSteps);
+      const valid=keys.length>=3&&keys.every(k=>sSteps[k]&&sSteps[k].t&&Array.isArray(sSteps[k].items));
+      const hasItems=keys.some(k=>sSteps[k].items.length>0);
+      if(valid&&hasItems) stepData=sSteps;
+    }
+  }catch(e){}
+  try{
+    const sImg=localStorage.getItem(LS+'imgBase');
+    if(sImg&&sImg.startsWith('http')) imgBase=sImg;
+  }catch(e){}
+  try{logoSrc=localStorage.getItem(LS+'logo')||'';}catch(e){}
+  try{gsUrl=localStorage.getItem(LS+'gsUrl')||'';}catch(e){}
+
   document.getElementById('staffInput').value=localStorage.getItem(LS+'staff')||'';
   renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
   updateSyncDot();
   if(gsUrl) pullFromCloud(true);
 }
-function lsGet(key){
-  // Safe localStorage read — returns null on any error or empty/invalid value
-  try{
-    const raw=localStorage.getItem(key);
-    if(!raw||raw==='null'||raw==='undefined')return null;
-    return JSON.parse(raw);
-  }catch(e){return null;}
-}
-
-function init(){
-  // Use lsGet for safe reads with proper fallbacks
-  const savedDb    = lsGet(LS+'db');
-  db       = (savedDb&&savedDb.length)          ? savedDb    : DEF_DB;
-
-  const savedSites = lsGet(LS+'sites');
-  sites    = (savedSites&&savedSites.length)    ? savedSites : DEF_SITES;
-
-  const savedCfg   = lsGet(LS+'cfg');
-  config   = (savedCfg&&savedCfg.title)         ? savedCfg   : {title:'工安標語採購系統'};
-
-  const savedCats  = lsGet(LS+'cats');
-  cats     = (savedCats&&Object.keys(savedCats).length) ? savedCats : DEF_CATS;
-
-  const savedOrd   = lsGet(LS+'catOrd');
-  catOrder = (savedOrd&&savedOrd.length)        ? savedOrd   : Object.keys(DEF_CATS);
-
-  // stepData: restore defaults if missing or all items empty
-  const savedSteps = lsGet(LS+'steps');
-  if(savedSteps&&Object.keys(savedSteps).length){
-    const hasItems=Object.values(savedSteps).some(s=>Array.isArray(s.items)&&s.items.length>0);
-    stepData = hasItems ? savedSteps : DEF_STEPS;
-  } else {
-    stepData = DEF_STEPS;
-  }
-
-  cart    = {};
-  imgBase = localStorage.getItem(LS+'imgBase') || 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
-  logoSrc = localStorage.getItem(LS+'logo')    || '';
-  gsUrl   = localStorage.getItem(LS+'gsUrl')   || '';
-
-  document.getElementById('staffInput').value = localStorage.getItem(LS+'staff')||'';
-  renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
-  updateSyncDot();
-  if(gsUrl) pullFromCloud(true);
-}
-
-/* ═══════ TOAST ═══════ */
-function showToast(msg,ms=2200){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms);
-}
-
-/* ═══════ SYNC DOT ═══════ */
-function updateSyncDot(){
-  const dot=document.getElementById('syncDot');
-  dot.className='sync-dot'+(gsUrl?'':' off');
-  dot.title=gsUrl?'雲端已連線':'未設定雲端（點管理員→雲端設定）';
-}
-
-/* ═══════ LOGO ═══════ */
 function renderLogo(){
   const el=document.getElementById('logoEl');
   el.className='hdr-logo'+(isAdmin?' editable':'');
