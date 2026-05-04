@@ -108,10 +108,11 @@ select{flex:1;}
 .a-id-edit::placeholder{color:var(--cream-dark);opacity:.8;}
 .admin-del-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--red);border:none;color:white;font-size:11px;cursor:pointer;display:none;place-items:center;z-index:3;font-family:inherit;}
 .isAdmin .card:hover .admin-del-btn{display:grid;}
-.admin-move-btns{position:absolute;top:-8px;left:18px;display:none;gap:2px;z-index:3;}
-.isAdmin .card:hover .admin-move-btns{display:flex;}
-.admin-move-btn{width:20px;height:20px;border-radius:4px;background:var(--dark);border:none;color:white;font-size:9px;cursor:pointer;display:grid;place-items:center;font-family:inherit;opacity:.85;}
-.admin-move-btn:hover{opacity:1;}
+.drag-handle{position:absolute;top:50%;left:-10px;transform:translateY(-50%);width:18px;height:28px;display:none;align-items:center;justify-content:center;cursor:grab;color:var(--ink4);font-size:14px;user-select:none;z-index:3;background:white;border:1px solid var(--border);border-radius:4px;box-shadow:var(--shadow);}
+.isAdmin .card:hover .drag-handle{display:flex;}
+.drag-handle:active{cursor:grabbing;}
+.card.dragging{opacity:.4;border-style:dashed;}
+.card.drag-over{border-color:var(--green)!important;background:#F0FCE4!important;border-width:2px!important;transform:scale(1.01);}
 
 /* ─── FOOTER ─── */
 .footer{background:var(--surface);border-top:1.5px solid var(--border);padding:11px 14px;flex-shrink:0;}
@@ -196,7 +197,10 @@ select{flex:1;}
   </div>
   <div class="hdr-right">
     <div class="sync-dot off" id="syncDot" title="雲端同步狀態"></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+    <button onclick="if(confirm('清除所有暫存資料並重新載入？')){clearAllCache();location.reload();}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:5px 8px;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit;">🔄</button>
     <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理員</button>
+  </div>
   </div>
 </div>
 
@@ -357,7 +361,401 @@ function cartGet(i){return cart[cartKey(i)]||{sel:false,qty:1};}
 
 /* ═══════ STATE ═══════ */
 const LS='ys11_'; // bumped — avoids stale localStorage from old versions
-let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='ALL';
+let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='S1';
+
+function lsGet(key){
+  try{const raw=localStorage.getItem(key);if(raw===null||raw==='null'||raw===''||raw==='undefined')return null;return JSON.parse(raw);}catch(e){return null;}
+}
+
+function clearAllCache(){
+  const keys=[];for(let i=0;i<localStorage.length;i++)keys.push(localStorage.key(i));
+  keys.filter(k=>/^ys/.test(k)).forEach(k=>localStorage.removeItem(k));
+}
+
+function init(){
+  if(location.search.includes('reset=1')){clearAllCache();location.replace(location.pathname);return;}
+  // Start with hardcoded defaults
+  db=DEF_DB; sites=DEF_SITES; config={title:'工安標語採購系統'};
+  cats=Object.assign({},DEF_CATS); catOrder=Object.keys(DEF_CATS);
+  stepData=JSON.parse(JSON.stringify(DEF_STEPS));
+  cart={}; imgBase='https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  logoSrc=''; gsUrl='';
+  // Override with stored values only if valid
+  const sDb=lsGet(LS+'db'); if(sDb&&sDb.length)db=sDb;
+  const sS=lsGet(LS+'sites'); if(sS&&sS.length)sites=sS;
+  const sCfg=lsGet(LS+'cfg'); if(sCfg&&sCfg.title)config=sCfg;
+  const sCats=lsGet(LS+'cats'); if(sCats&&Object.keys(sCats).length)cats=sCats;
+  const sOrd=lsGet(LS+'catOrd'); if(sOrd&&sOrd.length)catOrder=sOrd;
+  const sSteps=lsGet(LS+'steps');
+  if(sSteps&&Object.keys(sSteps).length){
+    const ok=Object.values(sSteps).some(s=>s&&Array.isArray(s.items)&&s.items.length);
+    if(ok)stepData=sSteps;
+  }
+  const sImg=localStorage.getItem(LS+'imgBase'); if(sImg&&sImg.startsWith('http'))imgBase=sImg;
+  logoSrc=localStorage.getItem(LS+'logo')||'';
+  gsUrl=localStorage.getItem(LS+'gsUrl')||'';
+  document.getElementById('staffInput').value=localStorage.getItem(LS+'staff')||'';
+  renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
+  updateSyncDot();
+  if(gsUrl) pullFromCloud(true);
+}tps://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --dark:#164E33;--green:#6EB831;
+  --cream:#FEF8E6;--cream2:#FFFBF0;
+  --cream-border:#E2C96A;--cream-dark:#B8942A;--cream-deep:#6B4700;
+  --ink:#0F172A;--ink3:#64748B;--ink4:#94A3B8;
+  --bg:#FFFDF5;--surface:#FFFFFF;--border:#D8EAB8;--card-bg:#FFFEF8;
+  --red:#DC2626;--blue:#1D4ED8;--purple:#6D28D9;
+  --r:14px;--r2:10px;--r3:8px;
+  --shadow:0 1px 3px rgba(22,78,51,.06),0 3px 10px rgba(22,78,51,.04);
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;}
+
+/* ─── HEADER ─── */
+.hdr{background:var(--dark);color:white;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-brand{display:flex;align-items:center;gap:10px;}
+.hdr-logo{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:default;overflow:hidden;position:relative;}
+.hdr-logo img{width:100%;height:100%;object-fit:contain;display:block;}
+.hdr-logo.editable{cursor:pointer;}
+.hdr-logo.editable::after{content:'✏';position:absolute;bottom:0;right:0;font-size:9px;background:var(--green);color:white;border-radius:50%;width:13px;height:13px;display:flex;align-items:center;justify-content:center;}
+.hdr-title{font-size:15px;font-weight:900;letter-spacing:.3px;}
+.hdr-ver{font-size:10px;opacity:.55;margin-top:1px;color:#A8D96A;}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#4CAF50;flex-shrink:0;transition:background .3s;}
+.sync-dot.off{background:#94A3B8;}
+.sync-dot.syncing{background:#F59E0B;animation:pulse .8s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.admin-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;}
+.admin-btn:hover{background:rgba(255,255,255,.2);}
+.admin-btn.active{background:rgba(110,184,49,.28);border-color:rgba(110,184,49,.5);color:#C8F07A;}
+
+/* ─── CONTROLS ─── */
+.ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 14px;display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
+.ctrl-group{display:flex;gap:6px;align-items:center;flex:1;min-width:140px;}
+select,input[type=text]{font-family:inherit;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--r3);background:var(--cream2);color:var(--ink);outline:none;transition:border-color .15s;}
+select:focus,input[type=text]:focus{border-color:var(--green);}
+select{flex:1;}
+.btn{font-family:inherit;font-size:12px;font-weight:700;padding:7px 11px;border-radius:var(--r3);border:none;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-dark{background:var(--dark);color:white;}.btn-dark:hover{background:#1E6840;}
+.btn-red{background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;}
+.btn-blue{background:#EFF6FF;color:var(--blue);border:1.5px solid #BFDBFE;}
+.btn-purple{background:#F5F3FF;color:var(--purple);border:1.5px solid #DDD6FE;}
+.btn-cream{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);}
+
+/* ─── TABS ─── */
+.tabs-outer{background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;position:relative;}
+.tabs-scroll{display:flex;overflow-x:auto;padding:9px 14px;gap:5px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-behavior:smooth;}
+.tabs-scroll::-webkit-scrollbar{display:none;}
+.tabs-arrow{position:absolute;top:0;bottom:0;width:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
+.tabs-arrow.left{left:0;background:linear-gradient(to right,var(--surface) 55%,transparent);}
+.tabs-arrow.right{right:0;background:linear-gradient(to left,var(--surface) 55%,transparent);}
+.tabs-arrow svg{width:15px;height:15px;stroke:var(--ink3);stroke-width:2.5;fill:none;}
+.tab{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;transition:all .15s;flex-shrink:0;user-select:none;display:flex;align-items:center;gap:4px;}
+.tab:hover{border-color:var(--green);color:var(--dark);}
+.tab.step-tab{background:var(--cream);border-color:var(--cream-border);color:var(--cream-deep);}
+.tab.all-tab{background:var(--cream);border-color:var(--cream-dark);color:var(--cream-deep);font-weight:900;}
+.tab.cat-tab{background:var(--surface);border-color:var(--border);color:var(--ink3);}
+.tab.active{background:var(--dark)!important;color:white!important;border-color:var(--dark)!important;box-shadow:0 2px 8px rgba(22,78,51,.25);}
+.tab-sep{width:1.5px;background:var(--border);flex-shrink:0;align-self:stretch;margin:0 4px;border-radius:1px;}
+.tab-edit-input{background:transparent;border:none;font-weight:700;font-size:12px;color:inherit;font-family:inherit;width:78px;outline:none;cursor:text;}
+
+/* ─── MAIN GRID ─── */
+.main{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px;}
+.empty-state{text-align:center;padding:80px 20px;color:var(--ink4);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+
+/* ─── CARD ─── */
+.card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:var(--r);padding:11px;display:flex;gap:11px;cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s;position:relative;box-shadow:var(--shadow);}
+.card:hover{border-color:var(--cream-border);background:var(--cream2);box-shadow:0 4px 14px rgba(22,78,51,.08);}
+.card.sel{border-color:var(--green);background:#F4FCE8;border-width:2px;}
+.card-check{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:white;display:grid;place-items:center;transition:all .18s;z-index:2;}
+.card.sel .card-check{background:var(--green);border-color:var(--green);}
+.check-icon{font-size:11px;font-weight:900;color:white;display:none;}
+.card.sel .check-icon{display:block;}
+.card-img{width:86px;height:72px;flex-shrink:0;border-radius:var(--r3);border:1.5px solid var(--border);overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;}
+.card-img img{width:100%;height:100%;object-fit:contain;transition:opacity .2s;}
+.img-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink4);}
+.img-placeholder span{font-size:18px;}
+.img-placeholder small{font-size:9px;text-align:center;line-height:1.2;}
+.card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;}
+.card-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.card-id{font-size:10px;font-weight:700;background:var(--cream);color:var(--cream-deep);padding:2px 6px;border-radius:4px;border:1px solid var(--cream-border);}
+.card-cat{font-size:10px;color:var(--ink4);}
+.card-name{font-size:13px;font-weight:900;color:var(--dark);line-height:1.35;margin-bottom:4px;}
+.card-specs{display:flex;gap:6px;flex-wrap:wrap;}
+.spec-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.spec-r{background:var(--cream);color:var(--cream-deep);border:1px solid var(--cream-border);}
+.spec-m{background:#F0F7E6;color:#2A5A1A;border:1px solid #C5DF98;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+.sel-chip{font-size:10px;background:var(--dark);color:white;padding:3px 8px;border-radius:20px;font-weight:700;}
+.qty-ctrl{display:flex;align-items:center;gap:7px;}
+.qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink3);font-family:inherit;transition:all .15s;line-height:1;flex-shrink:0;}
+.qty-btn:hover{border-color:var(--green);color:var(--green);background:#F4FCE8;}
+.qty-num{font-size:21px;font-weight:900;color:var(--dark);min-width:26px;text-align:center;line-height:1;}
+.a-name{background:var(--cream);border:1.5px dashed var(--cream-dark);border-radius:4px;padding:3px 6px;font-size:13px;font-weight:900;color:var(--cream-deep);width:100%;font-family:inherit;outline:none;}
+.a-spec{background:transparent;border:none;border-bottom:1.5px dashed #CBD5E1;font-size:10px;width:52px;font-family:inherit;outline:none;color:inherit;padding:1px 2px;}
+.a-id-edit{font-size:10px;font-weight:700;background:var(--cream);border:1.5px dashed var(--cream-dark);border-radius:4px;color:var(--cream-deep);padding:2px 5px;width:58px;font-family:inherit;outline:none;}
+.a-id-edit::placeholder{color:var(--cream-dark);opacity:.8;}
+.admin-del-btn{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--red);border:none;color:white;font-size:11px;cursor:pointer;display:none;place-items:center;z-index:3;font-family:inherit;}
+.isAdmin .card:hover .admin-del-btn{display:grid;}
+.drag-handle{position:absolute;top:50%;left:-10px;transform:translateY(-50%);width:18px;height:28px;display:none;align-items:center;justify-content:center;cursor:grab;color:var(--ink4);font-size:14px;user-select:none;z-index:3;background:white;border:1px solid var(--border);border-radius:4px;box-shadow:var(--shadow);}
+.isAdmin .card:hover .drag-handle{display:flex;}
+.drag-handle:active{cursor:grabbing;}
+.card.dragging{opacity:.4;border-style:dashed;}
+.card.drag-over{border-color:var(--green)!important;background:#F0FCE4!important;border-width:2px!important;transform:scale(1.01);}
+
+/* ─── FOOTER ─── */
+.footer{background:var(--surface);border-top:1.5px solid var(--border);padding:11px 14px;flex-shrink:0;}
+.admin-panel{display:none;margin-bottom:9px;flex-wrap:wrap;gap:6px;}
+.admin-panel.show{display:flex;}
+.footer-main{display:flex;gap:9px;align-items:stretch;}
+.btn-report{flex:1;background:var(--dark);color:white;border:none;padding:13px 14px;border-radius:var(--r2);font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 4px 14px rgba(22,78,51,.2);}
+.btn-report:hover{background:#1E6840;}
+.cart-badge{background:rgba(255,255,255,.22);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:900;min-width:28px;text-align:center;}
+.btn-reset{background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);padding:13px 13px;border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;}
+.btn-reset:hover{background:#FEF0C0;}
+
+/* ─── MODALS base ─── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;display:none;align-items:flex-end;justify-content:center;}
+.overlay.show{display:flex;}
+.sheet{background:white;width:100%;max-width:700px;border-radius:20px 20px 0 0;padding:18px;max-height:92vh;overflow-y:auto;animation:slideUp .26s cubic-bezier(.2,.7,0,1.1);}
+@keyframes slideUp{from{transform:translateY(56px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sheet-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 14px;display:block;}
+.sheet-title{font-size:17px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:14px;}
+.modal-meta{display:flex;justify-content:space-around;font-size:12px;color:var(--ink3);padding:9px 0;background:var(--cream2);border-radius:var(--r3);margin-bottom:12px;border:1px solid var(--cream-border);}
+.modal-meta span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;}
+.modal-meta strong{font-size:13px;color:var(--ink);font-weight:700;}
+.report-item{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:.5px solid #F1F5F9;}
+.report-item:last-child{border:none;}
+.rpt-num{font-size:11px;font-weight:700;color:var(--ink4);min-width:18px;text-align:center;}
+.rpt-img{width:50px;height:42px;border-radius:6px;border:1px solid var(--border);object-fit:contain;background:#F8FAFC;flex-shrink:0;}
+.rpt-info{flex:1;min-width:0;}
+.rpt-name{font-size:13px;font-weight:900;color:var(--ink);}
+.rpt-spec{font-size:11px;color:var(--ink3);margin-top:1px;}
+.rpt-qty{font-size:22px;font-weight:900;color:var(--dark);min-width:32px;text-align:right;}
+.rpt-total{display:flex;justify-content:space-between;padding:10px 14px;background:var(--dark);color:white;border-radius:var(--r3);margin-top:10px;font-size:13px;font-weight:700;}
+.rpt-total strong{color:#A8D96A;font-size:15px;}
+.modal-actions{display:flex;flex-direction:column;gap:7px;margin-top:13px;}
+.modal-btn{padding:13px;border-radius:var(--r3);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.hint-txt{font-size:11px;color:var(--ink4);text-align:center;margin-top:6px;line-height:1.6;}
+
+/* ─── HISTORY ─── */
+.hist-rec{background:#FAFAFA;border:1.5px solid #E2E8F0;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.hist-hdr{background:var(--dark);color:white;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}
+.hist-sub{padding:6px 10px;background:var(--cream2);border-bottom:.5px solid var(--cream-border);font-size:11px;color:var(--ink3);}
+.hist-row{display:flex;justify-content:space-between;padding:5px 10px;font-size:12px;border-bottom:.5px solid #F1F5F9;}
+.hist-row:last-child{border:none;}
+.hist-foot{padding:6px 10px;text-align:right;}
+
+/* ─── PRINT ─── */
+@media print{
+  html,body{height:auto!important;overflow:visible!important;}
+  body>*:not(#printContainer){display:none!important;}
+  #printContainer{display:block!important;}
+  tr{page-break-inside:avoid;}
+  @page{margin:12mm;}
+}
+#printContainer{display:none;}
+
+/* ─── IMAGE DOWNLOAD OVERLAY ─── */
+#imgOverlay{display:none;position:fixed;inset:0;z-index:99999;flex-direction:column;align-items:center;justify-content:center;}
+
+/* ─── SYNC TOAST ─── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(22,78,51,.92);color:white;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:99999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+
+/* scrollbars */
+.main::-webkit-scrollbar{width:3px;}
+.main::-webkit-scrollbar-thumb{background:#C5DF98;border-radius:2px;}
+.sheet::-webkit-scrollbar{width:3px;}
+.sheet::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div id="printContainer"></div>
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo" id="logoEl">🦺</div>
+    <div>
+      <div class="hdr-title" id="titleEl">工安標語採購系統</div>
+      <div class="hdr-ver">鈺通營造 Construction Safety</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="sync-dot off" id="syncDot" title="雲端同步狀態"></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+    <button onclick="if(confirm('清除所有暫存資料並重新載入？')){clearAllCache();location.reload();}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:5px 8px;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit;">🔄</button>
+    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理員</button>
+  </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="ctrl">
+  <div class="ctrl-group">
+    <select id="siteSelect" onchange="save()"></select>
+    <button class="btn btn-dark" onclick="addSite()">＋</button>
+  </div>
+  <input type="text" id="staffInput" placeholder="填單人員" style="width:108px;" oninput="save()">
+</div>
+
+<!-- TABS -->
+<div class="tabs-outer">
+  <div class="tabs-arrow left" onclick="scrollTabs(-120)">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </div>
+  <div class="tabs-scroll" id="tabsEl"></div>
+  <div class="tabs-arrow right" onclick="scrollTabs(120)">
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  </div>
+</div>
+
+<!-- GRID -->
+<div class="main" id="mainArea">
+  <div class="grid" id="gridEl"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="admin-panel" id="adminPanel">
+    <button class="btn btn-dark"   onclick="addNewSign()">➕ 新增標語</button>
+    <button class="btn btn-dark"   onclick="addStep()">➕ 新增工序</button>
+    <button class="btn btn-dark"   onclick="addCat()">➕ 新增類別</button>
+    <button class="btn btn-blue"   onclick="exportData()">📤 備份JSON</button>
+    <button class="btn btn-purple" onclick="importData()">📥 還原JSON</button>
+    <button class="btn btn-red"    onclick="deleteSite()">🗑 刪除工地</button>
+    <button class="btn btn-cream"  onclick="configImgBase()">🖼 圖片路徑</button>
+    <button class="btn btn-cream"  onclick="changeLogo()">🏷 更換圖示</button>
+    <button class="btn btn-cream"  onclick="configGSheets()">☁️ 雲端設定</button>
+    <button class="btn btn-cream"  onclick="pushToCloud()">⬆️ 推送雲端</button>
+    <button class="btn btn-cream"  onclick="pullFromCloud()">⬇️ 從雲端同步</button>
+  </div>
+  <div class="footer-main">
+    <button class="btn-report" onclick="buildReport()">
+      <span>📋 生成採購單</span>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+    <button class="btn btn-cream" style="padding:13px 10px;border-radius:var(--r2);font-size:11px;" onclick="showHistory()">📦<br>紀錄</button>
+    <button class="btn-reset" onclick="resetCart()">清除<br>重選</button>
+  </div>
+</div>
+
+<!-- ── REPORT MODAL ── -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="modalBox">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title" id="rptTitle"></div>
+    <div class="modal-meta" id="rptMeta"></div>
+    <div id="rptList"></div>
+    <div class="rpt-total" id="rptTotal"></div>
+    <div style="margin-top:10px;">
+      <div style="font-size:12px;font-weight:700;color:var(--dark);margin-bottom:5px;">備註（選填）</div>
+      <input id="orderNote" type="text" placeholder="例：急件、請優先處理..." style="width:100%;font-size:12px;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--cream2);font-family:inherit;outline:none;">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" style="background:var(--dark);color:white;" onclick="doPrint()">🖨 列印 ／ 儲存 PDF（電腦）</button>
+      <button class="modal-btn" style="background:var(--green);color:white;" id="imgDownBtn" onclick="downloadReportImage()">📥 儲存採購單圖片（手機長按）</button>
+      <button class="modal-btn" id="submitBtn" style="background:var(--cream-dark);color:white;" onclick="submitOrder()">📤 提交採購單至後台</button>
+      <button class="modal-btn" style="background:var(--cream);color:var(--cream-deep);border:1.5px solid var(--cream-border);" onclick="closeModal()">← 返回編輯</button>
+    </div>
+    <div class="hint-txt" id="modalHint"></div>
+  </div>
+</div>
+
+<!-- ── HISTORY MODAL ── -->
+<div class="overlay" id="histOverlay">
+  <div class="sheet" style="max-height:90vh;">
+    <span class="sheet-handle"></span>
+    <div class="sheet-title">📦 採購歷史紀錄</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="btn btn-dark"   onclick="exportHistExcel()" style="flex:1;">📊 匯出 Excel</button>
+      <button class="btn btn-cream"  onclick="exportHistPdf()"   style="flex:1;">📄 列印 PDF</button>
+      <button class="btn btn-red"    onclick="clearHistory()">🗑 清除全部</button>
+      <button class="btn btn-dark"   onclick="closeHistory()" style="flex:1;">← 關閉</button>
+    </div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- ── IMAGE DOWNLOAD OVERLAY ── -->
+<div id="imgOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);align-items:center;justify-content:center;flex-direction:column;padding:20px;">
+  <div style="font-size:13px;color:white;text-align:center;margin-bottom:14px;line-height:1.7;">
+    📱 <strong>手機：長按下方圖片 → 儲存至相簿</strong><br>
+    💻 電腦：右鍵圖片 → 另存圖片
+  </div>
+  <img id="reportImg" style="max-width:100%;max-height:70vh;border-radius:10px;display:block;" alt="採購單">
+  <button onclick="document.getElementById('imgOverlay').style.display='none'" style="margin-top:16px;padding:12px 32px;background:white;color:#164E33;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;">← 關閉</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DEFAULTS
+═══════════════════════════════════════════════ */
+const DEF_SITES=["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
+const DEF_DB=[
+  {cat:'J',n:'工程告示牌',s:'120x90',m:'鍍鋅鐵板'},{cat:'J',n:'安衛告示牌',s:'60x40',m:'中空板'},{cat:'J',n:'工地上梁典禮',s:'90x60',m:'中空板'},
+  {cat:'K',n:'守衛室',s:'30x10',m:'PVC'},{cat:'K',n:'統包商辦公室',s:'30x10',m:'PVC'},{cat:'K',n:'監造單位辦公室',s:'30x10',m:'PVC'},
+  {cat:'K',n:'管理單位辦公室',s:'30x10',m:'PVC'},{cat:'K',n:'會議室',s:'30x10',m:'PVC'},{cat:'K',n:'倉庫',s:'30x10',m:'PVC'},
+  {cat:'K',n:'建材展覽室',s:'30x10',m:'PVC'},{cat:'K',n:'休息區',s:'30x10',m:'PVC'},{cat:'K',n:'飲水機',s:'20x10',m:'PVC'},
+  {cat:'K',n:'急救箱',s:'20x10',m:'PVC'},{cat:'K',n:'汽車停放區',s:'60x20',m:'中空板'},{cat:'K',n:'機車停放區',s:'60x20',m:'中空板'},
+  {cat:'K',n:'工地／學校名稱',s:'依需求',m:'鍍鋅鐵板'},{cat:'K',n:'各棟別名稱',s:'依需求',m:'鍍鋅鐵板'},
+  {cat:'A',n:'男化妝室',s:'30x10',m:'PVC'},{cat:'A',n:'女化妝室',s:'30x10',m:'PVC'},{cat:'A',n:'小便斗',s:'20x10',m:'PVC'},
+  {cat:'B',n:'進入工區請戴安全帽',s:'60x40',m:'中空板'},{cat:'B',n:'背負式安全帶穿戴步驟',s:'60x40',m:'中空板'},
+  {cat:'B',n:'打開柵門作業請穿戴背負式安全帶',s:'60x40',m:'中空板'},{cat:'B',n:'施工架相關規定',s:'60x40',m:'中空板'},
+  {cat:'B',n:'今日危害因素告示牌',s:'60x40',m:'中空板'},{cat:'B',n:'工具箱會議',s:'60x40',m:'中空板'},
+  {cat:'B',n:'熱危害宣導',s:'60x40',m:'中空板'},{cat:'B',n:'安全第一',s:'60x20',m:'中空板'},
+  {cat:'C',n:'開口危險小心墜落',s:'60x40',m:'中空板'},{cat:'C',n:'升降梯開口危險',s:'60x40',m:'中空板'},
+  {cat:'C',n:'欄杆禁止跨越或攀爬',s:'60x40',m:'中空板'},{cat:'C',n:'吊料電梯專用口',s:'60x40',m:'中空板'},
+  {cat:'C',n:'有電危險請勿觸碰',s:'60x40',m:'中空板'},{cat:'C',n:'高壓電勿近',s:'60x40',m:'中空板'},
+  {cat:'C',n:'施工架嚴禁堆置物料',s:'60x40',m:'中空板'},{cat:'C',n:'施工電梯',s:'30x10',m:'PVC'},
+  {cat:'D',n:'嚴禁酒後進場',s:'60x40',m:'中空板'},{cat:'D',n:'非工作人員禁止進入',s:'60x40',m:'中空板'},{cat:'D',n:'非施工必要禁止進入',s:'60x40',m:'中空板'},
+  {cat:'E',n:'工區施工請勿停車',s:'60x40',m:'中空板'},{cat:'E',n:'進入工區請緩慢行駛',s:'60x40',m:'中空板'},
+  {cat:'F',n:'滅火器',s:'20x10',m:'PVC'},{cat:'F',n:'安全出口',s:'30x15',m:'燈箱'},{cat:'F',n:'樓梯標示',s:'20x10',m:'PVC'},
+  {cat:'F',n:'樓層標示',s:'20x10',m:'PVC'},{cat:'F',n:'放置鋼筋材料',s:'60x40',m:'中空板'},
+  {cat:'G',n:'工安標語6S',s:'60x40',m:'中空板'},
+  {cat:'H',n:'安全第一；品質至上',s:'60x20',m:'中空板'},{cat:'H',n:'工安公布宣導欄',s:'90x60',m:'中空板'},
+  {cat:'H',n:'生活點滴',s:'60x40',m:'中空板'},{cat:'H',n:'關懷標語',s:'60x20',m:'中空板'},
+  {cat:'H',n:'工安宣導',s:'60x40',m:'中空板'},{cat:'H',n:'存好心做好事說好話',s:'60x20',m:'中空板'},
+  {cat:'I',n:'一般垃圾',s:'30x20',m:'PVC'},{cat:'I',n:'資源回收',s:'30x20',m:'PVC'},{cat:'I',n:'廚餘',s:'30x20',m:'PVC'},
+  {cat:'I',n:'鐵鋁罐',s:'30x20',m:'PVC'},{cat:'I',n:'玻璃類',s:'30x20',m:'PVC'},{cat:'I',n:'塑膠類',s:'30x20',m:'PVC'},
+  {cat:'I',n:'紙容器',s:'30x20',m:'PVC'},{cat:'I',n:'廚餘宣傳',s:'60x40',m:'中空板'},
+  {cat:'I',n:'垃圾管道傾倒口',s:'30x20',m:'PVC'},{cat:'I',n:'物料暫置區',s:'60x40',m:'中空板'},{cat:'I',n:'營建廢棄物堆置區',s:'60x40',m:'中空板'},
+];
+const DEF_CATS={A:'A. 生活設施',B:'B. 安全防護',C:'C. 危險警示',D:'D. 禁止事項',E:'E. 交通動線',F:'F. 設施位置',G:'G. 作業規範',H:'H. 宣導標語',I:'I. 環境管理',J:'J. 圖資指引',K:'K. 區域標示'};
+const DEF_STEPS={
+  S1:{t:'🚧 Step1 入口',items:['J01','K01','B01','D01','E01','E02','D02']},
+  S2:{t:'🏗 Step2 基礎',items:['B01','B05','C01','D03','B06']},
+  S3:{t:'🔩 Step3 結構',items:['B01','B02','B03','C01','C02','C03','C07']},
+  S4:{t:'🪟 Step4 裝修',items:['A01','A02','A03','K08','K09','K10','F01']},
+  S5:{t:'🌿 Step5 景觀',items:['E01','E02','I01','I02','I03','H04']},
+  S6:{t:'🏁 Step6 完工',items:['K01','K05','H01','H02','J03','F02']},
+};
+
+/* ═══════ AUTO-ID ═══════ */
+function computeIds(arr){
+  const cnt={};
+  return arr.map(item=>{
+    const c=item.cat||'X'; cnt[c]=(cnt[c]||0)+1;
+    const autoId=c+String(cnt[c]).padStart(2,'0');
+    // manualId overrides auto; keep _autoId for placeholder
+    return {...item, id:item.manualId||autoId, _autoId:autoId};
+  });
+}
+function getDbWithIds(){return computeIds(db);}
+function cartKey(i){return i.cat+'::'+i.n;}
+function cartGet(i){return cart[cartKey(i)]||{sel:false,qty:1};}
+
+/* ═══════ STATE ═══════ */
+const LS='ys11_'; // bumped — avoids stale localStorage from old versions
+let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='S1';
 
 function lsGet(key){
   // Safe localStorage read — returns null on any error or empty/invalid value
@@ -518,14 +916,24 @@ function render(){
     const nameH=isAdmin?`<input class="a-name" value="${esc(item.n)}" oninput="updateName('${item.cat}','${escQ(item.n)}',this.value)">`:`<div class="card-name">${item.n}</div>`;
     const specR=isAdmin?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateField('${item.cat}','${escQ(item.n)}','s',this.value)">`:`<span class="spec-tag spec-r">${item.s}</span>`;
     const specM=isAdmin?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateField('${item.cat}','${escQ(item.n)}','m',this.value)">`:`<span class="spec-tag spec-m">${item.m}</span>`;
-    const moveBtn=isAdmin?`<div class="admin-move-btns"><button class="admin-move-btn" title="往前移" onclick="event.stopPropagation();moveItem('${item.cat}','${escQ(item.n)}',-1)">▲</button><button class="admin-move-btn" title="往後移" onclick="event.stopPropagation();moveItem('${item.cat}','${escQ(item.n)}',1)">▼</button></div>`:'';
+    const dragHandle=isAdmin?`<div class="drag-handle" draggable="false" title="拖曳排序">⠿</div>`:'';
     const delB=isAdmin?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`:'';
-    d.innerHTML=`${moveBtn}${delB}<div class="card-check"><span class="check-icon">✓</span></div>
+    d.innerHTML=`${dragHandle}${delB}<div class="card-check"><span class="check-icon">✓</span></div>
       <div class="card-img"><img src="${imgUrl}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity .2s" alt=""><div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖</small></div></div>
       <div class="card-body"><div><div class="card-meta">${idBadge}<span class="card-cat">${cats[item.cat]||item.cat}</span></div>${nameH}<div class="card-specs">${specR}${specM}</div></div>
         <div class="card-footer">${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
           <div class="qty-ctrl" onclick="event.stopPropagation()"><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',-1)">−</button><span class="qty-num">${st.qty||1}</span><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',1)">＋</button></div></div></div>`;
-    d.addEventListener('click',e=>{if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON')toggleItem(item.cat,item.n);});
+    d.addEventListener('click',e=>{if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON'&&!e.target.classList.contains('drag-handle'))toggleItem(item.cat,item.n);});
+    if(isAdmin){
+      d.draggable=true;
+      d.dataset.cat=item.cat;
+      d.dataset.name=item.n;
+      d.addEventListener('dragstart',onDragStart);
+      d.addEventListener('dragover',onDragOver);
+      d.addEventListener('dragleave',onDragLeave);
+      d.addEventListener('drop',onDrop);
+      d.addEventListener('dragend',onDragEnd);
+    }
     grid.appendChild(d);
   });
   if(isAdmin)document.getElementById('mainArea').classList.add('isAdmin');
@@ -550,18 +958,57 @@ function setManualId(cat,n,val){
   if(v) item.manualId=v; else delete item.manualId;
   save(); render();
 }
+/* ── Drag-to-reorder ── */
+let _dragSrcCat=null,_dragSrcName=null;
+function onDragStart(e){
+  _dragSrcCat=this.dataset.cat;
+  _dragSrcName=this.dataset.name;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',_dragSrcCat+'::'+_dragSrcName);
+}
+function onDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  this.classList.add('drag-over');
+}
+function onDragLeave(){this.classList.remove('drag-over');}
+function onDrop(e){
+  e.preventDefault();
+  this.classList.remove('drag-over');
+  const tgtCat=this.dataset.cat,tgtName=this.dataset.name;
+  if(_dragSrcCat===tgtCat&&_dragSrcName!==tgtName){
+    // Reorder within same category
+    const srcIdx=db.findIndex(x=>x.cat===_dragSrcCat&&x.n===_dragSrcName);
+    const tgtIdx=db.findIndex(x=>x.cat===tgtCat&&x.n===tgtName);
+    if(srcIdx<0||tgtIdx<0)return;
+    const [moved]=db.splice(srcIdx,1);
+    const newTgt=db.findIndex(x=>x.cat===tgtCat&&x.n===tgtName);
+    db.splice(newTgt,0,moved);
+    save();render();
+  } else if(_dragSrcCat!==tgtCat){
+    // Move to different category
+    const srcIdx=db.findIndex(x=>x.cat===_dragSrcCat&&x.n===_dragSrcName);
+    if(srcIdx<0)return;
+    const item=db.splice(srcIdx,1)[0];
+    item.cat=tgtCat;
+    delete item.manualId; // reset manual id when changing category
+    const tgtIdx=db.findIndex(x=>x.cat===tgtCat&&x.n===tgtName);
+    db.splice(tgtIdx,0,item);
+    save();renderTabs();render();
+  }
+}
+function onDragEnd(){
+  this.classList.remove('dragging');
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over'));
+}
 function moveItem(cat,n,dir){
-  // Find item in db and move it within same category
-  const idx=db.findIndex(x=>x.cat===cat&&x.n===n);
-  if(idx<0)return;
-  const catItems=db.map((x,i)=>i).filter(i=>db[i].cat===cat);
-  const posInCat=catItems.indexOf(idx);
-  const targetPos=posInCat+dir;
-  if(targetPos<0||targetPos>=catItems.length)return;
-  const targetIdx=catItems[targetPos];
-  // Swap
-  [db[idx],db[targetIdx]]=[db[targetIdx],db[idx]];
-  save(); render();
+  const idx=db.findIndex(x=>x.cat===cat&&x.n===n);if(idx<0)return;
+  const catItems=db.map((_,i)=>i).filter(i=>db[i].cat===cat);
+  const pos=catItems.indexOf(idx),newPos=pos+dir;
+  if(newPos<0||newPos>=catItems.length)return;
+  [db[idx],db[catItems[newPos]]]=[db[catItems[newPos]],db[idx]];
+  save();render();
 }
 
 /* ═══════ SITES ═══════ */
