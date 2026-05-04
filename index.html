@@ -906,4 +906,78 @@ async function gasSend(action, extra){
 
 async function pullFromCloud(silent=false){
   if(!gsUrl){if(!silent)openCloudSetup&&openCloudSetup();return;}
-  const res=await gasGet({action:
+  const res=await gasGet({action:'loadAll'});
+  if(!res||!res.ok){if(!silent)showToast('⚠️ 同步失敗：'+(res?res.error:'逾時'),5000);return;}
+  if(res.db&&res.db.length)        db=res.db;
+  if(res.sites&&res.sites.length)  sites=res.sites;
+  if(res.config)                   config=res.config;
+  if(res.steps)                    stepData=res.steps;
+  if(res.cats)                     cats=res.cats;
+  if(res.catOrder&&res.catOrder.length) catOrder=res.catOrder;
+  if(res.imgBase)                  imgBase=res.imgBase;
+  if(res.logo&&res.logo.length>5)  {logoSrc=res.logo;localStorage.setItem(LS+'logo',logoSrc);}
+  save();renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
+  if(!silent)showToast('⬇️ 已從雲端同步最新內容');
+}
+
+async function pushToCloud(){
+  if(!gsUrl){alert('請先設定雲端網址（管理員→☁️ 雲端設定）');return;}
+  showToast('⬆️ 推送中...',10000);
+  const res=await gasSend('saveAll',{data:{db,sites,config,stepData,cats,catOrder,imgBase}});
+  if(res&&res.ok)showToast('✅ 已推送至 Google Sheets！');
+  else{const m=res?res.error:'網路逾時';showToast('⚠️ 推送失敗：'+m,6000);}
+}
+
+async function pushHistToCloud(record){
+  if(!gsUrl)return{ok:false,error:'未設定雲端'};
+  return await gasSend('saveHistory',{record});
+}
+
+/* ═══════ ADMIN ═══════ */
+function openCloudSetup(){
+  const v=prompt('請輸入 Google Apps Script 網址（結尾須為 /exec）：',gsUrl||'');
+  if(v===null)return;
+  gsUrl=v.trim();
+  localStorage.setItem(LS+'gsUrl',gsUrl);
+  updateSyncDot();
+  if(gsUrl)showToast('☁️ 雲端網址已儲存，請試試推送');
+}
+function toggleAdmin(){
+  if(!isAdmin){
+    const pw=prompt('請輸入管理員密碼：');
+    if(pw==='751113'){
+      isAdmin=true;localStorage.setItem(LS+'adminPw',pw);
+      document.getElementById('adminBtn').textContent='🔓 管理中';
+      document.getElementById('adminBtn').classList.add('active');
+      document.getElementById('adminPanel').classList.add('show');
+    } else if(pw!==null)alert('密碼錯誤');
+  } else {
+    isAdmin=false;
+    document.getElementById('adminBtn').textContent='🔒 管理員';
+    document.getElementById('adminBtn').classList.remove('active');
+    document.getElementById('adminPanel').classList.remove('show');
+  }
+  renderLogo();renderTitle();renderTabs();render();
+}
+
+/* ═══════ PERSISTENCE ═══════ */
+function save(){
+  localStorage.setItem(LS+'db',JSON.stringify(db));
+  localStorage.setItem(LS+'staff',document.getElementById('staffInput').value);
+  localStorage.setItem(LS+'site',document.getElementById('siteSelect').value);
+  localStorage.setItem(LS+'cfg',JSON.stringify(config));
+  localStorage.setItem(LS+'steps',JSON.stringify(stepData));
+  localStorage.setItem(LS+'cats',JSON.stringify(cats));
+  localStorage.setItem(LS+'catOrd',JSON.stringify(catOrder));
+  localStorage.setItem(LS+'sites',JSON.stringify(sites));
+}
+function configImgBase(){const v=prompt('圖片路徑 Base URL（以 / 結尾）：',imgBase);if(v!==null&&v.trim()){imgBase=v.trim();localStorage.setItem(LS+'imgBase',imgBase);render();}}
+function exportData(){const d={db,sites,config,stepData,cats,catOrder,imgBase,logoSrc};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`工安標語備份_${new Date().toISOString().slice(0,10)}.json`;a.click();}
+function importData(){const j=prompt('貼上備份 JSON：');if(!j)return;try{const d=JSON.parse(j);if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.catOrder)catOrder=d.catOrder;if(d.imgBase)imgBase=d.imgBase;if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem(LS+'logo',logoSrc);}save();location.reload();}catch(e){alert('格式錯誤');}}
+
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('histOverlay').addEventListener('click',function(e){if(e.target===this)closeHistory();});
+init();
+</script>
+</body>
+</html>
