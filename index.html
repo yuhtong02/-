@@ -360,7 +360,7 @@ function cartKey(i){return i.cat+'::'+i.n;}
 function cartGet(i){return cart[cartKey(i)]||{sel:false,qty:1};}
 
 /* ═══════ STATE ═══════ */
-const LS='ys12_'; // bumped — avoids stale localStorage from old versions
+const LS='ys12_'; // bumped - avoids stale localStorage from old versions
 let db,cart={},sites,config,stepData,cats,catOrder,imgBase,logoSrc,gsUrl,isAdmin=false,currentTab='S1';
 
 function lsGet(key){
@@ -516,10 +516,27 @@ function render(){
   const dbIds=getDbWithIds();
   let list;
   if(stepData[currentTab]) list=dbIds.filter(x=>stepData[currentTab].items.includes(x.id));
-  else if(currentTab==='ALL') list=[...dbIds];
+  else if(currentTab==='ALL'){
+    // Sort strictly by catOrder index (A,B,C...K), preserve order within each cat
+    const orderMap={};
+    catOrder.forEach((k,i)=>orderMap[k]=i);
+    list=[...dbIds].sort((a,b)=>{
+      const oa=orderMap[a.cat]!==undefined?orderMap[a.cat]:99;
+      const ob=orderMap[b.cat]!==undefined?orderMap[b.cat]:99;
+      if(oa!==ob)return oa-ob;
+      // same category: preserve original db order (already by index)
+      return dbIds.indexOf(a)-dbIds.indexOf(b);
+    });
+  }
   else list=dbIds.filter(x=>x.cat===currentTab);
   const grid=document.getElementById('gridEl');
-  if(!list.length){grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div style="font-size:14px;color:var(--ink4);">此分類暫無標語</div></div>`;document.getElementById('mainArea').classList.remove('isAdmin');return;}
+  if(!list.length){
+    const hint=stepData[currentTab]&&isAdmin
+      ?'此工序尚無標語<br><small style="font-size:12px;color:var(--ink3);margin-top:8px;display:block;">切換至分類 Tab，點標語卡片右下角 <b>+Step</b> 按鈕可加入</small>'
+      :'此分類暫無標語';
+    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div style="font-size:14px;color:var(--ink4);">${hint}</div></div>`;
+    document.getElementById('mainArea').classList.remove('isAdmin');return;
+  }
   grid.innerHTML='';
   list.forEach(item=>{
     const st=cartGet(item);const d=document.createElement('div');
@@ -531,13 +548,17 @@ function render(){
     const nameH=isAdmin?`<input class="a-name" value="${esc(item.n)}" oninput="updateName('${item.cat}','${escQ(item.n)}',this.value)">`:`<div class="card-name">${item.n}</div>`;
     const specR=isAdmin?`<input class="a-spec spec-tag spec-r" value="${esc(item.s)}" oninput="updateField('${item.cat}','${escQ(item.n)}','s',this.value)">`:`<span class="spec-tag spec-r">${item.s}</span>`;
     const specM=isAdmin?`<input class="a-spec spec-tag spec-m" value="${esc(item.m)}" oninput="updateField('${item.cat}','${escQ(item.n)}','m',this.value)">`:`<span class="spec-tag spec-m">${item.m}</span>`;
-    const dragHandle=isAdmin?`<div class="drag-handle" draggable="false" title="拖曳排序">⠿</div>`:'';
-    const delB=isAdmin?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`:'';
-    d.innerHTML=`${dragHandle}${delB}<div class="card-check"><span class="check-icon">✓</span></div>
+    const dragHandle=isAdmin?`<div class="drag-handle" draggable="false" title="拖曳排序">⠿</div>`:''
+    const removeStepBtn=isAdmin&&stepData[currentTab]?`<button class="admin-del-btn" style="background:#D97706;" onclick="event.stopPropagation();removeFromStep('${item.id}')" title="從此Step移除">✕</button>`:'';
+    const delB=isAdmin&&!stepData[currentTab]?`<button class="admin-del-btn" onclick="event.stopPropagation();deleteItem('${item.cat}','${escQ(item.n)}')">✕</button>`:'';
+    d.innerHTML=`${dragHandle}${stepData[currentTab]?removeStepBtn:delB}<div class="card-check"><span class="check-icon">✓</span></div>
       <div class="card-img"><img src="${imgUrl}" onload="this.style.opacity=1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="opacity:0;transition:opacity .2s" alt=""><div class="img-placeholder" style="display:none"><span>🖼</span><small>${item.id}<br>無圖</small></div></div>
       <div class="card-body"><div><div class="card-meta">${idBadge}<span class="card-cat">${cats[item.cat]||item.cat}</span></div>${nameH}<div class="card-specs">${specR}${specM}</div></div>
         <div class="card-footer">${st.sel?'<span class="sel-chip">✓ 已選取</span>':'<span></span>'}
-          <div class="qty-ctrl" onclick="event.stopPropagation()"><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',-1)">−</button><span class="qty-num">${st.qty||1}</span><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',1)">＋</button></div></div></div>`;
+          <div style="display:flex;align-items:center;gap:6px;" onclick="event.stopPropagation()">
+            ${isAdmin?`<button class="qty-btn" style="width:auto;border-radius:4px;padding:0 6px;font-size:9px;font-weight:700;background:var(--cream);color:var(--cream-deep);border-color:var(--cream-border);" onclick="addToStep('${item.id}')" title="加入/移除 Step 工序">Step</button>`:''}
+            <div class="qty-ctrl"><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',-1)">−</button><span class="qty-num">${st.qty||1}</span><button class="qty-btn" onclick="adjQty('${item.cat}','${escQ(item.n)}',1)">＋</button></div>
+          </div></div></div>`;
     d.addEventListener('click',e=>{if(e.target.tagName!=='INPUT'&&e.target.tagName!=='BUTTON'&&!e.target.classList.contains('drag-handle'))toggleItem(item.cat,item.n);});
     if(isAdmin){
       d.draggable=true;
@@ -617,6 +638,15 @@ function onDragEnd(){
   this.classList.remove('dragging');
   document.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over'));
 }
+function removeFromStep(itemId){
+  if(!stepData[currentTab])return;
+  const idx=stepData[currentTab].items.indexOf(itemId);
+  if(idx>=0){
+    stepData[currentTab].items.splice(idx,1);
+    save();render();
+    showToast('已從 '+stepData[currentTab].t+' 移除');
+  }
+}
 function moveItem(cat,n,dir){
   const idx=db.findIndex(x=>x.cat===cat&&x.n===n);if(idx<0)return;
   const catItems=db.map((_,i)=>i).filter(i=>db[i].cat===cat);
@@ -644,7 +674,7 @@ function addNewSign(){
   const similar=dbIds.filter(x=>x.cat===cat&&x.n!==name&&(x.n.includes(name)||name.includes(x.n)));
   let manualId=undefined;
   if(same.length>0){
-    // exact duplicate exists — auto-assign suffix id
+    // exact duplicate exists - auto-assign suffix id
     const existId=same[same.length-1].manualId||same[same.length-1].id;
     const suggested=existId+'-1';
     const ans=prompt(`「${name}」在 ${cat} 類已存在（${existId}）。\n新編號建議：${suggested}\n（可修改或留空自動編號）`, suggested);
@@ -660,6 +690,39 @@ function addNewSign(){
   if(manualId)newItem.manualId=manualId;
   db.push(newItem);
   save();renderTabs();render();setTab(cat);
+}
+function addToStep(itemId){
+  // Show which steps this item can be added to
+  const stepKeys=Object.keys(stepData).sort();
+  const lines=stepKeys.map((k,i)=>{
+    const already=stepData[k].items.includes(itemId);
+    return (i+1)+'. '+stepData[k].t+(already?' ✓已在此':'');
+  });
+  const choice=prompt('將 ['+itemId+'] 加入哪個 Step？\n（輸入數字，多個用逗號，輸入「移除」可從Step移除）\n\n'+lines.join('\n'));
+  if(!choice)return;
+  if(choice.trim()==='移除'){
+    // Remove from all steps
+    let removed=0;
+    stepKeys.forEach(k=>{
+      const idx=stepData[k].items.indexOf(itemId);
+      if(idx>=0){stepData[k].items.splice(idx,1);removed++;}
+    });
+    save();render();
+    showToast(removed>0?'已從所有Step移除':'此項目不在任何Step中');
+    return;
+  }
+  const nums=choice.split(',').map(s=>parseInt(s.trim())-1).filter(n=>n>=0&&n<stepKeys.length);
+  if(!nums.length){alert('請輸入有效數字');return;}
+  let added=0;
+  nums.forEach(n=>{
+    const k=stepKeys[n];
+    if(!stepData[k].items.includes(itemId)){
+      stepData[k].items.push(itemId);
+      added++;
+    }
+  });
+  save();render();
+  showToast(added>0?'✅ 已加入 Step！':'此項目已在選擇的Step中');
 }
 function addStep(){const t=prompt('工序標籤名稱（含emoji）：',`🔧 Step${Object.keys(stepData).length+1} 新工序`);if(!t)return;let key='S'+(Object.keys(stepData).length+1);while(stepData[key])key='S'+(parseInt(key.slice(1))+1);stepData[key]={t,items:[]};save();renderTabs();setTab(key);}
 function deleteStep(key){if(!confirm(`確定刪除工序「${stepData[key].t}」？`))return;delete stepData[key];if(currentTab===key)currentTab='ALL';save();renderTabs();render();}
@@ -815,7 +878,7 @@ function downloadReportImage(){
   try{
     buildReportCanvas(dataUrl=>{
       btn.textContent='📥 儲存採購單圖片（手機長按）'; btn.disabled=false;
-      // Show in overlay — user long-presses to save
+      // Show in overlay - user long-presses to save
       const ov=document.getElementById('imgOverlay');
       const img=document.getElementById('reportImg');
       img.src=dataUrl;
@@ -904,7 +967,7 @@ function closeHistory(){document.getElementById('histOverlay').classList.remove(
 function deleteHistLocal(id){let h=getHistLocal().filter(r=>r.id!==id);localStorage.setItem(LS+'hist',JSON.stringify(h));showHistory();}
 function clearHistory(){if(!confirm('確定清除所有本機紀錄？'))return;localStorage.removeItem(LS+'hist');showHistory();}
 
-/* ── Export Excel (CSV with BOM — opens in Excel) ── */
+/* ── Export Excel (CSV with BOM - opens in Excel) ── */
 function exportHistExcel(){
   const h=getHistLocal();if(!h.length)return alert('尚無紀錄');
   let csv='\uFEFF日期,工地名稱,負責人員,編號,標語名稱,規格(cm),材質,數量,備註\n';
@@ -927,7 +990,7 @@ function exportHistPdf(){
   });
   const now=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
   document.getElementById('printContainer').innerHTML=`<div style="font-family:'Noto Sans TC',sans-serif;max-width:720px;margin:0 auto;padding:12px;">
-    <div style="background:#164E33;color:white;padding:12px 18px;border-radius:10px;margin-bottom:14px;display:flex;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span style="font-size:16px;font-weight:900;">${config.title} — 採購歷史紀錄</span><span style="font-size:11px;opacity:.7;">列印日期：${now}</span></div>
+    <div style="background:#164E33;color:white;padding:12px 18px;border-radius:10px;margin-bottom:14px;display:flex;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span style="font-size:16px;font-weight:900;">${config.title} - 採購歷史紀錄</span><span style="font-size:11px;opacity:.7;">列印日期：${now}</span></div>
     <table style="width:100%;border-collapse:collapse;font-size:12px;font-family:'Noto Sans TC',sans-serif;">
       <thead><tr style="background:#FFFBF0;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;text-align:center;">#</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">編號</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">名稱</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">規格</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;">材質</th><th style="padding:7px 8px;color:#164E33;border-bottom:2px solid #E2C96A;text-align:right;">數量</th></tr></thead>
       <tbody>${rows}</tbody>
@@ -980,14 +1043,14 @@ async function gasGet(params){
   catch(e){setSyncDot('off');return{ok:false,error:e.message};}
 }
 /* gasSend: encode entire payload as base64, send in ONE request (no chunking)
-   GAS URL limit is ~8000 chars; typical payload is ~7000 chars — fits fine */
+   GAS URL limit is ~8000 chars; typical payload is ~7000 chars - fits fine */
 async function gasSend(action, extra){
   if(!gsUrl)return null;
   setSyncDot('syncing');
   try{
     const pw=localStorage.getItem(LS+'adminPw')||'751113';
     const json=JSON.stringify({action,...extra,pw});
-    // Use encodeURIComponent on raw JSON — shorter than base64
+    // Use encodeURIComponent on raw JSON - shorter than base64
     const url=gsUrl+'?encoded='+encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
     const d=await jsonpCall(url);
     setSyncDot('ok');
@@ -999,38 +1062,59 @@ async function gasSend(action, extra){
 }
 
 async function pullFromCloud(silent=false){
-  if(!gsUrl){if(!silent)openCloudSetup&&openCloudSetup();return;}
-  const res=await gasGet({action:'loadAll'});
-  if(!res||!res.ok){if(!silent)showToast('⚠️ 同步失敗：'+(res?res.error:'逾時'),5000);return;}
-  if(res.db&&res.db.length)        db=res.db;
-  if(res.sites&&res.sites.length)  sites=res.sites;
-  if(res.config)                   config=res.config;
-  if(res.steps)                    stepData=res.steps;
-  if(res.cats)                     cats=res.cats;
-  if(res.catOrder&&res.catOrder.length) catOrder=res.catOrder;
-  if(res.imgBase)                  imgBase=res.imgBase;
-  if(res.logo&&res.logo.length>5)  {logoSrc=res.logo;localStorage.setItem(LS+'logo',logoSrc);}
-  save();renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
-  if(!silent)showToast('⬇️ 已從雲端同步最新內容');
+  if(!gsUrl){if(!silent){openCloudSetup();} return;}
+  if(!silent) showToast('⬇️ 同步中...',10000);
+  try{
+    const res=await gasGet({action:'loadAll'});
+    if(!res||!res.ok){
+      if(!silent) showMsg('⚠️ 同步失敗',(res?res.error:'逾時或無回應')+'\n\n請確認雲端設定正確。','err');
+      return;
+    }
+    // Only apply if data is valid
+    if(res.db&&Array.isArray(res.db)&&res.db.length>0)            db=res.db;
+    if(res.sites&&Array.isArray(res.sites)&&res.sites.length>0)    sites=res.sites;
+    if(res.config&&res.config.title)                               config=res.config;
+    const cloudSteps=res.steps||res.stepData;
+    if(cloudSteps&&typeof cloudSteps==='object'&&Object.keys(cloudSteps).length>0) stepData=cloudSteps;
+    if(res.cats&&typeof res.cats==='object'&&Object.keys(res.cats).length>0)    cats=res.cats;
+    if(res.catOrder&&Array.isArray(res.catOrder)&&res.catOrder.length>0)        catOrder=res.catOrder;
+    if(res.imgBase&&res.imgBase.startsWith('http'))                imgBase=res.imgBase;
+    if(res.logo&&res.logo.length>5){logoSrc=res.logo;localStorage.setItem(LS+'logo',logoSrc);}
+    save();
+    renderLogo();renderTitle();renderSites();renderTabs();render();updateBadge();
+    if(!silent){
+      showToast('⬇️ 已從雲端同步最新內容',3000);
+      showMsg('✅ 同步成功','已載入雲端最新資料。','ok');
+    }
+  }catch(e){
+    if(!silent) showMsg('⚠️ 同步錯誤',e.message,'err');
+  }
 }
 
 async function pushToCloud(){
-  if(!gsUrl){openCloudSetup();return;}
-  showToast('⬆️ 推送中，請稍候...',15000);
-  // Minimal payload: strip logo (too large), keep only essential fields
+  if(!gsUrl){
+    openCloudSetup();
+    return;
+  }
+  // Show immediate feedback
+  showToast('⬆️ 推送中，請稍候...',20000);
   const payload={
     db: db.map(x=>({cat:x.cat,n:x.n,s:x.s,m:x.m,...(x.manualId?{manualId:x.manualId}:{})})),
     sites, config, stepData, cats, catOrder, imgBase
   };
-  const res=await gasSend('saveAll',{data:payload});
-  if(res&&res.ok){
-    showToast('✅ 已推送至 Google Sheets！');
-  } else {
-    const m=res?res.error:'未收到回應';
-    showToast('⚠️ 推送失敗：'+m,8000);
-    setTimeout(()=>{
-      if(confirm('推送失敗：'+m+'\n\n請確認：\n1. Apps Script 已貼上 v3 程式碼並重新部署（新版本）\n2. 存取對象 = 所有人（包含匿名）\n3. 網址結尾是 /exec\n\n開啟雲端設定？'))openCloudSetup();
-    },500);
+  try{
+    const res=await gasSend('saveAll',{data:payload});
+    if(res&&res.ok){
+      showToast('✅ 已推送至 Google Sheets！',5000);
+      showMsg('✅ 推送成功','資料已同步至 Google Sheets。<br><br>採購人員重新整理頁面即可看到最新內容。','ok');
+    } else {
+      const m=res?res.error:'未收到回應（可能逾時）';
+      showToast('⚠️ 推送失敗',5000);
+      showMsg('⚠️ 推送失敗',m+'\n\n請確認：\n① Apps Script 已貼上 v3 並重新部署（選新版本）\n② 存取對象 = 所有人（包含匿名）\n③ 網址結尾是 /exec','err');
+    }
+  }catch(e){
+    showToast('⚠️ 推送錯誤',4000);
+    showMsg('⚠️ 推送錯誤',e.message,'err');
   }
 }
 
@@ -1082,8 +1166,18 @@ function exportData(){const d={db,sites,config,stepData,cats,catOrder,imgBase,lo
 function importData(){const j=prompt('貼上備份 JSON：');if(!j)return;try{const d=JSON.parse(j);if(d.db)db=d.db;if(d.sites)sites=d.sites;if(d.config)config=d.config;if(d.stepData)stepData=d.stepData;if(d.cats)cats=d.cats;if(d.catOrder)catOrder=d.catOrder;if(d.imgBase)imgBase=d.imgBase;if(d.logoSrc){logoSrc=d.logoSrc;localStorage.setItem(LS+'logo',logoSrc);}save();location.reload();}catch(e){alert('格式錯誤');}}
 
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('msgOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
 document.getElementById('histOverlay').addEventListener('click',function(e){if(e.target===this)closeHistory();});
 init();
 </script>
+
+<!-- MSG OVERLAY (replaces window.alert) -->
+<div class="overlay" id="msgOverlay">
+  <div class="sheet" style="max-height:60vh;max-width:460px;border-radius:16px;">
+    <div style="font-size:17px;font-weight:900;margin-bottom:10px;" id="msgTitle"></div>
+    <div style="font-size:13px;color:var(--ink3);line-height:1.7;" id="msgBody"></div>
+    <button onclick="document.getElementById('msgOverlay').classList.remove('show')" style="width:100%;margin-top:16px;padding:12px;background:var(--dark);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">確認</button>
+  </div>
+</div>
 </body>
 </html>
