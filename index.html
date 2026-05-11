@@ -1277,65 +1277,85 @@ function cfgCloud() {
 
 function pushCloud() {
   if (!gsUrl) { cfgCloud(); return; }
-  toast('⬆️ 推送中（1/3）...', 30000);
-
-  // Split into 3 small payloads to avoid URL length / timeout limits
   var pw = localStorage.getItem(LS+'apw') || '751113';
 
-  // Helper: encode small payload and call via JSONP
-  function sendPart(action, data, label) {
+  // Helper: encode to base64 and send via JSONP (max ~1800 encoded chars for GAS)
+  function gasCall(obj) {
     return new Promise(function(resolve) {
-      var json = JSON.stringify(Object.assign({action:action, pw:pw}, data));
-      var enc  = btoa(unescape(encodeURIComponent(json)));
-      var cb   = '__p_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-      var el   = document.createElement('script');
-      var t    = setTimeout(function(){ cleanup(); resolve({ok:false, error:label+'逾時'}); }, 20000);
+      var enc = btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+      var cb  = '__p'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      var el  = document.createElement('script');
+      var t   = setTimeout(function(){ cleanup(); resolve({ok:false,error:'逾時'}); }, 25000);
       function cleanup(){ clearTimeout(t); el.parentNode&&el.parentNode.removeChild(el); delete window[cb]; }
       window[cb] = function(d){ cleanup(); resolve(d); };
       el.src = gsUrl + '?encoded=' + encodeURIComponent(enc) + '&callback=' + cb;
-      el.onerror = function(){ cleanup(); resolve({ok:false, error:label+'載入失敗'}); };
+      el.onerror = function(){ cleanup(); resolve({ok:false,error:'載入失敗'}); };
       document.head.appendChild(el);
     });
   }
 
-  // Part 1: DB + sites
-  sendPart('savePart', {
-    part: 'db',
-    db: db.map(function(x){ var r={cat:x.cat,n:x.n,s:x.s,m:x.m}; if(x.manualId) r.manualId=x.manualId; return r; }),
-    sites: sites
-  }, 'Part1').then(function(r1) {
-    if (!r1 || !r1.ok) {
-      showMsg('⚠️ 推送失敗(1/3)', r1?r1.error:'無回應', 'err'); return;
-    }
-    toast('⬆️ 推送中（2/3）...', 25000);
+  // Sequentially run an array of promise-factories
+  function runSeq(tasks) {
+    return tasks.reduce(function(p, fn) {
+      return p.then(function(prev) {
+        if (!prev.ok) return prev; // stop on first failure
+        return fn();
+      });
+    }, Promise.resolve({ok:true}));
+  }
 
-    // Part 2: steps + cats + catOrder
-    return sendPart('savePart', {
-      part: 'structure',
-      stepData: steps, cats: cats, catOrder: catOrd
-    }, 'Part2');
-  }).then(function(r2) {
-    if (!r2 || !r2.ok) {
-      showMsg('⚠️ 推送失敗(2/3)', r2?r2.error:'無回應', 'err'); return;
-    }
-    toast('⬆️ 推送中（3/3）...', 20000);
+  // Build DB tasks: 7 items per batch (safe for GAS 2048-char URL limit)
+  var dbItems = db.map(function(x){
+    var r={cat:x.cat,n:x.n,s:x.s,m:x.m};
+    if(x.manualId) r.manualId=x.manualId;
+    return r;
+  });
+  var BATCH = 7;
+  var tasks = [];
 
-    // Part 3: config + gasUrl (so all users can submit orders)
-    return sendPart('savePart', {
-      part: 'config',
-      config: config,
-      imgBase: imgBase,
-      gasUrl: gsUrl
-    }, 'Part3');
-  }).then(function(r3) {
-    if (!r3 || !r3.ok) {
-      showMsg('⚠️ 推送失敗(3/3)', r3?r3.error:'無回應', 'err'); return;
+  // Task: clear DB first (so old deleted items don't remain)
+  tasks.push(function(){ return gasCall({action:'savePart',pw:pw,part:'db_clear'}); });
+
+  // Tasks: DB in batches
+  for (var i=0; i<dbItems.length; i+=BATCH) {
+    (function(chunk, idx) {
+      tasks.push(function() {
+        toast('⬆️ 推送中（標語 '+(idx+1)+'/'+(Math.ceil(dbItems.length/BATCH))+'）...', 20000);
+        return gasCall({action:'savePart',pw:pw,part:'db_append',db:chunk});
+      });
+    })(dbItems.slice(i, i+BATCH), Math.floor(i/BATCH));
+  }
+
+  // Task: sites
+  tasks.push(function() {
+    toast('⬆️ 推送工地名單...', 15000);
+    return gasCall({action:'savePart',pw:pw,part:'sites',sites:sites});
+  });
+
+  // Task: structure (steps + cats)
+  tasks.push(function() {
+    toast('⬆️ 推送分類設定...', 15000);
+    return gasCall({action:'savePart',pw:pw,part:'structure',
+      stepData:steps, cats:cats, catOrder:catOrd});
+  });
+
+  // Task: config + gasUrl
+  tasks.push(function() {
+    toast('⬆️ 推送系統設定...', 15000);
+    return gasCall({action:'savePart',pw:pw,part:'config',
+      config:config, imgBase:imgBase, gasUrl:gsUrl});
+  });
+
+  toast('⬆️ 開始推送（共 '+(tasks.length)+' 步）...', 60000);
+
+  runSeq(tasks).then(function(res) {
+    if (res && res.ok) {
+      localStorage.setItem(LS+'submitUrl', gsUrl);
+      window.__GAS_URL__ = gsUrl;
+      showMsg('✅ 推送成功','全部資料已同步至 Google Sheets！<br><br>採購人員直接開啟網址，選標語後即可送單。','ok');
+    } else {
+      showMsg('⚠️ 推送失敗', res ? res.error : '未知錯誤', 'err');
     }
-    // Success
-    localStorage.setItem(LS+'submitUrl', gsUrl);
-    window.__GAS_URL__ = gsUrl;
-    showMsg('✅ 推送成功','資料已同步至 Google Sheets！<br><br>採購人員直接開啟網址，選標語後即可送單，不需任何設定。','ok');
-    toast('✅ 推送成功！', 4000);
   }).catch(function(e) {
     showMsg('⚠️ 推送錯誤', e.message, 'err');
   });
