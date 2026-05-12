@@ -470,7 +470,7 @@ function init() {
   catOrd  = Object.keys(DEF_CATS);
   steps   = JSON.parse(JSON.stringify(DEF_STEPS));
   cart    = {};
-  imgBase = 'https://raw.githubusercontent.com/yutong888/Safety-signs/main/img/';
+  imgBase = 'https://yuhtong02.github.io/-/IMG/';
   logoSrc = '';
   gsUrl   = '';
 
@@ -668,7 +668,7 @@ function render() {
     var st = cget(item);
     var d = document.createElement('div');
     d.className = 'card' + (st.sel ? ' sel' : '');
-    var imgUrl = imgBase + item.id + '.jpg';
+    var imgUrl = imgBase + item.id + '.JPG';
 
     var idBadge = isAdmin
       ? '<input class="aid" value="'+esc(item.manualId||'')+'" placeholder="'+esc(item._auto)+'" title="手動編號（空=自動）" oninput="setManId(\''+item.cat+'\',\''+escQ(item.n)+'\',this.value)">'
