@@ -313,6 +313,12 @@ select{flex:1}
 
 <script>
 // ──────────────────────────────────────────
+// GAS_BAKED: set by admin after pushCloud
+// All users get this without any config
+// ──────────────────────────────────────────
+var GAS_BAKED = localStorage.getItem('gas_url_global') || '';
+
+// ──────────────────────────────────────────
 // DATA DEFAULTS
 // ──────────────────────────────────────────
 const DEF_SITES = ["嘉義創世基金會","嘉義嘉科實中","嘉義博愛安居","嘉義北門集合住宅","嘉義民雄院區","臺南林森圖書館"];
@@ -418,19 +424,24 @@ function cget(item) { return cart[ckey(item)] || {sel:false,qty:1}; }
 var GAS_BAKED = ''; // 管理員推送後自動寫入，請勿手動修改
 var LS = 'ys13_';
 
-// gasSubmit: 送單不需密碼，任何人都能用
+// gasSubmit: 任何人都能用，不需密碼，不需管理員登入
 function gasSubmit(record) {
-  var url = gsUrl;
-  if (!url) return Promise.resolve({ok:false, error:'未設定雲端網址'});
-  // Build minimal JSON and encode
-  var json = JSON.stringify({action:'saveHistory', record:record});
-  var enc = btoa(unescape(encodeURIComponent(json)));
+  // Priority: localStorage submitUrl > GAS_BAKED > admin gsUrl
+  var url = localStorage.getItem(LS+'submitUrl')
+         || localStorage.getItem('gas_url_global')
+         || window.__GAS_URL__
+         || gsUrl
+         || '';
+  if (!url) return Promise.resolve({ok:false, error:'NO_URL'});
+  var pw  = localStorage.getItem(LS+'writeToken') || '751113';
+  var json = JSON.stringify({action:'saveHistory', pw:pw, record:record});
+  var enc  = btoa(unescape(encodeURIComponent(json)));
   return new Promise(function(resolve) {
-    var cb = '__sub_'+Date.now();
+    var cb = '__sub_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
     var el = document.createElement('script');
-    var t = setTimeout(function(){
-      cleanup(); resolve({ok:false, error:'逾時，請檢查網路連線'});
-    }, 15000);
+    var t  = setTimeout(function(){
+      cleanup(); resolve({ok:false, error:'逾時，請確認網路連線正常'});
+    }, 20000);
     function cleanup(){ clearTimeout(t); el.parentNode&&el.parentNode.removeChild(el); delete window[cb]; }
     window[cb] = function(d){ cleanup(); resolve(d); };
     el.src = url + '?encoded=' + encodeURIComponent(enc) + '&callback=' + cb;
@@ -477,7 +488,11 @@ function init() {
   }
   v = localStorage.getItem(LS+'imgBase'); if (v && v.startsWith('http')) imgBase = v;
   logoSrc = localStorage.getItem(LS+'logo') || '';
-  gsUrl   = localStorage.getItem(LS+'gsUrl') || localStorage.getItem(LS+'gasUrl_public') || GAS_BAKED || '';
+  gsUrl   = localStorage.getItem(LS+'gsUrl') || '';
+  // submitUrl is the public URL for all users (no admin needed)
+  var submitUrl = localStorage.getItem(LS+'submitUrl') || localStorage.getItem('gas_url_global') || '';
+  if (submitUrl) { window.__GAS_URL__ = submitUrl; }
+  if (!gsUrl && submitUrl) gsUrl = submitUrl;  // non-admin devices get url from sync
 
   document.getElementById('staff-in').value = localStorage.getItem(LS+'staff') || '';
   // Load public submit URL — available to all users without admin login
@@ -1093,9 +1108,17 @@ function submitOrder() {
   // Check if we have a submit URL (set by admin, works for all users)
   var url = localStorage.getItem(LS+'submitUrl') || window.__GAS_URL__ || gsUrl || '';
   if (!url) {
-    hint.innerHTML = '<span style="color:#D97706;font-weight:700">尚未連線到後台</span><br>'
-      + '<small style="color:#64748B">資料已存本機。'
-      + '請管理員完成雲端設定並推送一次，之後所有人即可直接送單。</small>';
+    // Try one more time: ping cloud to get gasUrl
+    hint.innerHTML = '<span style="color:#64748B">⏳ 嘗試連線後台...</span>';
+    gasGet({action:'ping'}).then(function(r){
+      if (r && r.ok) {
+        // Retry submit now that we have the URL
+        submitOrder();
+      } else {
+        hint.innerHTML = '<span style="color:#D97706;font-weight:700">尚未連線到後台</span><br>'
+          + '<small style="color:#64748B">資料已存本機。請向管理員確認雲端設定是否完成。</small>';
+      }
+    });
     return;
   }
   btn.textContent = '⏳ 提交中...'; btn.disabled = true;
@@ -1351,8 +1374,9 @@ function pushCloud() {
   runSeq(tasks).then(function(res) {
     if (res && res.ok) {
       localStorage.setItem(LS+'submitUrl', gsUrl);
+      localStorage.setItem('gas_url_global', gsUrl);  // global key for all devices
       window.__GAS_URL__ = gsUrl;
-      showMsg('✅ 推送成功','全部資料已同步至 Google Sheets！<br><br>採購人員直接開啟網址，選標語後即可送單。','ok');
+      showMsg('✅ 推送成功','全部資料已同步至 Google Sheets！<br><br>採購人員直接開啟網址，選標語後即可送單，不需任何設定。','ok');
     } else {
       showMsg('⚠️ 推送失敗', res ? res.error : '未知錯誤', 'err');
     }
@@ -1381,8 +1405,9 @@ function pullCloud(silent) {
     if (res.logo && res.logo.length > 5) { logoSrc = res.logo; localStorage.setItem(LS+'logo', logoSrc); }
     // Save submit URL and write token for non-admin order submission
     if (res.gasUrl && res.gasUrl.length > 10) {
-      // Store as public submit URL — available to ALL users after sync, no admin needed
+      // Store in ALL possible keys so any device can submit orders immediately
       localStorage.setItem(LS+'submitUrl', res.gasUrl);
+      localStorage.setItem('gas_url_global', res.gasUrl);  // global key, version-independent
       window.__GAS_URL__ = res.gasUrl;
       if (!gsUrl) { gsUrl = res.gasUrl; updateDot(); }
     }
