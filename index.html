@@ -316,7 +316,7 @@ select{flex:1}
 // GAS_BAKED: set by admin after pushCloud
 // All users get this without any config
 // ──────────────────────────────────────────
-var GAS_BAKED = localStorage.getItem('gas_url_global') || '';
+var GAS_BAKED = 'https://script.google.com/macros/s/AKfycbwJ-vob2iYfgQkwgZURgmvyQILCFviRnmvV2W5mpBtzJBO2z0dhAgj52-EETYRCsWlKIA/exec';
 
 // ──────────────────────────────────────────
 // DATA DEFAULTS
@@ -427,8 +427,8 @@ var LS = 'ys13_';
 // gasSubmit: 任何人都能用，不需密碼，不需管理員登入
 function gasSubmit(record) {
   // Priority: localStorage submitUrl > GAS_BAKED > admin gsUrl
-  var url = localStorage.getItem(LS+'submitUrl')
-         || localStorage.getItem('gas_url_global')
+  var url = GAS_BAKED
+         || localStorage.getItem(LS+'submitUrl')
          || window.__GAS_URL__
          || gsUrl
          || '';
@@ -490,9 +490,17 @@ function init() {
   logoSrc = localStorage.getItem(LS+'logo') || '';
   gsUrl   = localStorage.getItem(LS+'gsUrl') || '';
   // submitUrl is the public URL for all users (no admin needed)
-  var submitUrl = localStorage.getItem(LS+'submitUrl') || localStorage.getItem('gas_url_global') || '';
-  if (submitUrl) { window.__GAS_URL__ = submitUrl; }
-  if (!gsUrl && submitUrl) gsUrl = submitUrl;  // non-admin devices get url from sync
+  // Always use baked-in URL — no sync needed for order submission
+  var submitUrl = GAS_BAKED
+               || localStorage.getItem(LS+'submitUrl')
+               || localStorage.getItem('gas_url_global')
+               || '';
+  if (submitUrl) {
+    window.__GAS_URL__ = submitUrl;
+    localStorage.setItem(LS+'submitUrl', submitUrl);
+    localStorage.setItem('gas_url_global', submitUrl);
+  }
+  if (!gsUrl) gsUrl = submitUrl;
 
   document.getElementById('staff-in').value = localStorage.getItem(LS+'staff') || '';
   // Load public submit URL — available to all users without admin login
@@ -1125,17 +1133,8 @@ function submitOrder() {
   // Check if we have a submit URL (set by admin, works for all users)
   var url = localStorage.getItem(LS+'submitUrl') || window.__GAS_URL__ || gsUrl || '';
   if (!url) {
-    // Try one more time: ping cloud to get gasUrl
-    hint.innerHTML = '<span style="color:#64748B">⏳ 嘗試連線後台...</span>';
-    gasGet({action:'ping'}).then(function(r){
-      if (r && r.ok) {
-        // Retry submit now that we have the URL
-        submitOrder();
-      } else {
-        hint.innerHTML = '<span style="color:#D97706;font-weight:700">尚未連線到後台</span><br>'
-          + '<small style="color:#64748B">資料已存本機。請向管理員確認雲端設定是否完成。</small>';
-      }
-    });
+    hint.innerHTML = '<span style="color:#D97706;font-weight:700">無法連線後台</span><br>'
+      + '<small style="color:#64748B">資料已存本機。請重新整理頁面後再試。</small>';
     return;
   }
   btn.textContent = '⏳ 提交中...'; btn.disabled = true;
