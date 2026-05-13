@@ -505,6 +505,23 @@ function init() {
 }
 
 // ──────────────────────────────────────────
+// IMAGE FALLBACK — tries .JPG then .jpg then .png
+// ──────────────────────────────────────────
+function imgFallback(el, id) {
+  var tried = el._tried || 0;
+  var base = imgBase;
+  var exts = ['.JPG', '.jpg', '.png', '.PNG', '.jpeg'];
+  if (tried < exts.length) {
+    el._tried = tried + 1;
+    el.src = base + id + exts[tried];
+  } else {
+    el.style.display = 'none';
+    var ph = document.getElementById('ph_' + id);
+    if (ph) ph.style.display = 'flex';
+  }
+}
+
+// ──────────────────────────────────────────
 // TOAST & MSG
 // ──────────────────────────────────────────
 function toast(msg, ms) {
@@ -693,8 +710,8 @@ function render() {
     d.innerHTML = dhHtml + delBtnHtml
       + '<div class="card-chk"><span class="chk-ico">✓</span></div>'
       + '<div class="card-img">'
-      + '<img src="'+imgUrl+'" onload="this.style.opacity=1" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" style="opacity:0;transition:opacity .2s" alt="">'
-      + '<div class="no-img" style="display:none"><span style="font-size:18px">🖼</span>'+item.id+'<br>無圖</div>'
+      + '<img src="'+imgUrl+'" onload="this.style.opacity=1" onerror="imgFallback(this,\''+item.id+'\',0)" style="opacity:0;transition:opacity .2s" alt="">'
+      + '<div class="no-img" id="ph_'+item.id+'" style="display:none"><span style="font-size:18px">🖼</span>'+item.id+'<br>無圖</div>'
       + '</div>'
       + '<div class="card-body"><div>'
       + '<div class="card-meta">'+idBadge+'<span class="card-cat">'+( cats[item.cat]||item.cat)+'</span></div>'
