@@ -1131,7 +1131,7 @@ function submitOrder() {
   // Always save locally first
   saveHistLocal(record);
   // Check if we have a submit URL (set by admin, works for all users)
-  var url = localStorage.getItem(LS+'submitUrl') || window.__GAS_URL__ || gsUrl || '';
+  var url = GAS_BAKED || localStorage.getItem(LS+'submitUrl') || window.__GAS_URL__ || gsUrl || '';
   if (!url) {
     hint.innerHTML = '<span style="color:#D97706;font-weight:700">無法連線後台</span><br>'
       + '<small style="color:#64748B">資料已存本機。請重新整理頁面後再試。</small>';
