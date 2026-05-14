@@ -517,7 +517,7 @@ function init() {
 // ──────────────────────────────────────────
 function imgFallback(el, id) {
   var tried = el._tried || 0;
-  var base = imgBase;
+  var base = 'https://raw.githubusercontent.com/yuhtong02/-/main/img/';
   var exts = ['.JPG', '.jpg', '.png', '.PNG', '.jpeg'];
   if (tried < exts.length) {
     el._tried = tried + 1;
@@ -693,7 +693,7 @@ function render() {
     var st = cget(item);
     var d = document.createElement('div');
     d.className = 'card' + (st.sel ? ' sel' : '');
-    var imgUrl = imgBase + item.id + '.jpg';
+    var imgUrl = imgBase + item.id + '.JPG';
 
     var idBadge = isAdmin
       ? '<input class="aid" value="'+esc(item.manualId||'')+'" placeholder="'+esc(item._auto)+'" title="手動編號（空=自動）" oninput="setManId(\''+item.cat+'\',\''+escQ(item.n)+'\',this.value)">'
