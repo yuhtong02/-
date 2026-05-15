@@ -433,8 +433,8 @@ function gasSubmit(record) {
          || gsUrl
          || '';
   if (!url) return Promise.resolve({ok:false, error:'NO_URL'});
-  var pw  = localStorage.getItem(LS+'writeToken') || '751113';
-  var json = JSON.stringify({action:'saveHistory', pw:pw, record:record});
+  // No password needed — GAS allows saveHistory from anyone
+  var json = JSON.stringify({action:'saveHistory', record:record});
   var enc  = btoa(unescape(encodeURIComponent(json)));
   return new Promise(function(resolve) {
     var cb = '__sub_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
