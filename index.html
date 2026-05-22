@@ -1550,8 +1550,7 @@ function cfgCloud() {
   // Format: https://docs.google.com/spreadsheets/d/SHEET_ID/edit
   // Ask admin to provide Sheets URL for direct edit link
   if (!localStorage.getItem(LS+'sheetsEditUrl')) {
-    var sUrl = prompt('（選填）請貼上 Google Sheets 試算表網址，方便直接開啟編輯：
-（可跳過，之後在管理面板補設定）', '');
+    var sUrl = prompt('（選填）請貼上 Google Sheets 試算表網址，方便直接開啟編輯：\n（可跳過，之後在管理面板補設定）', '');
     if (sUrl && sUrl.trim()) localStorage.setItem(LS+'sheetsEditUrl', sUrl.trim());
   }
   updateDot();
