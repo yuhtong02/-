@@ -242,17 +242,28 @@ select{flex:1}
 <!-- FOOTER -->
 <div class="footer">
   <div class="ap" id="ap">
+    <div style="width:100%;padding:7px 10px;background:var(--cream);border-radius:6px;border:1px solid var(--cb);font-size:11px;color:var(--cdp);line-height:1.6;margin-bottom:2px">
+      💡 <b>在 Google Sheets 直接編輯</b>後點「⬇️ 從雲端同步」即可更新<br>
+      📋 <b>DB 工作表欄位說明：</b><br>
+      &nbsp;&nbsp;• <b>cat</b>=類別代碼 &nbsp; <b>n</b>=標語名稱 &nbsp; <b>s</b>=規格 &nbsp; <b>m</b>=材質<br>
+      &nbsp;&nbsp;• <b>sort</b>=排序數字（填 1,2,3… 小的排前面；空白=依列順序）<br>
+      &nbsp;&nbsp;• 直接在 Sheets <b>拖動列</b>可調整預設順序，同步後即生效
+    </div>
     <button class="btn btn-dk" onclick="addSign()">+ 新增標語</button>
     <button class="btn btn-dk" onclick="addStep()">+ 新增工序</button>
     <button class="btn btn-dk" onclick="addCat()">+ 新增類別</button>
     <button class="btn btn-blue" onclick="exportJSON()">📤 備份</button>
+    <button class="btn btn-blue" onclick="openSheets()">📋 開啟 Google Sheets</button>
     <button class="btn btn-pu" onclick="importJSON()">📥 還原</button>
     <button class="btn btn-red" onclick="delSite()">🗑 刪除工地</button>
     <button class="btn btn-cr" onclick="cfgImgBase()">🖼 圖片路徑</button>
     <button class="btn btn-cr" onclick="changeLogo()">🏷 更換圖示</button>
     <button class="btn btn-cr" onclick="cfgCloud()">☁️ 雲端設定</button>
-    <button class="btn btn-cr" onclick="pushCloud()">⬆️ 推送雲端</button>
-    <button class="btn btn-cr" onclick="pullCloud(false)">⬇️ 從雲端同步</button>
+    <button class="btn btn-cr" onclick="pushCloud()">⬆️ 推送至 Sheets</button>
+    <button class="btn btn-cr" onclick="pullCloud(false)">⬇️ 從 Sheets 同步</button>
+  </div>
+  <div class="foot-main" style="margin-bottom:6px">
+    <button onclick="var _o=gsUrl;if(!gsUrl)gsUrl=GAS_BAKED||'';pullCloud(false);if(!_o)gsUrl=_o;" style="width:100%;padding:9px;background:var(--cream);color:var(--cdp);border:1.5px solid var(--cb);border-radius:var(--r2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔄 重新整理資料（從 Google Sheets 更新）</button>
   </div>
   <div class="foot-main">
     <button class="rpt-btn" onclick="buildReport()">
@@ -291,10 +302,32 @@ select{flex:1}
   <div class="sheet">
     <span class="sh"></span>
     <div class="st">📦 採購歷史紀錄</div>
+    <div id="hist-source" style="text-align:center;font-size:11px;color:var(--ink4);margin-top:-8px;margin-bottom:8px">☁️ 雲端完整紀錄</div>
+
+    <!-- 工地篩選 -->
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:7px">
+      <span style="font-size:12px;font-weight:700;color:var(--dk);white-space:nowrap">🏗 工地：</span>
+      <select id="hist-site-filter" onchange="filterHist()"
+        style="flex:1;font-family:inherit;font-size:12px;padding:7px 9px;border:1.5px solid var(--bd);border-radius:8px;background:var(--cream);color:var(--ink);outline:none">
+        <option value="">── 全部工地 ──</option>
+      </select>
+      <button class="btn btn-cr" id="hist-my-site-btn" onclick="filterMysite()" title="只看我的工地" style="white-space:nowrap;font-size:11px">📍 我的工地</button>
+    </div>
+
+    <!-- 關鍵字搜尋 -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <input id="hist-search" type="text" placeholder="搜尋標語名稱、人員..." oninput="filterHist()"
+        style="flex:1;min-width:140px;font-size:12px;padding:7px 9px;border:1.5px solid var(--bd);border-radius:8px;background:var(--cream);font-family:inherit;outline:none">
+      <button class="btn btn-dk" onclick="showHist()" title="重新載入">🔄</button>
+    </div>
+
+    <!-- 統計列 -->
+    <div id="hist-stat" style="display:none;background:var(--cream);border:1px solid var(--cb);border-radius:8px;padding:6px 11px;margin-bottom:8px;font-size:11px;color:var(--cdp);font-weight:700"></div>
+
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px">
       <button class="btn btn-dk" onclick="expHistExcel()" style="flex:1">📊 匯出 Excel</button>
       <button class="btn btn-cr" onclick="expHistPdf()" style="flex:1">📄 列印 PDF</button>
-      <button class="btn btn-red" onclick="clearHist()">🗑 清除</button>
+      <button class="btn btn-red" id="hist-clear-btn" onclick="clearHist()" style="display:none">🗑 清除</button>
       <button class="btn btn-dk" onclick="closeOv('hist-ov')" style="flex:1">← 關閉</button>
     </div>
     <div id="hist-list"></div>
@@ -508,8 +541,11 @@ function init() {
   if (su) window.__GAS_URL__ = su;
   renderLogo(); renderTitle(); renderSites(); renderTabs(); render(); updateBadge();
   updateDot();
-  // Auto-sync on load: fetches latest data AND picks up submitUrl from cloud
-  if (gsUrl) pullCloud(true);
+  // Google Sheets is the master DB — always pull fresh data on every load
+  var _orig = gsUrl;
+  if (!gsUrl) gsUrl = GAS_BAKED || localStorage.getItem(LS+'submitUrl') || '';
+  pullCloud(true);
+  if (!_orig) gsUrl = _orig;
 }
 
 // ──────────────────────────────────────────
@@ -666,17 +702,28 @@ function render() {
     var ids = steps[curTab].items;
     list = dbIds.filter(function(x){ return ids.indexOf(x.id) >= 0; });
   } else if (curTab === 'ALL') {
-    // Sort by catOrd A->K, then preserve db order within category
+    // Sort by catOrd A->K, then by sort field (if present), then by db order within category
     var omap = {};
     catOrd.forEach(function(k,i){ omap[k] = i; });
     list = dbIds.slice().sort(function(a,b) {
       var oa = omap[a.cat] !== undefined ? omap[a.cat] : 99;
       var ob = omap[b.cat] !== undefined ? omap[b.cat] : 99;
       if (oa !== ob) return oa - ob;
+      // sort field: numeric ascending (empty = 9999)
+      var sa = a.sort !== undefined && a.sort !== '' ? Number(a.sort) : 9999;
+      var sb = b.sort !== undefined && b.sort !== '' ? Number(b.sort) : 9999;
+      if (sa !== sb) return sa - sb;
       return dbIds.indexOf(a) - dbIds.indexOf(b);
     });
   } else {
     list = dbIds.filter(function(x){ return x.cat === curTab; });
+    // Within category: apply sort field too
+    list = list.slice().sort(function(a,b){
+      var sa = a.sort !== undefined && a.sort !== '' ? Number(a.sort) : 9999;
+      var sb = b.sort !== undefined && b.sort !== '' ? Number(b.sort) : 9999;
+      if (sa !== sb) return sa - sb;
+      return dbIds.indexOf(a) - dbIds.indexOf(b);
+    });
   }
 
   var grid = document.getElementById('grid-el');
@@ -698,6 +745,11 @@ function render() {
     var idBadge = isAdmin
       ? '<input class="aid" value="'+esc(item.manualId||'')+'" placeholder="'+esc(item._auto)+'" title="手動編號（空=自動）" oninput="setManId(\''+item.cat+'\',\''+escQ(item.n)+'\',this.value)">'
       : '<span class="card-id">'+item.id+'</span>';
+
+    // sort field (admin only)
+    var sortBadge = isAdmin
+      ? '<input class="aid" style="width:38px;border-color:#93C5FD" value="'+esc(item.sort||'')+'" placeholder="排序" title="排序數字（小→前，空=依列順序）" oninput="updField(\''+item.cat+'\',\''+escQ(item.n)+'\',\'sort\',this.value)">'
+      : '';
 
     var namePart = isAdmin
       ? '<input class="ai" value="'+esc(item.n)+'" oninput="updName(\''+item.cat+'\',\''+escQ(item.n)+'\',this.value)">'
@@ -722,7 +774,7 @@ function render() {
       + '<div class="no-img" id="ph_'+item.id+'" style="display:none"><span style="font-size:18px">🖼</span>'+item.id+'<br>無圖</div>'
       + '</div>'
       + '<div class="card-body"><div>'
-      + '<div class="card-meta">'+idBadge+'<span class="card-cat">'+( cats[item.cat]||item.cat)+'</span></div>'
+      + '<div class="card-meta">'+idBadge+(isAdmin?sortBadge:'')+'<span class="card-cat">'+( cats[item.cat]||item.cat)+'</span></div>'
       + namePart
       + '<div class="card-specs">'+specS+specM+'</div>'
       + '</div>'
@@ -1162,25 +1214,173 @@ function saveHistLocal(r) {
   if (h.length > 300) h = h.slice(0, 300);
   localStorage.setItem(LS+'hist', JSON.stringify(h));
 }
-function showHist() {
-  var h = getHist();
+function renderHistList(h) {
   var el = document.getElementById('hist-list');
-  if (!h.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink4);font-size:14px">尚無採購紀錄</div>'; }
-  else {
-    el.innerHTML = h.map(function(rec) {
-      return '<div class="hrec">'
-        +'<div class="hh"><span style="font-size:13px;font-weight:900">'+rec.site+'</span><span style="font-size:11px;opacity:.75">'+rec.date+'</span></div>'
-        +'<div class="hsub">負責人：'+rec.staff+'　'+(rec.items?rec.items.length:0)+' 品項　'+rec.totalQty+' 件'+(rec.note?' | '+rec.note:'')+'</div>'
-        +(rec.items||[]).map(function(i){ return '<div class="hrow"><span style="color:#164E33;font-weight:700">['+i.id+'] '+i.n+'</span><span style="font-weight:700">x'+i.qty+'</span></div>'; }).join('')
-        +'<div class="hfoot"><button onclick="delHistRec('+rec.id+')" style="font-size:10px;padding:3px 8px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:4px;cursor:pointer;font-family:inherit">刪除</button></div>'
-        +'</div>';
-    }).join('');
+  if (!h || !h.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink4);font-size:14px">尚無採購紀錄</div>';
+    return;
   }
-  openOv('hist-ov');
+  el.innerHTML = h.map(function(rec) {
+    return '<div class="hrec">'
+      +'<div class="hh"><span style="font-size:13px;font-weight:900">'+rec.site+'</span><span style="font-size:11px;opacity:.75">'+rec.date+'</span></div>'
+      +'<div class="hsub">負責人：'+rec.staff+'　'+(rec.items?rec.items.length:0)+' 品項　'+rec.totalQty+' 件'+(rec.note?' | '+rec.note:'')+'</div>'
+      +(rec.items||[]).map(function(i){
+        return '<div class="hrow"><span style="color:#164E33;font-weight:700">['+i.id+'] '+i.n+'</span>'
+          +'<span style="color:#64748B;font-size:11px;margin:0 6px">'+i.s+'／'+i.m+'</span>'
+          +'<span style="font-weight:700">×'+i.qty+'</span></div>';
+      }).join('')
+      +(isAdmin ? '<div class="hfoot"><button data-id="'+rec.id+'" onclick="delHistRec(this.dataset.id)" style="font-size:10px;padding:3px 8px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:4px;cursor:pointer;font-family:inherit">刪除</button></div>' : '')
+      +'</div>';
+  }).join('');
 }
+
+function showHist() {
+  openOv('hist-ov');
+  var el = document.getElementById('hist-list');
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--ink4)">⏳ 載入歷史紀錄...</div>';
+
+  // Pre-select current site in dropdown
+  var curSite = (document.getElementById('site-sel')||{}).value || '';
+  var sf = document.getElementById('hist-site-filter');
+  if (sf && curSite) sf.value = curSite; // will be updated after load
+
+  var url = GAS_BAKED || localStorage.getItem(LS+'submitUrl') || gsUrl || '';
+  if (!url) {
+    _loadHistDone(getHist(), '本機紀錄');
+    return;
+  }
+
+  var cb = '__hist'+Date.now();
+  var sc = document.createElement('script');
+  var t  = setTimeout(function(){
+    cleanup();
+    _loadHistDone(getHist(), '本機紀錄（雲端逾時）');
+  }, 15000);
+  function cleanup(){ clearTimeout(t); sc.parentNode&&sc.parentNode.removeChild(sc); delete window[cb]; }
+  window[cb] = function(res) {
+    cleanup();
+    if (res && res.ok && res.history && res.history.length) {
+      _loadHistDone(res.history, '☁️ 雲端完整紀錄');
+    } else {
+      _loadHistDone(getHist(), '本機紀錄');
+    }
+  };
+  sc.src = url + '?action=getHistory&callback=' + cb;
+  sc.onerror = function(){ cleanup(); _loadHistDone(getHist(), '本機紀錄（雲端失敗）'); };
+  document.head.appendChild(sc);
+}
+
+// Called once data is loaded — builds site dropdown then renders
+var _fullHist = [];
+function _loadHistDone(history, source) {
+  _fullHist = history || [];
+  // Update source label
+  var srcEl = document.getElementById('hist-source');
+  if (srcEl) srcEl.textContent = source;
+  // Build site filter dropdown
+  var sf = document.getElementById('hist-site-filter');
+  if (sf) {
+    var curVal = sf.value; // preserve selection if reloading
+    var allSites = [];
+    _fullHist.forEach(function(r){ if (r.site && allSites.indexOf(r.site) < 0) allSites.push(r.site); });
+    allSites.sort();
+    sf.innerHTML = '<option value="">── 全部工地（'+allSites.length+'個）──</option>'
+      + allSites.map(function(s){ return '<option value="'+esc(s)+'">'+s+'</option>'; }).join('');
+    // Default to current site if present
+    var curSite = (document.getElementById('site-sel')||{}).value || '';
+    if (curSite && allSites.indexOf(curSite) >= 0) sf.value = curSite;
+    else if (curVal && allSites.indexOf(curVal) >= 0) sf.value = curVal;
+  }
+  filterHist();
+}
+
+function filterMysite() {
+  var curSite = (document.getElementById('site-sel')||{}).value || '';
+  var sf = document.getElementById('hist-site-filter');
+  if (sf && curSite) { sf.value = curSite; filterHist(); }
+}
+
+// Store full history for filtering
+function filterHist() {
+  var q = (document.getElementById('hist-search').value || '').toLowerCase().trim();
+  var siteF = (document.getElementById('hist-site-filter')||{}).value || '';
+  var el = document.getElementById('hist-list');
+
+  var filtered = _fullHist.filter(function(r) {
+    var siteOk = !siteF || (r.site||'') === siteF;
+    var qOk = !q
+      || (r.site||'').toLowerCase().includes(q)
+      || (r.staff||'').toLowerCase().includes(q)
+      || (r.date||'').includes(q)
+      || (r.note||'').toLowerCase().includes(q)
+      || (r.items||[]).some(function(i){ return (i.n||'').toLowerCase().includes(q); });
+    return siteOk && qOk;
+  });
+
+  // Update stats bar
+  var statEl = document.getElementById('hist-stat');
+  if (statEl) {
+    if (filtered.length > 0) {
+      var totalItems = filtered.reduce(function(s,r){ return s+(r.items||[]).length; }, 0);
+      var totalQty   = filtered.reduce(function(s,r){ return s+(r.totalQty||0); }, 0);
+      statEl.style.display = '';
+      statEl.textContent = '共 '+filtered.length+' 筆紀錄 ／ '+totalItems+' 品項 ／ 合計 '+totalQty+' 件';
+    } else {
+      statEl.style.display = 'none';
+    }
+  }
+
+  renderHistList(filtered);
+}
+
+function renderHistList(h) {
+  var el = document.getElementById('hist-list');
+  if (!h || !h.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink4);font-size:14px">🔍 找不到符合的紀錄</div>';
+    return;
+  }
+  el.innerHTML = h.map(function(rec) {
+    return '<div class="hrec">'
+      +'<div class="hh">'
+      +'<span style="font-size:13px;font-weight:900">🏗 '+rec.site+'</span>'
+      +'<span style="font-size:11px;opacity:.75">'+rec.date+'</span>'
+      +'</div>'
+      +'<div class="hsub">👷 '+rec.staff
+        +'　📦 '+(rec.items?rec.items.length:0)+' 品項'
+        +'　合計 <b>'+rec.totalQty+'</b> 件'
+        +(rec.note ? ' ｜ 📝 '+rec.note : '')
+      +'</div>'
+      +(rec.items||[]).map(function(i){
+        return '<div class="hrow">'
+          +'<span style="color:#164E33;font-weight:700">['+i.id+'] '+i.n+'</span>'
+          +'<span style="color:#64748B;font-size:11px;margin:0 5px">'+i.s+'／'+i.m+'</span>'
+          +'<span style="font-weight:900;color:var(--dk)">×'+i.qty+'</span>'
+          +'</div>';
+      }).join('')
+      +(isAdmin
+        ? '<div class="hfoot"><button data-id="'+rec.id+'" onclick="delHistRec(this.dataset.id)" style="font-size:10px;padding:3px 8px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:4px;cursor:pointer;font-family:inherit">🗑 刪除此筆</button></div>'
+        : '')
+      +'</div>';
+  }).join('');
+}
+
 function delHistRec(id) {
-  var h = getHist().filter(function(r){ return r.id !== id; });
-  localStorage.setItem(LS+'hist', JSON.stringify(h)); showHist();
+  // Delete locally
+  var h = getHist().filter(function(r){ return String(r.id) !== String(id); });
+  localStorage.setItem(LS+'hist', JSON.stringify(h));
+  // Delete from cloud too
+  var submitUrl = GAS_BAKED || localStorage.getItem(LS+'submitUrl') || gsUrl || '';
+  if (submitUrl) {
+    var pw = localStorage.getItem(LS+'apw') || '751113';
+    var json = JSON.stringify({action:'deleteHistRecord', id:id, pw:pw});
+    var enc  = btoa(unescape(encodeURIComponent(json)));
+    var cb   = '__dh'+Date.now();
+    var el   = document.createElement('script');
+    window[cb] = function(){ delete window[cb]; el.parentNode&&el.parentNode.removeChild(el); };
+    el.src = (GAS_BAKED||gsUrl) + '?encoded='+encodeURIComponent(enc)+'&callback='+cb;
+    document.head.appendChild(el);
+  }
+  showHist();
 }
 function clearHist() {
   if (!confirm('確定清除所有本機紀錄？')) return;
@@ -1262,12 +1462,15 @@ function jsonpCall(url, ms) {
 }
 
 function gasGet(params) {
-  if (!gsUrl) return Promise.resolve(null);
+  var url = GAS_BAKED || gsUrl || '';
+  if (!url) return Promise.resolve(null);
+  // Temporarily set gsUrl for the call below
+  var _saved = gsUrl; gsUrl = url;
   setDot('sync');
   var pw = localStorage.getItem(LS+'apw') || '751113';
   var all = Object.assign({}, params, {pw:pw});
   var qs = Object.keys(all).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(typeof all[k]==='object'?JSON.stringify(all[k]):String(all[k])); }).join('&');
-  return jsonpCall(gsUrl+'?'+qs).then(function(d){ setDot(''); return d; }).catch(function(e){ setDot('off'); return {ok:false,error:e.message}; });
+  return jsonpCall(url+'?'+qs).then(function(d){ setDot(''); gsUrl=_saved; return d; }).catch(function(e){ setDot('off'); gsUrl=_saved; return {ok:false,error:e.message}; });
 }
 
 function gasSend(action, extra) {
@@ -1294,16 +1497,63 @@ function gasSendTo(url, action, extra) {
     .catch(function(e){ setDot('off'); return {ok:false,error:e.message}; });
 }
 
+function openSheets() {
+  // Find the Sheets URL from GAS URL
+  // GAS URL: https://script.google.com/macros/s/XXXX/exec
+  // We open a ping first to get spreadsheet ID
+  var url = gsUrl || GAS_BAKED || '';
+  if (!url) { showMsg('提示','請先設定雲端網址','err'); return; }
+  // Open GAS script project page (closest we can get without storing spreadsheet ID)
+  var gasId = url.match(/\/s\/([^\/]+)\//);  if (gasId) {    var sheetsHint = '請到 Google Apps Script 編輯器，點選左上角「試算表圖示」即可開啟關聯的 Google Sheets。';    showMsg('開啟 Google Sheets', sheetsHint, 'ok');  }
+}
+
+function openSheets() {
+  // Open Google Sheets DB sheet directly for editing
+  var sheetsUrl = localStorage.getItem(LS+'sheetsEditUrl') || '';
+  if (!sheetsUrl) {
+    sheetsUrl = prompt('請輸入 Google Sheets 試算表網址（可在 Sheets 網址列複製）：');
+    if (!sheetsUrl || !sheetsUrl.trim()) return;
+    localStorage.setItem(LS+'sheetsEditUrl', sheetsUrl.trim());
+  }
+  window.open(sheetsUrl, '_blank');
+}
+
+function openSheets() {
+  var url = gsUrl || GAS_BAKED || '';
+  if (!url) { toast('請先設定雲端網址'); cfgCloud(); return; }
+  // Extract spreadsheet ID from deployment - open the Sheets URL
+  var sheetUrl = localStorage.getItem(LS+'sheetUrl') || '';
+  if (sheetUrl) {
+    window.open(sheetUrl, '_blank');
+  } else {
+    var entered = prompt('請輸入 Google Sheets 試算表網址\n（從試算表位址列複製）：');
+    if (entered && entered.trim()) {
+      localStorage.setItem(LS+'sheetUrl', entered.trim());
+      window.open(entered.trim(), '_blank');
+    }
+  }
+}
+
 function cfgCloud() {
   var v = prompt('請輸入 Google Apps Script 網址\n（結尾須為 /exec）：', gsUrl||'');
   if (v === null) return;
   var pw = prompt('管理員密碼（雲端用）：', localStorage.getItem(LS+'apw')||'751113');
   if (pw === null) return;
+  var sv = prompt('Google Sheets 試算表網址（選填，方便直接開啟編輯）：', localStorage.getItem(LS+'sheetUrl')||'');
+  if (sv !== null && sv.trim()) localStorage.setItem(LS+'sheetUrl', sv.trim());
   gsUrl = v.trim();
   localStorage.setItem(LS+'gsUrl', gsUrl);
-  localStorage.setItem(LS+'submitUrl', gsUrl);  // also available for order submission
+  localStorage.setItem(LS+'submitUrl', gsUrl);
   window.__GAS_URL__ = gsUrl;
   if (pw.trim()) localStorage.setItem(LS+'apw', pw.trim());
+  // Derive Sheets URL from GAS URL (same script project)
+  // Format: https://docs.google.com/spreadsheets/d/SHEET_ID/edit
+  // Ask admin to provide Sheets URL for direct edit link
+  if (!localStorage.getItem(LS+'sheetsEditUrl')) {
+    var sUrl = prompt('（選填）請貼上 Google Sheets 試算表網址，方便直接開啟編輯：
+（可跳過，之後在管理面板補設定）', '');
+    if (sUrl && sUrl.trim()) localStorage.setItem(LS+'sheetsEditUrl', sUrl.trim());
+  }
   updateDot();
   if (gsUrl) {
     toast('☁️ 設定已儲存，測試連線中...', 5000);
@@ -1347,6 +1597,7 @@ function pushCloud() {
   var dbItems = db.map(function(x){
     var r={cat:x.cat,n:x.n,s:x.s,m:x.m};
     if(x.manualId) r.manualId=x.manualId;
+    if(x.sort !== undefined && x.sort !== '') r.sort=x.sort;
     return r;
   });
   var BATCH = 7;
@@ -1402,9 +1653,14 @@ function pushCloud() {
 }
 
 function pullCloud(silent) {
-  if (!gsUrl) { if (!silent) cfgCloud(); return; }
-  if (!silent) toast('⬇️ 同步中...', 10000);
+  var url = gsUrl || GAS_BAKED || localStorage.getItem(LS+'submitUrl') || '';
+  if (!url) { if (!silent) cfgCloud(); return; }
+  if (!silent) toast('⬇️ 載入最新資料...', 10000);
+  // Use the available URL temporarily
+  var origUrl = gsUrl;
+  if (!gsUrl) gsUrl = url;
   gasGet({action:'loadAll'}).then(function(res) {
+    if (!origUrl) gsUrl = origUrl || '';  // restore non-admin state
     if (!res || !res.ok) {
       if (!silent) showMsg('⚠️ 同步失敗', (res?res.error:'逾時或無回應')+'\n\n請確認雲端設定正確。', 'err');
       return;
@@ -1429,7 +1685,12 @@ function pullCloud(silent) {
     }
     saveLocal();
     renderLogo(); renderTitle(); renderSites(); renderTabs(); render(); updateBadge();
-    if (!silent) showMsg('✅ 同步成功','已載入雲端最新資料。','ok');
+    if (!silent) {
+      showMsg('✅ 同步成功','已載入 Google Sheets 最新資料。
+管理員可直接在 Sheets 修改標語後點同步。','ok');
+    } else {
+      toast('✅ 已載入最新資料', 2000);
+    }
   });
 }
 
@@ -1444,12 +1705,16 @@ function toggleAdmin() {
       document.getElementById('abtn').textContent = '🔓 管理中';
       document.getElementById('abtn').classList.add('on');
       document.getElementById('ap').classList.add('on');
+      var hcb = document.getElementById('hist-clear-btn');
+      if (hcb) hcb.style.display = '';
     } else if (pw !== null) { toast('密碼錯誤'); }
   } else {
     isAdmin = false;
     document.getElementById('abtn').textContent = '🔒 管理員';
     document.getElementById('abtn').classList.remove('on');
     document.getElementById('ap').classList.remove('on');
+    var hcb2 = document.getElementById('hist-clear-btn');
+    if (hcb2) hcb2.style.display = 'none';
   }
   renderLogo(); renderTitle(); renderTabs(); render();
 }
