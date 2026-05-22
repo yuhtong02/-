@@ -1685,8 +1685,7 @@ function pullCloud(silent) {
     saveLocal();
     renderLogo(); renderTitle(); renderSites(); renderTabs(); render(); updateBadge();
     if (!silent) {
-      showMsg('✅ 同步成功','已載入 Google Sheets 最新資料。
-管理員可直接在 Sheets 修改標語後點同步。','ok');
+      showMsg('✅ 同步成功','已載入 Google Sheets 最新資料。\n管理員可直接在 Sheets 修改標語後點同步。','ok');
     } else {
       toast('✅ 已載入最新資料', 2000);
     }
