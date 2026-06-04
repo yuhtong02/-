@@ -265,6 +265,7 @@ select{flex:1}
     <button class="btn btn-blue" onclick="exportJSON()">📤 備份</button>
     <button class="btn btn-blue" onclick="openSheets()">📋 開啟 Google Sheets</button>
     <button class="btn btn-pu" onclick="importJSON()">📥 還原</button>
+    <button class="btn btn-red" onclick="resetToDefault()">🔄 重置為預設資料</button>
     <button class="btn btn-red" onclick="delSite()">🗑 刪除工地</button>
     <button class="btn btn-cr" onclick="cfgImgBase()">🖼 圖片路徑</button>
     <button class="btn btn-cr" onclick="changeLogo()">🏷 更換圖示</button>
@@ -1788,6 +1789,16 @@ function exportJSON() {
   var b = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(b);
   a.download = '工安標語備份_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+}
+function resetToDefault() {
+  if (!confirm('確定要重置所有標語分類為最新預設資料？\n\n⚠️ 目前的標語資料會被覆蓋，建議先點「備份」儲存現有資料。')) return;
+  db     = JSON.parse(JSON.stringify(DEF_DB));
+  cats   = JSON.parse(JSON.stringify(DEF_CATS));
+  catOrd = Object.keys(DEF_CATS);
+  sel    = {};
+  saveLocal();
+  renderTabs(); render(); updateBadge();
+  showMsg('✅ 重置成功', '已套用最新預設分類（A~F 六大類）。\n\n請記得點「⬆️ 推送至 Sheets」更新雲端資料。', 'ok');
 }
 function importJSON() {
   var j = prompt('貼上備份 JSON：'); if (!j) return;
