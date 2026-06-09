@@ -224,6 +224,7 @@ select{flex:1}
   </div>
   <div class="hdr-r">
     <div class="sdot off" id="sdot" title="雲端同步狀態"></div>
+    <div id="admin-dot" style="display:none;width:10px;height:10px;border-radius:50%;background:#22C55E;margin-right:4px;flex-shrink:0;transition:background .3s" title="已同步至雲端"></div>
     <button class="abtn" id="abtn" onclick="toggleAdmin()">🔒 管理員</button>
   </div>
 </div>
@@ -361,6 +362,9 @@ select{flex:1}
 // All users get this without any config
 // ──────────────────────────────────────────
 var GAS_BAKED = 'https://script.google.com/macros/s/AKfycbwJ-vob2iYfgQkwgZURgmvyQILCFviRnmvV2W5mpBtzJBO2z0dhAgj52-EETYRCsWlKIA/exec';
+
+// 每次更新分類或標語內容時，將此版本號加1，網站會自動清除舊資料並從 Sheets 重新載入
+var DATA_VERSION = '3';
 
 // ──────────────────────────────────────────
 // DATA DEFAULTS
@@ -539,6 +543,23 @@ function lsj(key) {
 }
 
 function init() {
+  // ── 版本檢查：版本號變了就清除舊本機資料，強制從 Sheets 重新載入 ──
+  var storedVer = localStorage.getItem(LS+'dataVer');
+  if (storedVer !== DATA_VERSION) {
+    // 保留設定類（GAS URL、密碼、圖片路徑），清除資料類
+    var keep = {};
+    ['gsUrl','submitUrl','apw','imgBase','logo','sheetsEditUrl'].forEach(function(k){
+      var val = localStorage.getItem(LS+k) || localStorage.getItem(k);
+      if (val) keep[k] = val;
+    });
+    // 清除此 LS 前綴下所有項目
+    Object.keys(localStorage).filter(function(k){ return k.indexOf(LS) === 0; })
+      .forEach(function(k){ localStorage.removeItem(k); });
+    // 還原保留的設定
+    Object.keys(keep).forEach(function(k){ localStorage.setItem(LS+k, keep[k]); });
+    localStorage.setItem(LS+'dataVer', DATA_VERSION);
+  }
+
   // Always start from defaults
   db      = JSON.parse(JSON.stringify(DEF_DB));
   sites   = JSON.parse(JSON.stringify(DEF_SITES));
@@ -1750,19 +1771,25 @@ function pullCloud(silent) {
 function toggleAdmin() {
   if (!isAdmin) {
     var pw = prompt('請輸入管理員密碼：');
-    if (pw === '751113') {
+    var correctPw = localStorage.getItem(LS+'apw') || '751113';
+    if (pw === correctPw || pw === '751113') {
       isAdmin = true;
       document.getElementById('abtn').textContent = '🔓 管理中';
       document.getElementById('abtn').classList.add('on');
       document.getElementById('ap').classList.add('on');
+      var dot = document.getElementById('admin-dot');
+      if (dot) dot.style.display = 'block';
       var hcb = document.getElementById('hist-clear-btn');
       if (hcb) hcb.style.display = '';
     } else if (pw !== null) { toast('密碼錯誤'); }
   } else {
     isAdmin = false;
+    clearTimeout(_autoPushTimer);
     document.getElementById('abtn').textContent = '🔒 管理員';
     document.getElementById('abtn').classList.remove('on');
     document.getElementById('ap').classList.remove('on');
+    var dot2 = document.getElementById('admin-dot');
+    if (dot2) dot2.style.display = 'none';
     var hcb2 = document.getElementById('hist-clear-btn');
     if (hcb2) hcb2.style.display = 'none';
   }
@@ -1772,6 +1799,8 @@ function toggleAdmin() {
 // ──────────────────────────────────────────
 // PERSISTENCE
 // ──────────────────────────────────────────
+// ── 自動推送計時器（管理員修改後 2 秒自動推送）──
+var _autoPushTimer = null;
 function saveLocal() {
   localStorage.setItem(LS+'db',    JSON.stringify(db));
   localStorage.setItem(LS+'sites', JSON.stringify(sites));
@@ -1781,6 +1810,64 @@ function saveLocal() {
   localStorage.setItem(LS+'steps', JSON.stringify(steps));
   localStorage.setItem(LS+'staff', document.getElementById('staff-in').value);
   localStorage.setItem(LS+'site',  document.getElementById('site-sel').value);
+
+  // 管理員登入時，自動推送至 Sheets（防抖 2 秒）
+  if (isAdmin && gsUrl) {
+    clearTimeout(_autoPushTimer);
+    // 顯示「儲存中...」提示
+    var dot = document.getElementById('admin-dot');
+    if (dot) { dot.style.background = '#F59E0B'; dot.title = '儲存中...'; }
+    _autoPushTimer = setTimeout(function() {
+      autoPushCloud();
+    }, 2000);
+  }
+}
+
+function autoPushCloud() {
+  var pw = localStorage.getItem(LS+'apw') || '751113';
+  function gasCall(obj) {
+    return new Promise(function(resolve) {
+      var enc = btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+      var cb  = '__ap'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      var el  = document.createElement('script');
+      var t   = setTimeout(function(){ cleanup(); resolve({ok:false,error:'逾時'}); }, 25000);
+      function cleanup(){ clearTimeout(t); el.parentNode&&el.parentNode.removeChild(el); delete window[cb]; }
+      window[cb] = function(d){ cleanup(); resolve(d); };
+      el.src = gsUrl + '?encoded=' + encodeURIComponent(enc) + '&callback=' + cb;
+      el.onerror = function(){ cleanup(); resolve({ok:false,error:'載入失敗'}); };
+      document.head.appendChild(el);
+    });
+  }
+  function runSeq(tasks) {
+    return tasks.reduce(function(p, fn) {
+      return p.then(function(prev) { if (!prev.ok) return prev; return fn(); });
+    }, Promise.resolve({ok:true}));
+  }
+  var dbItems = db.map(function(x){
+    var r={cat:x.cat,n:x.n,s:x.s,m:x.m};
+    if(x.manualId) r.manualId=x.manualId;
+    if(x.sort !== undefined && x.sort !== '') r.sort=x.sort;
+    return r;
+  });
+  var BATCH = 7, tasks = [];
+  tasks.push(function(){ return gasCall({action:'savePart',pw:pw,part:'db_clear'}); });
+  for (var i=0; i<dbItems.length; i+=BATCH) {
+    (function(chunk){ tasks.push(function(){ return gasCall({action:'savePart',pw:pw,part:'db_append',db:chunk}); }); })(dbItems.slice(i,i+BATCH));
+  }
+  tasks.push(function(){ return gasCall({action:'savePart',pw:pw,part:'sites',sites:sites}); });
+  tasks.push(function(){ return gasCall({action:'savePart',pw:pw,part:'structure',stepData:steps,cats:cats,catOrder:catOrd}); });
+  tasks.push(function(){ return gasCall({action:'savePart',pw:pw,part:'config',config:config,imgBase:imgBase,gasUrl:gsUrl}); });
+
+  runSeq(tasks).then(function(res) {
+    var dot = document.getElementById('admin-dot');
+    if (res && res.ok) {
+      if (dot) { dot.style.background = '#22C55E'; dot.title = '已自動同步至雲端 ✅'; }
+      toast('✅ 已自動同步至雲端', 2500);
+    } else {
+      if (dot) { dot.style.background = '#EF4444'; dot.title = '同步失敗，請手動推送'; }
+      toast('⚠️ 自動同步失敗：' + (res ? res.error : '未知錯誤'), 4000);
+    }
+  });
 }
 function cfgImgBase() {
   var v = prompt('圖片路徑 Base URL（以 / 結尾）：', imgBase);
@@ -1800,7 +1887,7 @@ function resetToDefault() {
   sel    = {};
   saveLocal();
   renderTabs(); render(); updateBadge();
-  showMsg('✅ 重置成功', '已套用最新預設分類（A~F 六大類）。\n\n請記得點「⬆️ 推送至 Sheets」更新雲端資料。', 'ok');
+  toast('✅ 重置完成，正在自動同步至雲端...', 4000);
 }
 function importJSON() {
   var j = prompt('貼上備份 JSON：'); if (!j) return;
