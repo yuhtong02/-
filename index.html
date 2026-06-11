@@ -1136,156 +1136,150 @@ function genWordOrder() {
   var now   = new Date();
   var yy=now.getFullYear(), mm=now.getMonth()+1, dd=now.getDate();
   var hh=now.getHours(), mi=now.getMinutes();
-  var dateStr  = (yy-1911)+'年'+mm+'月'+dd+'日';
-  var timeStr  = (hh<10?'0'+hh:hh)+':'+(mi<10?'0'+mi:mi);
+  var rocY = yy - 1911;
+  var dateStr = rocY+'年'+mm+'月'+dd+'日';
+  var timeStr = (hh<10?'0'+hh:hh)+':'+(mi<10?'0'+mi:mi);
   var fileDateStr = yy+(mm<10?'0'+mm:mm)+(dd<10?'0'+dd:dd);
 
   if (!_sel || !_sel.length) { toast('請先點選標語品項'); return; }
-  var items = _sel.map(function(item){ return {n:item.n,s:item.s||'',m:item.m||'',qty:cget(item).qty||1}; });
-  var totalQty = items.reduce(function(s,x){return s+Number(x.qty);},0);
+  var items = _sel.map(function(item){ return {n:item.n, s:item.s||'', m:item.m||'', qty:cget(item).qty||1}; });
 
-  function xe(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  // ── 讀取原始 Word 模板（base64），替換 placeholder，下載 ──
+  var b64 = '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';
 
-  // 欄寬 dxa（依原始 Word 欄寬比例）
-  var W = [436,1418,1418,500,750,1000,1418,667,333,333,500,500,1167];
-  var TW = W.reduce(function(a,b){return a+b;},0);
+  // base64 → Uint8Array
+  var bin = atob(b64);
+  var arr = new Uint8Array(bin.length);
+  for (var i=0; i<bin.length; i++) arr[i] = bin.charCodeAt(i);
 
-  function tcell(text,w,bold,center,fs){
-    var b=bold?'<w:b/>':''; var jc=center?'center':'left'; var f=fs||18;
-    return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'
-      +'<w:tcBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>'
-      +'<w:vAlign w:val="center"/></w:tcPr>'
-      +'<w:p><w:pPr><w:jc w:val="'+jc+'"/><w:spacing w:before="30" w:after="30"/></w:pPr>'
-      +'<w:r><w:rPr>'+b+'<w:sz w:val="'+f+'"/><w:szCs w:val="'+f+'"/></w:rPr>'
-      +'<w:t xml:space="preserve">'+xe(text)+'</w:t></w:r></w:p></w:tc>';
-  }
-  function tspan(text,w,bold,center,fs){
-    // merged cell spanning multiple columns
-    var b=bold?'<w:b/>':''; var jc=center?'center':'left'; var f=fs||18;
-    return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'
-      +'<w:tcBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>'
-      +'<w:vAlign w:val="center"/></w:tcPr>'
-      +'<w:p><w:pPr><w:jc w:val="'+jc+'"/><w:spacing w:before="30" w:after="30"/></w:pPr>'
-      +'<w:r><w:rPr>'+b+'<w:sz w:val="'+f+'"/><w:szCs w:val="'+f+'"/></w:rPr>'
-      +'<w:t xml:space="preserve">'+xe(text)+'</w:t></w:r></w:p></w:tc>';
-  }
+  // DOCX 是 ZIP，找到 word/document.xml 並替換 placeholder
+  // 用 JSZip-like 純手工解/重壓縮太複雜，改用 TextDecoder 找到 XML 並做字串替換
+  // 策略：直接對 ZIP bytes 搜尋 UTF-8 encoded XML，替換 placeholder 文字後重新包裝
 
-  // 表頭第1列（處理/資產編定 各跨2欄）
-  var hdr1='<w:tr>'
-    +tcell('項次',W[0],true,true,16)
-    +tcell('品　　　名',W[1],true,true,16)
-    +tcell('規　格　說　明',W[2],true,true,16)
-    +tcell('單位',W[3],true,true,16)
-    +tcell('數量',W[4],true,true,16)
-    +tcell('存放地點',W[5],true,true,16)
-    +tcell('用途及說明',W[6],true,true,16)
-    +tcell('需求日期',W[7],true,true,16)
-    +tspan('處　理',W[8]+W[9],true,true,16)
-    +tspan('資產編定',W[10]+W[11],true,true,16)
-    +tcell('備　　註',W[12],true,true,16)
-    +'</w:tr>';
+  // 把整個 ZIP 轉成字串搜尋（只修改 word/document.xml 部分）
+  var decoder = new TextDecoder('utf-8');
+  var encoder = new TextEncoder();
 
-  // 表頭第2列（撥/購/一般/固定）
-  var hdr2='<w:tr>'
-    +tcell('',W[0],false,true,16)+tcell('',W[1],false,true,16)+tcell('',W[2],false,true,16)
-    +tcell('',W[3],false,true,16)+tcell('',W[4],false,true,16)+tcell('',W[5],false,true,16)
-    +tcell('',W[6],false,true,16)+tcell('',W[7],false,true,16)
-    +tcell('撥',W[8],true,true,16)+tcell('購',W[9],true,true,16)
-    +tcell('一般',W[10],true,true,16)+tcell('固定',W[11],true,true,16)
-    +tcell('',W[12],false,true,16)
-    +'</w:tr>';
-
-  // 資料列
-  var dataRows='';
-  for(var i=0;i<Math.max(items.length,10);i++){
-    var it=items[i];
-    var spec=it?(it.s+(it.m?'　'+it.m:'')):'';
-    dataRows+='<w:tr>'
-      +tcell(it?(i+1):'',   W[0],false,true,18)
-      +tcell(it?it.n:'',    W[1],false,false,18)
-      +tcell(it?spec:'',    W[2],false,false,16)
-      +tcell(it?'片':'',    W[3],false,true,18)
-      +tcell(it?it.qty:'',  W[4],false,true,18)
-      +tcell(it?site:'',    W[5],false,false,16)
-      +tcell(it?'工地安全標識':'',W[6],false,false,16)
-      +tcell(it?dateStr:'', W[7],false,true,14)
-      +tcell('',W[8],false,true,16)+tcell('',W[9],false,true,16)
-      +tcell('',W[10],false,true,16)+tcell('',W[11],false,true,16)
-      +tcell(it&&i===0?note:'',W[12],false,false,16)
-      +'</w:tr>';
+  // 找 word/document.xml 在 ZIP 中的位置
+  var xmlStart = -1, xmlEnd = -1;
+  var marker = encoder.encode('word/document.xml');
+  // 找 local file header for word/document.xml
+  for (var i = 0; i < arr.length - marker.length - 30; i++) {
+    if (arr[i]===0x50 && arr[i+1]===0x4B && arr[i+2]===0x03 && arr[i+3]===0x04) {
+      var fnLen = arr[i+26] | (arr[i+27]<<8);
+      var exLen = arr[i+28] | (arr[i+29]<<8);
+      var fn = decoder.decode(arr.slice(i+30, i+30+fnLen));
+      if (fn === 'word/document.xml') {
+        var dataStart = i + 30 + fnLen + exLen;
+        var dataLen   = arr[i+18] | (arr[i+19]<<8) | (arr[i+20]<<16) | (arr[i+21]<<24);
+        xmlStart = dataStart;
+        xmlEnd   = dataStart + dataLen;
+        break;
+      }
+    }
   }
 
-  // 簽名列
-  var signRow='<w:tr>'
-    +tspan('批　　示',W[0]+W[1]+W[2],false,true,18)
-    +tspan('單位主管',W[3]+W[4]+W[5],false,true,18)
-    // 請購人（姓名+換行+日期時間）
-    +'<w:tc><w:tcPr><w:tcW w:w="'+(W[6]+W[7])+'" w:type="dxa"/>'
-    +'<w:tcBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>'
-    +'<w:vAlign w:val="center"/></w:tcPr>'
-    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="30" w:after="30"/></w:pPr>'
-    +'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t xml:space="preserve">請購人：'+xe(staff)+'</w:t></w:r>'
-    +'<w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:br/></w:r>'
-    +'<w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:t xml:space="preserve">'+xe(dateStr)+'　'+xe(timeStr)+'</w:t></w:r>'
-    +'</w:p></w:tc>'
-    +tspan('總辦室主任',W[8]+W[9]+W[10],false,true,18)
-    +tspan('總務',W[11],false,true,18)
-    +tspan('承辦人',W[12],false,true,18)
-    +'</w:tr>';
+  if (xmlStart < 0) { toast('❌ 找不到文件 XML'); return; }
 
-  var colGrid=W.map(function(w){return '<w:gridCol w:w="'+w+'"/>';}).join('');
+  var xmlStr = decoder.decode(arr.slice(xmlStart, xmlEnd));
 
-  var docXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'
-    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="60"/></w:pPr>'
-    +'<w:r><w:rPr><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>鈺 通 營 造 工 程 股 份 有 限 公 司</w:t></w:r></w:p>'
-    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="60"/></w:pPr>'
-    +'<w:r><w:rPr><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr><w:t>請　　　購　　　單</w:t></w:r></w:p>'
-    +'<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:before="0" w:after="40"/></w:pPr>'
-    +'<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t>單　　號：</w:t></w:r></w:p>'
-    +'<w:p><w:pPr><w:spacing w:before="0" w:after="40"/></w:pPr>'
-    +'<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
-    +'<w:t xml:space="preserve">使用單位：'+xe(site)+'　　　　　　　　　　　　　　　　　　　　　　　請購日期：'+xe(dateStr)+'　　　合計數量：'+totalQty+' 件</w:t></w:r></w:p>'
-    +'<w:tbl>'
-    +'<w:tblPr><w:tblW w:w="'+TW+'" w:type="dxa"/>'
-    +'<w:tblBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:color="000000"/></w:tblBorders>'
-    +'</w:tblPr>'
-    +'<w:tblGrid>'+colGrid+'</w:tblGrid>'
-    +hdr1+hdr2+dataRows+signRow
-    +'</w:tbl>'
-    +'<w:p><w:pPr><w:spacing w:before="40" w:after="0"/></w:pPr>'
-    +'<w:r><w:rPr><w:sz w:val="14"/><w:szCs w:val="14"/></w:rPr><w:t>(QPR060201)</w:t></w:r></w:p>'
-    +'<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>'
-    +'<w:pgMar w:top="567" w:right="567" w:bottom="567" w:left="720"/></w:sectPr>'
-    +'</w:body></w:document>';
+  // 替換所有 placeholder
+  function rp(s, ph, val) { return s.split(ph).join(val || ''); }
+  function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  var rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
-  var wordRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
-  var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
+  xmlStr = rp(xmlStr, '{{SITE}}',  xe(site));
+  xmlStr = rp(xmlStr, '{{DATE}}',  xe(dateStr));
+  xmlStr = rp(xmlStr, '{{STAFF}}', xe(staff));
+  xmlStr = rp(xmlStr, '{{TIME}}',  xe(timeStr));
 
-  function u16(n){var b=new Uint8Array(2);b[0]=n&0xff;b[1]=(n>>8)&0xff;return b;}
-  function u32(n){var b=new Uint8Array(4);n=n>>>0;b[0]=n&0xff;b[1]=(n>>8)&0xff;b[2]=(n>>16)&0xff;b[3]=(n>>24)&0xff;return b;}
-  function crc(buf){var t=new Uint32Array(256);for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}var v=0xFFFFFFFF>>>0;for(var k=0;k<buf.length;k++)v=((v>>>8)^t[(v^buf[k])&0xff])>>>0;return(v^0xFFFFFFFF)>>>0;}
-  function cat(list){var n=list.reduce(function(s,a){return s+a.length;},0),o=new Uint8Array(n),p=0;list.forEach(function(a){o.set(a,p);p+=a.length;});return o;}
-  function cb(){return cat(Array.prototype.slice.call(arguments));}
-  try{
-    var enc=new TextEncoder(),lp=[],cp=[],zo=0;
-    [{n:'_rels/.rels',d:rels},{n:'[Content_Types].xml',d:ct},{n:'word/_rels/document.xml.rels',d:wordRels},{n:'word/document.xml',d:docXml}]
-    .forEach(function(f){
-      var db=enc.encode(f.d),nb=enc.encode(f.n),cv=crc(db);
-      var lh=cb(new Uint8Array([0x50,0x4B,0x03,0x04]),u16(20),u16(0),u16(0),u16(0),u16(0),u32(cv),u32(db.length),u32(db.length),u16(nb.length),u16(0),nb,db);
-      var cd=cb(new Uint8Array([0x50,0x4B,0x01,0x02]),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(cv),u32(db.length),u32(db.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(zo),nb);
-      lp.push(lh);cp.push(cd);zo+=lh.length;
-    });
-    var cdb=cat(cp);
-    var eocd=cb(new Uint8Array([0x50,0x4B,0x05,0x06]),u16(0),u16(0),u16(4),u16(4),u32(cdb.length),u32(zo),u16(0));
-    var blob=new Blob([cat(lp.concat(cp).concat([eocd]))],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-    var url=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=url;a.download='請購單_'+(site||'工地')+'_'+fileDateStr+'.docx';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(function(){URL.revokeObjectURL(url);},3000);
-    toast('✅ 請購單已下載！',3000);
-  }catch(e){toast('❌ 下載失敗：'+e.message);console.error(e);}
+  for (var i=0; i<11; i++) {
+    var it = items[i];
+    xmlStr = rp(xmlStr, '{{NO'+i+    '}}', it ? String(i+1) : '');
+    xmlStr = rp(xmlStr, '{{NAME'+i+  '}}', it ? xe(it.n) : '');
+    xmlStr = rp(xmlStr, '{{SPEC'+i+  '}}', it ? xe(it.s + (it.m?'　'+it.m:'')) : '');
+    xmlStr = rp(xmlStr, '{{UNIT'+i+  '}}', it ? '片' : '');
+    xmlStr = rp(xmlStr, '{{QTY'+i+   '}}', it ? String(it.qty) : '');
+    xmlStr = rp(xmlStr, '{{LOC'+i+   '}}', it ? xe(site) : '');
+    xmlStr = rp(xmlStr, '{{USE'+i+   '}}', it ? '工地安全標識' : '');
+    xmlStr = rp(xmlStr, '{{NEED'+i+  '}}', it ? xe(dateStr) : '');
+    xmlStr = rp(xmlStr, '{{NOTE'+i+  '}}', it && i===0 ? xe(note) : '');
+  }
+
+  // 把修改後的 XML 寫回 ZIP
+  var newXmlBytes = encoder.encode(xmlStr);
+  var oldLen = xmlEnd - xmlStart;
+  var diff = newXmlBytes.length - oldLen;
+
+  // 重建 ZIP bytes
+  var newArr = new Uint8Array(arr.length + diff);
+  newArr.set(arr.slice(0, xmlStart), 0);
+  newArr.set(newXmlBytes, xmlStart);
+  newArr.set(arr.slice(xmlEnd), xmlStart + newXmlBytes.length);
+
+  // 更新 local file header: compressed size (offset i+18) & uncompressed size (offset i+22)
+  // 找到 word/document.xml 的 local header 位置
+  for (var j = 0; j < newArr.length - 30; j++) {
+    if (newArr[j]===0x50 && newArr[j+1]===0x4B && newArr[j+2]===0x03 && newArr[j+3]===0x04) {
+      var fnLen2 = newArr[j+26] | (newArr[j+27]<<8);
+      var exLen2 = newArr[j+28] | (newArr[j+29]<<8);
+      var fn2 = decoder.decode(newArr.slice(j+30, j+30+fnLen2));
+      if (fn2 === 'word/document.xml') {
+        var sz = newXmlBytes.length;
+        // update compressed size (store, so compressed == uncompressed)
+        newArr[j+18]=sz&0xff; newArr[j+19]=(sz>>8)&0xff; newArr[j+20]=(sz>>16)&0xff; newArr[j+21]=(sz>>24)&0xff;
+        newArr[j+22]=sz&0xff; newArr[j+23]=(sz>>8)&0xff; newArr[j+24]=(sz>>16)&0xff; newArr[j+25]=(sz>>24)&0xff;
+        // update crc32
+        var crc = calcCrc32(newXmlBytes);
+        newArr[j+14]=crc&0xff; newArr[j+15]=(crc>>8)&0xff; newArr[j+16]=(crc>>16)&0xff; newArr[j+17]=(crc>>24)&0xff;
+        break;
+      }
+    }
+  }
+
+  // 更新 central directory 裡的 word/document.xml 條目
+  for (var k = xmlStart + newXmlBytes.length; k < newArr.length - 46; k++) {
+    if (newArr[k]===0x50 && newArr[k+1]===0x4B && newArr[k+2]===0x01 && newArr[k+3]===0x02) {
+      var fnLen3 = newArr[k+28] | (newArr[k+29]<<8);
+      var fn3 = decoder.decode(newArr.slice(k+46, k+46+fnLen3));
+      if (fn3 === 'word/document.xml') {
+        var sz2 = newXmlBytes.length;
+        newArr[k+20]=sz2&0xff; newArr[k+21]=(sz2>>8)&0xff; newArr[k+22]=(sz2>>16)&0xff; newArr[k+23]=(sz2>>24)&0xff;
+        newArr[k+24]=sz2&0xff; newArr[k+25]=(sz2>>8)&0xff; newArr[k+26]=(sz2>>16)&0xff; newArr[k+27]=(sz2>>24)&0xff;
+        var crc2 = calcCrc32(newXmlBytes);
+        newArr[k+16]=crc2&0xff; newArr[k+17]=(crc2>>8)&0xff; newArr[k+18]=(crc2>>16)&0xff; newArr[k+19]=(crc2>>24)&0xff;
+        break;
+      }
+    }
+  }
+
+  // 更新 EOCD 中 central directory offset（如果在 xml 後面需要位移）
+  // 找 EOCD (0x50 0x4B 0x05 0x06)
+  for (var e = newArr.length - 22; e >= 0; e--) {
+    if (newArr[e]===0x50 && newArr[e+1]===0x4B && newArr[e+2]===0x05 && newArr[e+3]===0x06) {
+      var cdOff = newArr[e+16] | (newArr[e+17]<<8) | (newArr[e+18]<<16) | (newArr[e+19]<<24);
+      if (cdOff >= xmlStart) {
+        cdOff += diff;
+        newArr[e+16]=cdOff&0xff; newArr[e+17]=(cdOff>>8)&0xff; newArr[e+18]=(cdOff>>16)&0xff; newArr[e+19]=(cdOff>>24)&0xff;
+      }
+      break;
+    }
+  }
+
+  var blob = new Blob([newArr], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = '請購單_'+(site||'工地')+'_'+fileDateStr+'.docx';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);}, 3000);
+  toast('✅ 請購單已下載！', 3000);
+}
+
+function calcCrc32(buf) {
+  var t=new Uint32Array(256);
+  for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}
+  var v=0xFFFFFFFF>>>0;
+  for(var k=0;k<buf.length;k++)v=((v>>>8)^t[(v^buf[k])&0xff])>>>0;
+  return(v^0xFFFFFFFF)>>>0;
 }
 function buildDocxAndDownload() {} // 已由 genWordOrder 直接處理，保留避免參照錯誤
 
