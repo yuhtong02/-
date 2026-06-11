@@ -1292,58 +1292,63 @@ function genWordOrder() {
     for(var k=0;k<buf.length;k++)crc=((crc>>>8)^t[(crc^buf[k])&0xff])>>>0;
     return(crc^0xFFFFFFFF)>>>0;
   }
-  function catBufs(){
-    var args=Array.prototype.slice.call(arguments);
-    var len=args.reduce(function(s,a){return s+a.length;},0);
+  function concatAll(list){
+    var len=list.reduce(function(s,a){return s+a.length;},0);
     var out=new Uint8Array(len),p=0;
-    args.forEach(function(a){out.set(a,p);p+=a.length;});
+    list.forEach(function(a){out.set(a,p);p+=a.length;});
     return out;
   }
-  var tenc=new TextEncoder();
-  var localParts=[],cdParts=[],zipOffset=0;
-  var fileList=[
-    {name:'_rels/.rels',       data:rels},
-    {name:'[Content_Types].xml',data:contentTypes},
-    {name:'word/_rels/document.xml.rels',data:wordRels},
-    {name:'word/document.xml', data:docXml}
-  ];
-  fileList.forEach(function(f){
-    var dataBuf=tenc.encode(f.data);
-    var nameBuf=tenc.encode(f.name);
-    var crc=crc32b(dataBuf);
-    var local=catBufs(
-      new Uint8Array([0x50,0x4B,0x03,0x04]),
-      u16le(20),u16le(0),u16le(0),u16le(0),u16le(0),
-      u32le(crc),u32le(dataBuf.length),u32le(dataBuf.length),
-      u16le(nameBuf.length),u16le(0),nameBuf,dataBuf
+  function catBufs(){return concatAll(Array.prototype.slice.call(arguments));}
+  try {
+    var tenc=new TextEncoder();
+    var localParts=[],cdParts=[],zipOffset=0;
+    var fileList=[
+      {name:'_rels/.rels',       data:rels},
+      {name:'[Content_Types].xml',data:contentTypes},
+      {name:'word/_rels/document.xml.rels',data:wordRels},
+      {name:'word/document.xml', data:docXml}
+    ];
+    fileList.forEach(function(f){
+      var dataBuf=tenc.encode(f.data);
+      var nameBuf=tenc.encode(f.name);
+      var crc=crc32b(dataBuf);
+      var local=catBufs(
+        new Uint8Array([0x50,0x4B,0x03,0x04]),
+        u16le(20),u16le(0),u16le(0),u16le(0),u16le(0),
+        u32le(crc),u32le(dataBuf.length),u32le(dataBuf.length),
+        u16le(nameBuf.length),u16le(0),nameBuf,dataBuf
+      );
+      var cd=catBufs(
+        new Uint8Array([0x50,0x4B,0x01,0x02]),
+        u16le(20),u16le(20),u16le(0),u16le(0),u16le(0),u16le(0),
+        u32le(crc),u32le(dataBuf.length),u32le(dataBuf.length),
+        u16le(nameBuf.length),u16le(0),u16le(0),u16le(0),u16le(0),
+        u32le(0),u32le(zipOffset),nameBuf
+      );
+      localParts.push(local);
+      cdParts.push(cd);
+      zipOffset+=local.length;
+    });
+    var cdBuf=concatAll(cdParts);
+    var eocd=catBufs(
+      new Uint8Array([0x50,0x4B,0x05,0x06]),
+      u16le(0),u16le(0),
+      u16le(fileList.length),u16le(fileList.length),
+      u32le(cdBuf.length),u32le(zipOffset),u16le(0)
     );
-    var cd=catBufs(
-      new Uint8Array([0x50,0x4B,0x01,0x02]),
-      u16le(20),u16le(20),u16le(0),u16le(0),u16le(0),u16le(0),
-      u32le(crc),u32le(dataBuf.length),u32le(dataBuf.length),
-      u16le(nameBuf.length),u16le(0),u16le(0),u16le(0),u16le(0),
-      u32le(0),u32le(zipOffset),nameBuf
-    );
-    localParts.push(local);
-    cdParts.push(cd);
-    zipOffset+=local.length;
-  });
-  var cdBuf=catBufs.apply(null,cdParts);
-  var eocd=catBufs(
-    new Uint8Array([0x50,0x4B,0x05,0x06]),
-    u16le(0),u16le(0),
-    u16le(fileList.length),u16le(fileList.length),
-    u32le(cdBuf.length),u32le(zipOffset),u16le(0)
-  );
-  var zipBuf=catBufs.apply(null,localParts.concat(cdParts).concat([eocd]));
-  var blob=new Blob([zipBuf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='請購單_'+(site||'工地')+'_'+fileDateStr+'.docx';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(function(){URL.revokeObjectURL(url);},3000);
-  toast('✅ 請購單已下載！',3000);
+    var zipBuf=concatAll(localParts.concat(cdParts).concat([eocd]));
+    var blob=new Blob([zipBuf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='請購單_'+(site||'工地')+'_'+fileDateStr+'.docx';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},3000);
+    toast('✅ 請購單已下載！',3000);
+  } catch(e) {
+    toast('❌ 下載失敗：'+e.message);
+    console.error('genWordOrder error:', e);
+  }
 }
 
 function buildDocxAndDownload() {} // 已由 genWordOrder 直接處理，保留避免參照錯誤
