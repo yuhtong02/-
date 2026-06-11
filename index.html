@@ -1130,27 +1130,19 @@ function buildReport() {
 // PRINT
 // ──────────────────────────────────────────
 function genWordOrder() {
-  var site  = (document.getElementById('site-sel')||{}).value || '';
-  var staff = (document.getElementById('staff-in')||{}).value || '';
+  var site  = _site  || (document.getElementById('site-sel')||{}).value || '';
+  var staff = _staff || (document.getElementById('staff-in')||{}).value || '';
   var note  = (document.getElementById('note-in')||{}).value || '';
   var today = new Date();
   var yy = today.getFullYear(), mm = today.getMonth()+1, dd = today.getDate();
   var dateStr = yy + '年' + mm + '月' + dd + '日';
   var fileDateStr = yy + (mm<10?'0'+mm:mm) + (dd<10?'0'+dd:dd);
 
-  // 收集選取品項
-  var items = [];
-  var dbMap = {};
-  getDB().forEach(function(x){ dbMap[x.id] = x; });
-  Object.keys(sel).forEach(function(id){
-    var qty = sel[id];
-    if (!qty || qty <= 0) return;
-    var item = dbMap[id];
-    if (!item) return;
-    items.push({n:item.n, s:item.s||'', m:item.m||'', qty:qty});
+  // 使用 _sel（與列印/圖片相同的資料來源）
+  if (!_sel || !_sel.length) { toast('請先點選標語品項'); return; }
+  var items = _sel.map(function(item) {
+    return {n:item.n, s:item.s||'', m:item.m||'', qty: cget(item).qty || 1};
   });
-  if (!items.length) { toast('請先選取標語品項'); return; }
-
   var totalQty = items.reduce(function(s,x){ return s+Number(x.qty); }, 0);
 
   function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
