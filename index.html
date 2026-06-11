@@ -1133,216 +1133,160 @@ function genWordOrder() {
   var site  = _site  || (document.getElementById('site-sel')||{}).value || '';
   var staff = _staff || (document.getElementById('staff-in')||{}).value || '';
   var note  = (document.getElementById('note-in')||{}).value || '';
-  var today = new Date();
-  var yy = today.getFullYear(), mm = today.getMonth()+1, dd = today.getDate();
-  var dateStr = yy + '年' + mm + '月' + dd + '日';
-  var fileDateStr = yy + (mm<10?'0'+mm:mm) + (dd<10?'0'+dd:dd);
+  var now   = new Date();
+  var yy=now.getFullYear(), mm=now.getMonth()+1, dd=now.getDate();
+  var hh=now.getHours(), mi=now.getMinutes();
+  var dateStr  = (yy-1911)+'年'+mm+'月'+dd+'日';
+  var timeStr  = (hh<10?'0'+hh:hh)+':'+(mi<10?'0'+mi:mi);
+  var fileDateStr = yy+(mm<10?'0'+mm:mm)+(dd<10?'0'+dd:dd);
 
-  // 使用 _sel（與列印/圖片相同的資料來源）
   if (!_sel || !_sel.length) { toast('請先點選標語品項'); return; }
-  var items = _sel.map(function(item) {
-    return {n:item.n, s:item.s||'', m:item.m||'', qty: cget(item).qty || 1};
-  });
-  var totalQty = items.reduce(function(s,x){ return s+Number(x.qty); }, 0);
+  var items = _sel.map(function(item){ return {n:item.n,s:item.s||'',m:item.m||'',qty:cget(item).qty||1}; });
+  var totalQty = items.reduce(function(s,x){return s+Number(x.qty);},0);
 
-  function xe(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function xe(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-  function tc(text, w, bold, center) {
-    var b = bold ? '<w:b/>' : '';
-    var jc = center ? 'center' : 'left';
-    return '<w:tc>'
-      +'<w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'
-      +'<w:tcBorders>'
-      +'<w:top w:val="single" w:sz="4" w:color="000000"/>'
-      +'<w:left w:val="single" w:sz="4" w:color="000000"/>'
-      +'<w:bottom w:val="single" w:sz="4" w:color="000000"/>'
-      +'<w:right w:val="single" w:sz="4" w:color="000000"/>'
-      +'</w:tcBorders>'
-      +'<w:vAlign w:val="center"/>'
-      +'</w:tcPr>'
-      +'<w:p><w:pPr><w:jc w:val="'+jc+'"/><w:spacing w:before="40" w:after="40"/></w:pPr>'
-      +'<w:r><w:rPr>'+b+'<w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>'
+  // 欄寬 dxa（依原始 Word 欄寬比例）
+  var W = [436,1418,1418,500,750,1000,1418,667,333,333,500,500,1167];
+  var TW = W.reduce(function(a,b){return a+b;},0);
+
+  function tcell(text,w,bold,center,fs){
+    var b=bold?'<w:b/>':''; var jc=center?'center':'left'; var f=fs||18;
+    return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'
+      +'<w:tcBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>'
+      +'<w:vAlign w:val="center"/></w:tcPr>'
+      +'<w:p><w:pPr><w:jc w:val="'+jc+'"/><w:spacing w:before="30" w:after="30"/></w:pPr>'
+      +'<w:r><w:rPr>'+b+'<w:sz w:val="'+f+'"/><w:szCs w:val="'+f+'"/></w:rPr>'
+      +'<w:t xml:space="preserve">'+xe(text)+'</w:t></w:r></w:p></w:tc>';
+  }
+  function tspan(text,w,bold,center,fs){
+    // merged cell spanning multiple columns
+    var b=bold?'<w:b/>':''; var jc=center?'center':'left'; var f=fs||18;
+    return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'
+      +'<w:tcBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>'
+      +'<w:vAlign w:val="center"/></w:tcPr>'
+      +'<w:p><w:pPr><w:jc w:val="'+jc+'"/><w:spacing w:before="30" w:after="30"/></w:pPr>'
+      +'<w:r><w:rPr>'+b+'<w:sz w:val="'+f+'"/><w:szCs w:val="'+f+'"/></w:rPr>'
       +'<w:t xml:space="preserve">'+xe(text)+'</w:t></w:r></w:p></w:tc>';
   }
 
-  // 欄寬：項次500、品名2400、規格1800、單位450、數量450、存放地點1400、用途1400、需求日期900、備註1500 = 10800
-  var COL = [500, 2400, 1800, 450, 450, 1400, 1400, 900, 1500];
-
-  var headerRow = '<w:tr>'
-    + tc('項次',COL[0],true,true)
-    + tc('品　　名',COL[1],true,true)
-    + tc('規格說明',COL[2],true,true)
-    + tc('單位',COL[3],true,true)
-    + tc('數量',COL[4],true,true)
-    + tc('存放地點',COL[5],true,true)
-    + tc('用途及說明',COL[6],true,true)
-    + tc('需求日期',COL[7],true,true)
-    + tc('備　註',COL[8],true,true)
+  // 表頭第1列（處理/資產編定 各跨2欄）
+  var hdr1='<w:tr>'
+    +tcell('項次',W[0],true,true,16)
+    +tcell('品　　　名',W[1],true,true,16)
+    +tcell('規　格　說　明',W[2],true,true,16)
+    +tcell('單位',W[3],true,true,16)
+    +tcell('數量',W[4],true,true,16)
+    +tcell('存放地點',W[5],true,true,16)
+    +tcell('用途及說明',W[6],true,true,16)
+    +tcell('需求日期',W[7],true,true,16)
+    +tspan('處　理',W[8]+W[9],true,true,16)
+    +tspan('資產編定',W[10]+W[11],true,true,16)
+    +tcell('備　　註',W[12],true,true,16)
     +'</w:tr>';
 
-  var dataRows = '';
-  var ROWS = Math.max(items.length, 10);
-  for (var i = 0; i < ROWS; i++) {
-    var it = items[i];
-    dataRows += '<w:tr>'
-      + tc(it ? (i+1) : '', COL[0], false, true)
-      + tc(it ? it.n : '', COL[1], false, false)
-      + tc(it ? (it.s + (it.m ? '／'+it.m : '')) : '', COL[2], false, false)
-      + tc(it ? '片' : '', COL[3], false, true)
-      + tc(it ? it.qty : '', COL[4], false, true)
-      + tc(it ? site : '', COL[5], false, false)
-      + tc(it ? '工地安全標識' : '', COL[6], false, false)
-      + tc(it ? dateStr : '', COL[7], false, true)
-      + tc(it && i===0 ? note : '', COL[8], false, false)
+  // 表頭第2列（撥/購/一般/固定）
+  var hdr2='<w:tr>'
+    +tcell('',W[0],false,true,16)+tcell('',W[1],false,true,16)+tcell('',W[2],false,true,16)
+    +tcell('',W[3],false,true,16)+tcell('',W[4],false,true,16)+tcell('',W[5],false,true,16)
+    +tcell('',W[6],false,true,16)+tcell('',W[7],false,true,16)
+    +tcell('撥',W[8],true,true,16)+tcell('購',W[9],true,true,16)
+    +tcell('一般',W[10],true,true,16)+tcell('固定',W[11],true,true,16)
+    +tcell('',W[12],false,true,16)
+    +'</w:tr>';
+
+  // 資料列
+  var dataRows='';
+  for(var i=0;i<Math.max(items.length,10);i++){
+    var it=items[i];
+    var spec=it?(it.s+(it.m?'　'+it.m:'')):'';
+    dataRows+='<w:tr>'
+      +tcell(it?(i+1):'',   W[0],false,true,18)
+      +tcell(it?it.n:'',    W[1],false,false,18)
+      +tcell(it?spec:'',    W[2],false,false,16)
+      +tcell(it?'片':'',    W[3],false,true,18)
+      +tcell(it?it.qty:'',  W[4],false,true,18)
+      +tcell(it?site:'',    W[5],false,false,16)
+      +tcell(it?'工地安全標識':'',W[6],false,false,16)
+      +tcell(it?dateStr:'', W[7],false,true,14)
+      +tcell('',W[8],false,true,16)+tcell('',W[9],false,true,16)
+      +tcell('',W[10],false,true,16)+tcell('',W[11],false,true,16)
+      +tcell(it&&i===0?note:'',W[12],false,false,16)
       +'</w:tr>';
   }
 
-  // 請購人列（跨欄）
-  var signRow = '<w:tr>'
-    +'<w:tc><w:tcPr>'
-    +'<w:tcW w:w="10800" w:type="dxa"/>'
-    +'<w:gridSpan w:val="9"/>'
-    +'<w:tcBorders>'
-    +'<w:top w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:left w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:bottom w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:right w:val="single" w:sz="4" w:color="000000"/>'
-    +'</w:tcBorders></w:tcPr>'
-    +'<w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr>'
-    +'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>'
-    +'<w:t xml:space="preserve">請購人：'+xe(staff)
-    +'　　　　　　　　　　　　　　　　　　　　　　　　　　批示：主管　　　　總辦室主任　　　　總務　　　　承辦人　　　　單位主管</w:t></w:r></w:p></w:tc>'
+  // 簽名列
+  var signRow='<w:tr>'
+    +tspan('批　　示',W[0]+W[1]+W[2],false,true,18)
+    +tspan('單位主管',W[3]+W[4]+W[5],false,true,18)
+    // 請購人（姓名+換行+日期時間）
+    +'<w:tc><w:tcPr><w:tcW w:w="'+(W[6]+W[7])+'" w:type="dxa"/>'
+    +'<w:tcBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>'
+    +'<w:vAlign w:val="center"/></w:tcPr>'
+    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="30" w:after="30"/></w:pPr>'
+    +'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t xml:space="preserve">請購人：'+xe(staff)+'</w:t></w:r>'
+    +'<w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:br/></w:r>'
+    +'<w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:t xml:space="preserve">'+xe(dateStr)+'　'+xe(timeStr)+'</w:t></w:r>'
+    +'</w:p></w:tc>'
+    +tspan('總辦室主任',W[8]+W[9]+W[10],false,true,18)
+    +tspan('總務',W[11],false,true,18)
+    +tspan('承辦人',W[12],false,true,18)
     +'</w:tr>';
 
-  var colGrid = COL.map(function(w){ return '<w:gridCol w:w="'+w+'"/>'; }).join('');
-  var tblW = COL.reduce(function(a,b){return a+b;},0);
+  var colGrid=W.map(function(w){return '<w:gridCol w:w="'+w+'"/>';}).join('');
 
-  var docXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
-    +'<w:body>'
-    // 公司名稱
-    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="80"/></w:pPr>'
-    +'<w:r><w:rPr><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr>'
-    +'<w:t>鈺通營造工程股份有限公司</w:t></w:r></w:p>'
-    // 標題
-    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="80"/></w:pPr>'
-    +'<w:r><w:rPr><w:b/><w:sz w:val="36"/><w:szCs w:val="36"/></w:rPr>'
-    +'<w:t>請　　購　　單</w:t></w:r></w:p>'
-    // 資訊列
-    +'<w:p><w:pPr><w:spacing w:before="0" w:after="80"/></w:pPr>'
+  var docXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'
+    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="60"/></w:pPr>'
+    +'<w:r><w:rPr><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>鈺 通 營 造 工 程 股 份 有 限 公 司</w:t></w:r></w:p>'
+    +'<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="60"/></w:pPr>'
+    +'<w:r><w:rPr><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr><w:t>請　　　購　　　單</w:t></w:r></w:p>'
+    +'<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:before="0" w:after="40"/></w:pPr>'
+    +'<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t>單　　號：</w:t></w:r></w:p>'
+    +'<w:p><w:pPr><w:spacing w:before="0" w:after="40"/></w:pPr>'
     +'<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>'
-    +'<w:t xml:space="preserve">使用單位：'+xe(site)
-    +'　　　　　　　　　　請購日期：'+xe(dateStr)
-    +'　　　　　　合計數量：'+totalQty+' 件　　　　　　單號：</w:t></w:r></w:p>'
-    // 表格
+    +'<w:t xml:space="preserve">使用單位：'+xe(site)+'　　　　　　　　　　　　　　　　　　　　　　　請購日期：'+xe(dateStr)+'　　　合計數量：'+totalQty+' 件</w:t></w:r></w:p>'
     +'<w:tbl>'
-    +'<w:tblPr>'
-    +'<w:tblW w:w="'+tblW+'" w:type="dxa"/>'
-    +'<w:tblBorders>'
-    +'<w:top w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:left w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:bottom w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:right w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:insideH w:val="single" w:sz="4" w:color="000000"/>'
-    +'<w:insideV w:val="single" w:sz="4" w:color="000000"/>'
-    +'</w:tblBorders>'
+    +'<w:tblPr><w:tblW w:w="'+TW+'" w:type="dxa"/>'
+    +'<w:tblBorders><w:top w:val="single" w:sz="4" w:color="000000"/><w:left w:val="single" w:sz="4" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:color="000000"/><w:right w:val="single" w:sz="4" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:color="000000"/></w:tblBorders>'
     +'</w:tblPr>'
     +'<w:tblGrid>'+colGrid+'</w:tblGrid>'
-    + headerRow + dataRows + signRow
+    +hdr1+hdr2+dataRows+signRow
     +'</w:tbl>'
-    +'<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:before="60" w:after="0"/></w:pPr>'
-    +'<w:r><w:rPr><w:sz w:val="14"/></w:rPr><w:t>(QPR060201)</w:t></w:r></w:p>'
-    +'<w:sectPr>'
-    +'<w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>'
-    +'<w:pgMar w:top="567" w:right="567" w:bottom="567" w:left="567"/>'
-    +'</w:sectPr>'
+    +'<w:p><w:pPr><w:spacing w:before="40" w:after="0"/></w:pPr>'
+    +'<w:r><w:rPr><w:sz w:val="14"/><w:szCs w:val="14"/></w:rPr><w:t>(QPR060201)</w:t></w:r></w:p>'
+    +'<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>'
+    +'<w:pgMar w:top="567" w:right="567" w:bottom="567" w:left="720"/></w:sectPr>'
     +'</w:body></w:document>';
 
-  var rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
-    +'</Relationships>';
+  var rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+  var wordRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+  var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
 
-  var wordRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-    +'</Relationships>';
-
-  var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-    +'<Default Extension="xml" ContentType="application/xml"/>'
-    +'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
-    +'</Types>';
-
-  // ── 純 JS ZIP 打包（不依賴外部套件）──
-  function u16le(n){var b=new Uint8Array(2);b[0]=n&0xff;b[1]=(n>>8)&0xff;return b;}
-  function u32le(n){var b=new Uint8Array(4);n=n>>>0;b[0]=n&0xff;b[1]=(n>>8)&0xff;b[2]=(n>>16)&0xff;b[3]=(n>>24)&0xff;return b;}
-  function crc32b(buf){
-    var t=new Uint32Array(256);
-    for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}
-    var crc=0xFFFFFFFF>>>0;
-    for(var k=0;k<buf.length;k++)crc=((crc>>>8)^t[(crc^buf[k])&0xff])>>>0;
-    return(crc^0xFFFFFFFF)>>>0;
-  }
-  function concatAll(list){
-    var len=list.reduce(function(s,a){return s+a.length;},0);
-    var out=new Uint8Array(len),p=0;
-    list.forEach(function(a){out.set(a,p);p+=a.length;});
-    return out;
-  }
-  function catBufs(){return concatAll(Array.prototype.slice.call(arguments));}
-  try {
-    var tenc=new TextEncoder();
-    var localParts=[],cdParts=[],zipOffset=0;
-    var fileList=[
-      {name:'_rels/.rels',       data:rels},
-      {name:'[Content_Types].xml',data:contentTypes},
-      {name:'word/_rels/document.xml.rels',data:wordRels},
-      {name:'word/document.xml', data:docXml}
-    ];
-    fileList.forEach(function(f){
-      var dataBuf=tenc.encode(f.data);
-      var nameBuf=tenc.encode(f.name);
-      var crc=crc32b(dataBuf);
-      var local=catBufs(
-        new Uint8Array([0x50,0x4B,0x03,0x04]),
-        u16le(20),u16le(0),u16le(0),u16le(0),u16le(0),
-        u32le(crc),u32le(dataBuf.length),u32le(dataBuf.length),
-        u16le(nameBuf.length),u16le(0),nameBuf,dataBuf
-      );
-      var cd=catBufs(
-        new Uint8Array([0x50,0x4B,0x01,0x02]),
-        u16le(20),u16le(20),u16le(0),u16le(0),u16le(0),u16le(0),
-        u32le(crc),u32le(dataBuf.length),u32le(dataBuf.length),
-        u16le(nameBuf.length),u16le(0),u16le(0),u16le(0),u16le(0),
-        u32le(0),u32le(zipOffset),nameBuf
-      );
-      localParts.push(local);
-      cdParts.push(cd);
-      zipOffset+=local.length;
+  function u16(n){var b=new Uint8Array(2);b[0]=n&0xff;b[1]=(n>>8)&0xff;return b;}
+  function u32(n){var b=new Uint8Array(4);n=n>>>0;b[0]=n&0xff;b[1]=(n>>8)&0xff;b[2]=(n>>16)&0xff;b[3]=(n>>24)&0xff;return b;}
+  function crc(buf){var t=new Uint32Array(256);for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}var v=0xFFFFFFFF>>>0;for(var k=0;k<buf.length;k++)v=((v>>>8)^t[(v^buf[k])&0xff])>>>0;return(v^0xFFFFFFFF)>>>0;}
+  function cat(list){var n=list.reduce(function(s,a){return s+a.length;},0),o=new Uint8Array(n),p=0;list.forEach(function(a){o.set(a,p);p+=a.length;});return o;}
+  function cb(){return cat(Array.prototype.slice.call(arguments));}
+  try{
+    var enc=new TextEncoder(),lp=[],cp=[],zo=0;
+    [{n:'_rels/.rels',d:rels},{n:'[Content_Types].xml',d:ct},{n:'word/_rels/document.xml.rels',d:wordRels},{n:'word/document.xml',d:docXml}]
+    .forEach(function(f){
+      var db=enc.encode(f.d),nb=enc.encode(f.n),cv=crc(db);
+      var lh=cb(new Uint8Array([0x50,0x4B,0x03,0x04]),u16(20),u16(0),u16(0),u16(0),u16(0),u32(cv),u32(db.length),u32(db.length),u16(nb.length),u16(0),nb,db);
+      var cd=cb(new Uint8Array([0x50,0x4B,0x01,0x02]),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(cv),u32(db.length),u32(db.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(zo),nb);
+      lp.push(lh);cp.push(cd);zo+=lh.length;
     });
-    var cdBuf=concatAll(cdParts);
-    var eocd=catBufs(
-      new Uint8Array([0x50,0x4B,0x05,0x06]),
-      u16le(0),u16le(0),
-      u16le(fileList.length),u16le(fileList.length),
-      u32le(cdBuf.length),u32le(zipOffset),u16le(0)
-    );
-    var zipBuf=concatAll(localParts.concat(cdParts).concat([eocd]));
-    var blob=new Blob([zipBuf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url;
-    a.download='請購單_'+(site||'工地')+'_'+fileDateStr+'.docx';
+    var cdb=cat(cp);
+    var eocd=cb(new Uint8Array([0x50,0x4B,0x05,0x06]),u16(0),u16(0),u16(4),u16(4),u32(cdb.length),u32(zo),u16(0));
+    var blob=new Blob([cat(lp.concat(cp).concat([eocd]))],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    var url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='請購單_'+(site||'工地')+'_'+fileDateStr+'.docx';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     setTimeout(function(){URL.revokeObjectURL(url);},3000);
     toast('✅ 請購單已下載！',3000);
-  } catch(e) {
-    toast('❌ 下載失敗：'+e.message);
-    console.error('genWordOrder error:', e);
-  }
+  }catch(e){toast('❌ 下載失敗：'+e.message);console.error(e);}
 }
-
 function buildDocxAndDownload() {} // 已由 genWordOrder 直接處理，保留避免參照錯誤
 
 function doPrint() {
