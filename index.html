@@ -1114,9 +1114,8 @@ function buildReport() {
     var c = cget(i);
     var item = i;
     if (c.customSize && c.customSize.trim()) {
-      // 用填單人輸入的實際尺寸取代「視工地…」描述
-      var s2 = (item.s||'').replace(/視工地[^\/]*/, c.customSize.trim());
-      item = Object.assign({}, item, {s: s2});
+      // 整個規格欄位改為填單人輸入的實際尺寸
+      item = Object.assign({}, item, {s: c.customSize.trim()});
     }
     if (c.customMat && c.customMat.trim()) {
       // 用填單人選擇的材質取代多選材質
