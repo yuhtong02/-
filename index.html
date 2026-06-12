@@ -1307,30 +1307,6 @@ function calcCrc32(buf) {
   for(var k=0;k<buf.length;k++)v=((v>>>8)^t[(v^buf[k])&0xff])>>>0;
   return(v^0xFFFFFFFF)>>>0;
 }
-
-function calcCrc32(buf) {
-  var t=new Uint32Array(256);
-  for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}
-  var v=0xFFFFFFFF>>>0;
-  for(var k=0;k<buf.length;k++)v=((v>>>8)^t[(v^buf[k])&0xff])>>>0;
-  return(v^0xFFFFFFFF)>>>0;
-}
-
-function calcCrc32(buf) {
-  var t=new Uint32Array(256);
-  for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}
-  var v=0xFFFFFFFF>>>0;
-  for(var k=0;k<buf.length;k++)v=((v>>>8)^t[(v^buf[k])&0xff])>>>0;
-  return(v^0xFFFFFFFF)>>>0;
-}
-
-function calcCrc32(buf) {
-  var t=new Uint32Array(256);
-  for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c;}
-  var v=0xFFFFFFFF>>>0;
-  for(var k=0;k<buf.length;k++)v=((v>>>8)^t[(v^buf[k])&0xff])>>>0;
-  return(v^0xFFFFFFFF)>>>0;
-}
 function buildDocxAndDownload() {} // 已由 genWordOrder 直接處理，保留避免參照錯誤
 
 function doPrint() {
