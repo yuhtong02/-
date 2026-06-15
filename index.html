@@ -375,7 +375,7 @@ var GAS_BAKED = 'https://script.google.com/macros/s/AKfycbwJ-vob2iYfgQkwgZURgmvy
 
 // 每次更新分類或標語內容時，將此版本號加1，網站會自動清除舊資料並從 Sheets 重新載入
 var DATA_VERSION = '6';
-var IMG_CACHE_BUST = Date.now(); // 每次開啟頁面強制重新抓取圖片，避免CDN/瀏覽器快取
+var IMG_CACHE_BUST = new Date().toISOString().slice(0,10); // 每日更新一次，允許瀏覽器當天快取圖片
 
 // ──────────────────────────────────────────
 // DATA DEFAULTS
@@ -620,7 +620,7 @@ function init() {
 // ──────────────────────────────────────────
 function imgFallback(el, id) {
   var tried = el._tried || 0;
-  var exts = ['.JPG', '.jpg', '.jpeg', '.JPEG', '.png', '.PNG'];
+  var exts = ['.JPG', '.PNG', '.jpg', '.png', '.jpeg', '.JPEG'];
   if (tried < exts.length) {
     el._tried = tried + 1;
     el.src = imgBase + id + exts[tried] + '?v=' + IMG_CACHE_BUST;
@@ -866,7 +866,7 @@ function render() {
     d.innerHTML = dhHtml + delBtnHtml
       + '<div class="card-chk"><span class="chk-ico">✓</span></div>'
       + '<div class="card-img" id="ci_'+item.id+'">'
-      + '<img src="'+imgUrl+'" onload="this.style.opacity=1;this.closest(\'.card-img\').classList.add(\'has-img\')" onerror="this._tried=1;imgFallback(this,\''+item.id+'\')" style="opacity:0;transition:opacity .2s" alt="">'
+      + '<img src="'+imgUrl+'" loading="lazy" onload="this.style.opacity=1;this.closest(\'.card-img\').classList.add(\'has-img\')" onerror="this._tried=1;imgFallback(this,\''+item.id+'\')" style="opacity:0;transition:opacity .2s" alt="">'
       + '<div class="no-img" id="ph_'+item.id+'" style="display:none"><span style="font-size:18px">🖼</span>'+item.id+'<br>無圖</div>'
       + '</div>'
       + '<div class="card-body"><div>'
