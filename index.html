@@ -620,7 +620,7 @@ function init() {
 // ──────────────────────────────────────────
 function imgFallback(el, id) {
   var tried = el._tried || 0;
-  var exts = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG'];
+  var exts = ['.JPG', '.jpg', '.jpeg', '.JPEG', '.png', '.PNG'];
   if (tried < exts.length) {
     el._tried = tried + 1;
     el.src = imgBase + id + exts[tried] + '?v=' + IMG_CACHE_BUST;
@@ -806,7 +806,7 @@ function render() {
     var st = cget(item);
     var d = document.createElement('div');
     d.className = 'card' + (st.sel ? ' sel' : '');
-    var imgUrl = imgBase + item.id + '.JPG?v=' + IMG_CACHE_BUST;
+    var imgUrl = imgBase + item.id + '.JPG?v=' + IMG_CACHE_BUST; // 第一次嘗試 .JPG（對應 IMG_EXTS[0]）
 
     var idBadge = isAdmin
       ? '<input class="aid" value="'+esc(item.manualId||'')+'" placeholder="'+esc(item._auto)+'" title="手動編號（空=自動）" oninput="setManId(\''+item.cat+'\',\''+escQ(item.n)+'\',this.value)">'
@@ -866,7 +866,7 @@ function render() {
     d.innerHTML = dhHtml + delBtnHtml
       + '<div class="card-chk"><span class="chk-ico">✓</span></div>'
       + '<div class="card-img" id="ci_'+item.id+'">'
-      + '<img src="'+imgUrl+'" onload="this.style.opacity=1;this.closest(\'.card-img\').classList.add(\'has-img\')" onerror="imgFallback(this,\''+item.id+'\',0)" style="opacity:0;transition:opacity .2s" alt="">'
+      + '<img src="'+imgUrl+'" onload="this.style.opacity=1;this.closest(\'.card-img\').classList.add(\'has-img\')" onerror="this._tried=1;imgFallback(this,\''+item.id+'\')" style="opacity:0;transition:opacity .2s" alt="">'
       + '<div class="no-img" id="ph_'+item.id+'" style="display:none"><span style="font-size:18px">🖼</span>'+item.id+'<br>無圖</div>'
       + '</div>'
       + '<div class="card-body"><div>'
