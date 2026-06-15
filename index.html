@@ -2230,7 +2230,21 @@ function autoPushCloud() {
 }
 function cfgImgBase() {
   var v = prompt('圖片路徑 Base URL（以 / 結尾）：', imgBase);
-  if (v !== null && v.trim()) { imgBase = v.trim(); localStorage.setItem(LS+'imgBase', imgBase); render(); }
+  if (v !== null && v.trim()) {
+    imgBase = v.trim();
+    if (!imgBase.endsWith('/')) imgBase += '/'; // 確保結尾有斜線
+    localStorage.setItem(LS+'imgBase', imgBase);
+    render();
+    if (isAdmin && gsUrl) {
+      toast('⬆️ 正在同步圖片路徑至雲端...', 3000);
+      gasSend('savePart', {part:'config', config:config, imgBase:imgBase, gasUrl:gsUrl}).then(function(res){
+        if (res && res.ok) toast('✅ 圖片路徑已同步至雲端', 2000);
+        else toast('⚠️ 同步失敗，請稍後重試', 3000);
+      });
+    } else {
+      toast('⚠️ 未以管理員登入，設定僅儲存在本機，重新整理後可能被雲端舊設定覆蓋', 5000);
+    }
+  }
 }
 function exportJSON() {
   var d = {db:db, sites:sites, config:config, stepData:steps, cats:cats, catOrder:catOrd, imgBase:imgBase, logoSrc:logoSrc};
