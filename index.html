@@ -866,7 +866,7 @@ function render() {
     d.innerHTML = dhHtml + delBtnHtml
       + '<div class="card-chk"><span class="chk-ico">✓</span></div>'
       + '<div class="card-img" id="ci_'+item.id+'">'
-      + '<img src="'+imgUrl+'" onload="this.style.opacity=1;this.closest(\'.card-img\').classList.add(\'has-img\')" onerror="this._tried=0;imgFallback(this,\''+item.id+'\')" style="opacity:0;transition:opacity .2s" alt="">'
+      + '<img src="'+imgUrl+'" onload="this.style.opacity=1;this.closest(\'.card-img\').classList.add(\'has-img\')" onerror="imgFallback(this,\''+item.id+'\')" style="opacity:0;transition:opacity .2s" alt="">'
       + '<div class="no-img" id="ph_'+item.id+'" style="display:none"><span style="font-size:18px">🖼</span>'+item.id+'<br>無圖</div>'
       + '</div>'
       + '<div class="card-body"><div>'
