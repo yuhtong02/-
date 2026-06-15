@@ -2238,8 +2238,16 @@ function cfgImgBase() {
     if (isAdmin && gsUrl) {
       toast('⬆️ 正在同步圖片路徑至雲端...', 3000);
       gasSend('savePart', {part:'config', config:config, imgBase:imgBase, gasUrl:gsUrl}).then(function(res){
-        if (res && res.ok) toast('✅ 圖片路徑已同步至雲端', 2000);
-        else toast('⚠️ 同步失敗，請稍後重試', 3000);
+        if (res && res.ok) {
+          toast('✅ 圖片路徑已同步至雲端', 2000);
+        } else {
+          var errMsg = (res && res.error) ? res.error : '未知錯誤';
+          showMsg('⚠️ 同步失敗', '圖片路徑已儲存在本機，但同步至雲端失敗：\n\n'+errMsg+'\n\n請確認：\n①「☁️ 雲端設定」裡的網址結尾為 /exec\n②該 Apps Script 已部署為「網頁應用程式」且存取權限為「所有人」\n\n本機設定仍會生效，但下次F5可能被雲端舊值覆蓋。', 'err');
+          console.error('imgBase 同步失敗，完整回應：', res);
+        }
+      }).catch(function(e){
+        showMsg('⚠️ 同步失敗', '發生例外錯誤：\n'+e.message, 'err');
+        console.error('imgBase 同步例外：', e);
       });
     } else {
       toast('⚠️ 未以管理員登入，設定僅儲存在本機，重新整理後可能被雲端舊設定覆蓋', 5000);
