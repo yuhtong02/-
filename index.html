@@ -375,6 +375,7 @@ var GAS_BAKED = 'https://script.google.com/macros/s/AKfycbwJ-vob2iYfgQkwgZURgmvy
 
 // 每次更新分類或標語內容時，將此版本號加1，網站會自動清除舊資料並從 Sheets 重新載入
 var DATA_VERSION = '6';
+var IMG_CACHE_BUST = Date.now(); // 每次開啟頁面強制重新抓取圖片，避免CDN/瀏覽器快取
 
 // ──────────────────────────────────────────
 // DATA DEFAULTS
@@ -622,7 +623,7 @@ function imgFallback(el, id) {
   var exts = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG'];
   if (tried < exts.length) {
     el._tried = tried + 1;
-    el.src = imgBase + id + exts[tried];
+    el.src = imgBase + id + exts[tried] + '?v=' + IMG_CACHE_BUST;
   } else {
     el.style.display = 'none';
     var ph = document.getElementById('ph_' + id);
@@ -805,7 +806,7 @@ function render() {
     var st = cget(item);
     var d = document.createElement('div');
     d.className = 'card' + (st.sel ? ' sel' : '');
-    var imgUrl = imgBase + item.id + '.JPG';
+    var imgUrl = imgBase + item.id + '.JPG?v=' + IMG_CACHE_BUST;
 
     var idBadge = isAdmin
       ? '<input class="aid" value="'+esc(item.manualId||'')+'" placeholder="'+esc(item._auto)+'" title="手動編號（空=自動）" oninput="setManId(\''+item.cat+'\',\''+escQ(item.n)+'\',this.value)">'
@@ -1140,7 +1141,7 @@ function buildReport() {
     var qty = cget(item).qty || 1;
     rows += '<div class="ri">'
       + '<span class="rn">'+(idx+1)+'</span>'
-      + '<img class="rimg" src="'+imgBase+item.id+'.jpg" onerror="this.style.opacity=.1" alt="">'
+      + '<img class="rimg" src="'+imgBase+item.id+'.jpg?v='+IMG_CACHE_BUST+'" onerror="this.style.opacity=.1" alt="">'
       + '<div class="rinfo"><div class="rname">['+item.id+'] '+item.n+'</div>'
       + '<div class="rspec">規格：'+item.s+'　材質：'+item.m+'</div></div>'
       + '<div class="rqty">'+qty+'</div>'
