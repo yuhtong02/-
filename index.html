@@ -620,7 +620,7 @@ function init() {
 // ──────────────────────────────────────────
 function imgFallback(el, id) {
   var tried = el._tried || 0;
-  var exts = ['.png', '.JPG', '.jpg', '.PNG', '.jpeg', '.JPEG'];
+  var exts = ['.jpg', '.JPG', '.PNG', '.jpeg', '.JPEG', '.png'];
   if (tried < exts.length) {
     el._tried = tried + 1;
     el.src = imgBase + id + exts[tried] + '?v=' + IMG_CACHE_BUST;
@@ -806,7 +806,7 @@ function render() {
     var st = cget(item);
     var d = document.createElement('div');
     d.className = 'card' + (st.sel ? ' sel' : '');
-    var imgUrl = imgBase + item.id + '.JPG?v=' + IMG_CACHE_BUST; // 第一次嘗試 .JPG（對應 IMG_EXTS[1]，失敗後從index2開始試）
+    var imgUrl = imgBase + item.id + '.png?v=' + IMG_CACHE_BUST;
 
     var idBadge = isAdmin
       ? '<input class="aid" value="'+esc(item.manualId||'')+'" placeholder="'+esc(item._auto)+'" title="手動編號（空=自動）" oninput="setManId(\''+item.cat+'\',\''+escQ(item.n)+'\',this.value)">'
