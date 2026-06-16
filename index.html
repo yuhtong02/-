@@ -698,11 +698,9 @@ function renderTitle() {
 // ──────────────────────────────────────────
 function renderSites() {
   var sel = document.getElementById('site-sel');
-  var saved = localStorage.getItem(LS+'site') || '';
   sel.innerHTML = '<option value="">── 請選擇工地 ──</option>'
     + sites.map(function(x){ return '<option value="'+x+'">'+x+'</option>'; }).join('');
-  if (saved && sites.indexOf(saved) >= 0) sel.value = saved;
-  else sel.value = '';
+  sel.value = '';
 }
 function addSite() {
   var nm = prompt('新增工地名稱：'); if (!nm || !nm.trim()) return;
