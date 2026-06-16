@@ -309,10 +309,8 @@ select{flex:1}
       <input id="note-in" type="text" placeholder="例：急件、請優先處理..." style="width:100%;font-size:12px;padding:8px 9px;border:1.5px solid var(--bd);border-radius:8px;background:var(--cream);font-family:inherit;outline:none">
     </div>
     <div class="ma">
-      <button class="mbtn" style="background:var(--dk);color:#fff" onclick="doPrint()">🖨 列印 / 儲存 PDF</button>
       <button class="mbtn" style="background:#1D6F42;color:#fff" onclick="genWordOrder()">📄 下載公司請購單 Word</button>
       <button class="mbtn" style="background:var(--gr);color:#fff" onclick="genImg()">📥 儲存採購單圖片</button>
-      <button class="mbtn" id="sub-btn" style="background:var(--cd);color:#fff" onclick="submitOrder()">📤 提交採購單至後台</button>
       <button class="mbtn" style="background:var(--cream);color:var(--cdp);border:1.5px solid var(--cb)" onclick="closeOv('rpt-ov')">← 返回編輯</button>
     </div>
     <div class="mhint" id="rpt-hint"></div>
@@ -700,8 +698,11 @@ function renderTitle() {
 // ──────────────────────────────────────────
 function renderSites() {
   var sel = document.getElementById('site-sel');
-  sel.innerHTML = sites.map(function(x){ return '<option value="'+x+'">'+x+'</option>'; }).join('');
-  sel.value = localStorage.getItem(LS+'site') || sites[0];
+  var saved = localStorage.getItem(LS+'site') || '';
+  sel.innerHTML = '<option value="">── 請選擇工地 ──</option>'
+    + sites.map(function(x){ return '<option value="'+x+'">'+x+'</option>'; }).join('');
+  if (saved && sites.indexOf(saved) >= 0) sel.value = saved;
+  else sel.value = '';
 }
 function addSite() {
   var nm = prompt('新增工地名稱：'); if (!nm || !nm.trim()) return;
@@ -1299,6 +1300,17 @@ function genWordOrder() {
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(function(){URL.revokeObjectURL(url);},3000);
   toast('\u2705 \u8acb\u8cfc\u55ae\u5df2\u4e0b\u8f09\uff01',3000);
+  // 通知管理員有人下載了請購單
+  var notifyUrl = localStorage.getItem(LS+'submitUrl') || gsUrl || '';
+  if (notifyUrl) {
+    var now2 = new Date();
+    var notifyMsg = '\u300c'+site+'\u300d '+staff+' \u65bc '+
+      (now2.getMonth()+1)+'/'+now2.getDate()+' '+
+      (now2.getHours()<10?'0':'')+now2.getHours()+':'+
+      (now2.getMinutes()<10?'0':'')+now2.getMinutes()+
+      ' \u4e0b\u8f09\u4e86\u8acb\u8cfc\u55ae\uff08'+items.length+'\u9805\uff09';
+    gasSend('notify', {msg: notifyMsg}).catch(function(){});
+  }
 }
 
 function calcCrc32(buf) {
