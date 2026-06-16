@@ -2104,7 +2104,7 @@ function pullCloud(silent) {
     if (v && !Array.isArray(v) && Object.keys(v).length) steps = v;
     v = res.cats;     if (v && !Array.isArray(v) && Object.keys(v).length) cats = v;
     v = res.catOrder; if (v && v.length) catOrd = v;
-    v = res.imgBase;  if (v && v.startsWith('http')) imgBase = v;
+    v = res.imgBase;  if (v && v.startsWith('http') && v.indexOf('yuhtong02') >= 0) { imgBase = v; localStorage.setItem(LS+'imgBase', imgBase); } else if (v && v.startsWith('http') && v.indexOf('yuhtong02') < 0) { console.warn('忽略雲端的錯誤 imgBase：', v); }
     if (res.logo && res.logo.length > 5) { logoSrc = res.logo; localStorage.setItem(LS+'logo', logoSrc); }
     // Save submit URL and write token for non-admin order submission
     if (res.gasUrl && res.gasUrl.length > 10) {
